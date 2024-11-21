@@ -1,0 +1,124 @@
+#!/bin/bash
+set $term wezterm
+set $menu wmenu-run
+set $mod Mod1
+set $ws1 "1:Scratch"          
+set $ws2 "2:Computer Science"
+set $ws3 "3:Mathematics"     
+set $ws4 "4:Physical Science"     
+set $ws5 "5:Assignments"         
+set $ws6 "6:empty"               
+set $ws7 "7:empty"                
+set $ws8 "8:Background Processes" 
+set $ws9 "9:Media"                
+set $ws10 "10:Plan" 
+
+# Desktop Specific-----------------------------------------
+output DP-2 {
+    resolution 2560x1440@164.958Hz
+    pos 0 0
+    scale 1
+}
+
+output DP-3 {
+    resolution 3840x2160@59.997Hz
+    pos -2160 -1440
+    transform 90
+    scale 1.57
+}
+
+workspace $ws1  output DP-2
+workspace $ws2  output DP-2
+workspace $ws3  output DP-2
+workspace $ws4  output DP-2
+workspace $ws5  output DP-2
+workspace $ws6  output DP-3
+workspace $ws7  output DP-3
+workspace $ws8  output DP-3
+workspace $ws9  output DP-3
+workspace $ws10 output DP-3
+
+output DP-2 bg ./wallpaper/1440p.jpg fill
+output DP-3 bg ./wallpaper/4kPortrait.jpg fill
+#End of Desktop-----------------------------------------
+
+#Laptop Specific----------------------------------------
+#output eDP-1 bg ~/Pictures/wallpaper/1080p fill
+#End of Laptop------------------------------------------
+
+
+bindsym $mod+1 workspace $ws1
+bindsym $mod+2 workspace $ws2
+bindsym $mod+3 workspace $ws3
+bindsym $mod+4 workspace $ws4
+bindsym $mod+5 workspace $ws5
+bindsym $mod+6 workspace $ws6
+bindsym $mod+7 workspace $ws7
+bindsym $mod+8 workspace $ws8
+bindsym $mod+9 workspace $ws9
+bindsym $mod+0 workspace $ws10
+
+bindsym $mod+Shift+1 move container to workspace $ws1 
+bindsym $mod+Shift+2 move container to workspace $ws2 
+bindsym $mod+Shift+3 move container to workspace $ws3 
+bindsym $mod+Shift+4 move container to workspace $ws4 
+bindsym $mod+Shift+5 move container to workspace $ws5 
+bindsym $mod+Shift+6 move container to workspace $ws6 
+bindsym $mod+Shift+7 move container to workspace $ws7 
+bindsym $mod+Shift+8 move container to workspace $ws8 
+bindsym $mod+Shift+9 move container to workspace $ws9 
+bindsym $mod+Shift+0 move container to workspace $ws10
+
+
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
+bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym XF86MonBrightnessUp exec brightnessctl set 5%+
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+bindsym XF86Search exec $menu
+bindsym $mod+Shift+p exec "pkill -x waybar; waybar"
+
+exec swayidle -w \
+	timeout 1800 'systemctl hibernate'\
+
+bindsym $mod+w exec firefox
+bindsym $mod+t exec thunar
+bindsym $mod+return exec wezterm
+bindsym $mod+q kill
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+r restart
+bindsym $mod+d exec $menu
+floating_modifier $mod normal
+bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway  This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+bindsym $mod+v split v
+bindsym $mod+b split h
+bindsym $mod+m fullscreen toggle
+bindsym Print exec grim
+
+
+exec wl-paste -t text --watch clipman store --no-persist
+
+default_border pixel 2
+hide_edge_borders smart
+smart_gaps on
+gaps inner 5
+
+
+bar {
+    swaybar_command waybar
+    mode "dock"
+   }
+   bindsym $mod+u exec /home/jcvega/.config/sway/scripts/toggle_bar_mode.sh
+   exec_always swaymsg workspace $ws10
+   exec_always swaymsg workspace $ws1
+   exec_always swaymsg workspace $ws1
