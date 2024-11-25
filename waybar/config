@@ -10,7 +10,10 @@
     "fixed-center": "true",
     "reload_style_on_change": true,
     "modules-left": [
-       "sway/workspaces" 
+       "sway/workspaces",
+       "cpu",
+       "memory",
+       "temperature"
     ],
 
 
@@ -18,9 +21,6 @@
         "clock"
     ],
     "modules-right": [
-        "cpu",
-        "memory",
-        "temperature",
         "pulseaudio",
         "bluetooth",
         "network",

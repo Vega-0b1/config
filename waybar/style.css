@@ -135,8 +135,7 @@ button:hover {
 }
 
 #clock {
-    background-color: @surface1;
-    color: @text;
+    background-color: @lavender;
 }
 
 #network {
@@ -224,6 +223,7 @@ label:focus {
 }
 
 #cpu {
+    margin-left:3em;
     background-color:@mauve;
     color:@crust;
     
@@ -238,6 +238,7 @@ label:focus {
 }
 
 #backlight {
+    background-color: @lavender;
 }
 
 
