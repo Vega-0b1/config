@@ -11,6 +11,7 @@
     "reload_style_on_change": true,
     "modules-left": [
        "sway/workspaces",
+       "sway/mode",
        "cpu",
        "memory",
        "temperature"
@@ -34,6 +35,16 @@
      "sway/workspaces": {
          "disable-scroll": true,
          "warp-on-scroll": false,
+        "format": "{icon} {name}",
+        "format-icons": {
+            "1:Web": " ",
+            "2:Code": "󰅩 ",
+            "3:Edu": "󰑴 ",
+            "4:Math": "󰿈 ",
+            "5:Science": " ",
+            "10:Plan": "󰃰 ",
+            "9:Media": "󰽯 "
+        }
      },
       "sway/mode": {
         "format": "<span style=\"italic\">{}</span>"

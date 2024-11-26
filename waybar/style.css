@@ -84,15 +84,15 @@ button:hover {
 }
 
 #bluetooth.connected {
-    background-color: #28a745; /* Green when connected */
+    background-color: @blue; /* Green when connected */
 }
 
 #bluetooth.disconnected {
-    background-color: #dc3545; /* Red when disconnected */
+    background-color: @overlay1; /* Red when disconnected */
 }
 
 #bluetooth.pairing {
-    background-color: #ffc107; /* Yellow when pairing */
+    background-color: @yellow; /* Yellow when pairing */
 }
 
 #workspaces button {
