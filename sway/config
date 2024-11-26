@@ -118,7 +118,6 @@ exec wl-paste -t text --watch clipman store --no-persist
 default_border pixel 2
 hide_edge_borders smart
 smart_gaps on
-gaps inner 2
 
 
 bar {
