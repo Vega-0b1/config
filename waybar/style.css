@@ -1,27 +1,15 @@
-@import "macchiato.css";
+@import "latte.css";
 * {
-    /* `otf-font-awesome` is required to be installed for icons */
     font-family: FontAwesome, Roboto, Helvetica, Arial, sans-serif;
     font-size: 16px;
 }
 
 window#waybar {
-    background-color: @base;
-    border-bottom: 3px solid @crust;
+    background-color: @surface1;
     color: @text;
     transition-property: background-color;
     transition-duration: .5s;
 }
-
-window#waybar.termite {
-    background-color: #3F3F3F;
-}
-
-window#waybar.chromium {
-    background-color: #000000;
-    border: none;
-}
-
 
 #clock,
 #battery,
@@ -41,17 +29,14 @@ window#waybar.chromium {
 #scratchpad,
 #power-profiles-daemon,
 #mpd {
-    border-radius: 1em;
-    padding: 0 1.5em;
+    margin: 0 0;
+    padding:0 1em;
+    border: 1px solid @text;
     color: @crust;
 }
 
 button {
-    /* Use box-shadow instead of border so the text isn't offset */
     box-shadow: inset 0 -3px transparent;
-    /* Avoid rounded borders under each button name */
-    border: none;
-    border-radius: 0;
 }
 
 button:hover {
@@ -59,22 +44,21 @@ button:hover {
     box-shadow: inset 0 -3px #ffffff;
 }
 
-/* you can set a style on hover for any module like this */
 #pulseaudio:hover {
     background-color: #e8c47d;
 }
 
 
 #bluetooth {
-        background-color: @blue; /* Default color for the Bluetooth module */
+        background-color: @blue; 
    }
 
 #bluetooth:hover {
-    background-color: #5c8df0; /* Darker blue when hovered */
+    background-color: #5c8df0; 
 }
 
 #bluetooth:active {
-    background-color: @blue; /* Even darker blue when clicked */
+    background-color: @blue; 
 }
 
 #bluetooth .status {
@@ -84,34 +68,36 @@ button:hover {
 }
 
 #bluetooth.connected {
-    background-color: @blue; /* Green when connected */
+    background-color: @blue; 
 }
 
 #bluetooth.disconnected {
-    background-color: @overlay1; /* Red when disconnected */
+    background-color: @overlay1; 
 }
 
 #bluetooth.pairing {
-    background-color: @yellow; /* Yellow when pairing */
+    background-color: @yellow; 
 }
 
 #workspaces button {
     padding: 0 5px;
-    background-color: transparent;
+    background-color: @base;
     color: @text;
+    border:1px solid  @text;
 }
 
 #workspaces button:hover {
+    
     background: rgba(0, 0, 0, 0.2);
 }
 
 #workspaces button.focused {
-    background-color: #64727D;
-    box-shadow: inset 0 -3px #ffffff;
+    background-color: @pink; 
+    box-shadow: inset 0 -3px #ffffff; 
 }
 
 #workspaces button.urgent {
-    background-color: #eb4d4b;
+    background-color: @flamingo;
 }
 
 #mode {
@@ -121,7 +107,7 @@ button:hover {
 
 #window,
 #workspaces {
-    margin: 0 4px;
+    margin: 0 0;
 }
 
 /* If workspaces is the leftmost module, omit left margin */
@@ -143,11 +129,11 @@ button:hover {
 }
 
 #network:hover {
-   background-color: #eaaeae
+   background-color: #eaaeae;
 }
 
 #network:active {
-    background-color: #ffffff; /* Even darker blue when clicked */
+    background-color: #ffffff; 
 }
 
 #network.disconnected {
@@ -171,7 +157,6 @@ button:hover {
     }
 }
 
-/* Using steps() instead of linear as a timing function to limit cpu usage */
 #battery.critical:not(.charging) {
     background-color: #f53c3c;
     color: #ffffff;
@@ -184,28 +169,28 @@ button:hover {
 
 #power-profiles-daemon {
     color: #ffffff;
-    background-color: #2980b9; /* Default color */
+    background-color: #2980b9; 
 }
 
 #power-profiles-daemon.performance:hover {
-    background-color: #e86478; /* Darker blue on hover */
+    background-color: #e86478; 
 }
 
 #power-profiles-daemon.balanced:hover {
-    background-color: #5c8df0; /* Darker blue on hover */
+    background-color: #5c8df0; 
 }
 
 #power-profiles-daemon.power-saver:hover {
-    background-color: #90d17b; /* Darker blue on hover */
+    background-color: #90d17b; 
 }
 
 #power-profiles-daemon:active {
-    background-color: #003366; /* Darkest blue when clicked */
+    background-color: #003366; 
 }
 
 #power-profiles-daemon.performance {
     background-color: @red;
-    color:@crust
+    color:@crust;
 }
 
 #power-profiles-daemon.balanced {
@@ -218,12 +203,9 @@ button:hover {
     color: #000000;
 }
 
-label:focus {
-    background-color: #000000;
-}
 
 #cpu {
-    margin-left:3em;
+    margin-left:1em;
     background-color:@mauve;
     color:@crust;
     
@@ -276,7 +258,7 @@ label:focus {
 
 #temperature {
     background-color:@red;
-    margin-right: 3em
+    margin-right: 3em;
 }
 
 #temperature.critical {

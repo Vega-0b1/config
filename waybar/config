@@ -45,6 +45,15 @@
             "5:Science": " ",
             "10:Plan": "󰃰 ",
             "9:Media": "󰽯 "
+        },
+        "persistent-workspaces": {
+            "1:Web": [],
+            "2:Code": [],
+            "3:Edu": [],
+            "4:Math": [],
+            "5:Science": [],
+            "9:Media": [],
+            "10:Plan": []
         }
      },
       "sway/mode": {
