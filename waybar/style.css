@@ -5,18 +5,49 @@
 }
 
 window#waybar {
-    background-color: @surface1;
+    background-color: @subtext1;
     color: @text;
     transition-property: background-color;
     transition-duration: .5s;
 }
 
-#clock,
-#battery,
+button {
+    box-shadow: inset 0 -3px @mauve;
+    border-radius: 0;
+}
+
+button:hover {
+    background: inherit;
+    box-shadow: inset 0 -3px @pink;
+}
+
+#workspaces button {
+    padding: 0 5px;
+    background-color: @base;
+    color: @text;
+    border:1px solid  @text;
+}
+
+#workspaces button:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+#workspaces button.focused {
+    background-color: @pink; 
+    box-shadow: inset 0 -3px #ffffff; 
+}
+
 #cpu,
 #memory,
-#disk,
 #temperature,
+#disk {
+    padding:0 0.6em;
+    color: @crust;
+    border-radius: 0;    
+}
+
+#clock,
+#battery,
 #backlight,
 #network,
 #pulseaudio,
@@ -29,33 +60,84 @@ window#waybar {
 #scratchpad,
 #power-profiles-daemon,
 #mpd {
-    margin: 0 0;
     padding:0 1em;
-    border: 1px solid @text;
     color: @crust;
+    border-radius:1em;
 }
 
-button {
-    box-shadow: inset 0 -3px transparent;
+#idle_inhibitor:hover,
+#network:hover,
+#pulseaudio:hover,
+#bluetooth:hover,
+#power-profiles-daemon.performance:hover,
+#power-profiles-daemon.balanced:hover,
+#power-profiles-daemon.power-saver:hover {
+    background-color: @crust;
 }
 
-button:hover {
-    background: inherit;
+
+
+#mode {
+    background-color: @flamingo;
     box-shadow: inset 0 -3px #ffffff;
 }
 
-#pulseaudio:hover {
-    background-color: #e8c47d;
+#window,
+#workspaces {
+    margin: 0 0;
 }
 
+/* If workspaces is the leftmost module, omit left margin */
+.modules-left > widget:first-child > #workspaces {
+    margin-left: 0;
+}
+
+/* If workspaces is the rightmost module, omit right margin */
+.modules-right > widget:last-child > #workspaces {
+    margin-right: 0;
+}
+
+#cpu {
+    margin-left:1em;
+    background-color:@mauve;
+    color:@crust;
+    
+}
+
+#memory {
+    background-color:@peach;
+    color:@crust;
+}
+
+#temperature {
+    background-color:@red;
+    margin-right: 3em;
+}
+
+#temperature.critical {
+    background-color: #eb4d4b;
+}
+
+#disk {
+}
+#clock {
+    background-color: @lavender;
+}
+
+#pulseaudio {
+    background-color: @yellow;
+}
+
+
+#pulseaudio.muted {
+    background-color: #90b1b1;
+    color: #2a5c45;
+}
 
 #bluetooth {
         background-color: @blue; 
    }
 
-#bluetooth:hover {
-    background-color: #5c8df0; 
-}
 
 #bluetooth:active {
     background-color: @blue; 
@@ -78,59 +160,10 @@ button:hover {
 #bluetooth.pairing {
     background-color: @yellow; 
 }
-
-#workspaces button {
-    padding: 0 5px;
-    background-color: @base;
-    color: @text;
-    border:1px solid  @text;
-}
-
-#workspaces button:hover {
-    
-    background: rgba(0, 0, 0, 0.2);
-}
-
-#workspaces button.focused {
-    background-color: @pink; 
-    box-shadow: inset 0 -3px #ffffff; 
-}
-
-#workspaces button.urgent {
-    background-color: @flamingo;
-}
-
-#mode {
-    background-color: @flamingo;
-    box-shadow: inset 0 -3px #ffffff;
-}
-
-#window,
-#workspaces {
-    margin: 0 0;
-}
-
-/* If workspaces is the leftmost module, omit left margin */
-.modules-left > widget:first-child > #workspaces {
-    margin-left: 0;
-}
-
-/* If workspaces is the rightmost module, omit right margin */
-.modules-right > widget:last-child > #workspaces {
-    margin-right: 0;
-}
-
-#clock {
-    background-color: @lavender;
-}
-
 #network {
     background-color: @flamingo;
 }
 
-#network:hover {
-   background-color: #eaaeae;
-}
 
 #network:active {
     background-color: #ffffff; 
@@ -138,6 +171,35 @@ button:hover {
 
 #network.disconnected {
     background-color: #666666;
+}
+
+
+
+#power-profiles-daemon {
+    color: #ffffff;
+    background-color: #2980b9; 
+}
+
+
+#power-profiles-daemon:active {
+}
+
+#power-profiles-daemon.performance {
+    background-color: @red;
+    
+}
+
+#power-profiles-daemon.balanced {
+    background-color: @blue;
+    
+}
+
+#power-profiles-daemon.power-saver {
+    background-color: @green;
+}
+
+#backlight {
+    background-color: @lavender;
 }
 
 #battery {
@@ -167,71 +229,6 @@ button:hover {
     animation-direction: alternate;
 }
 
-#power-profiles-daemon {
-    color: #ffffff;
-    background-color: #2980b9; 
-}
-
-#power-profiles-daemon.performance:hover {
-    background-color: #e86478; 
-}
-
-#power-profiles-daemon.balanced:hover {
-    background-color: #5c8df0; 
-}
-
-#power-profiles-daemon.power-saver:hover {
-    background-color: #90d17b; 
-}
-
-#power-profiles-daemon:active {
-    background-color: #003366; 
-}
-
-#power-profiles-daemon.performance {
-    background-color: @red;
-    color:@crust;
-}
-
-#power-profiles-daemon.balanced {
-    background-color: @blue;
-    color:@crust;
-}
-
-#power-profiles-daemon.power-saver {
-    background-color: @green;
-    color: #000000;
-}
-
-
-#cpu {
-    margin-left:1em;
-    background-color:@mauve;
-    color:@crust;
-    
-}
-
-#memory {
-    background-color:@peach;
-    color:@crust;
-}
-
-#disk {
-}
-
-#backlight {
-    background-color: @lavender;
-}
-
-
-#pulseaudio {
-    background-color:@yellow;
-}
-
-#pulseaudio.muted {
-    background-color: #90b1b1;
-    color: #2a5c45;
-}
 
 #wireplumber {
     background-color: #fff0f5;
@@ -256,14 +253,7 @@ button:hover {
     background-color: #ffa000;
 }
 
-#temperature {
-    background-color:@red;
-    margin-right: 3em;
-}
 
-#temperature.critical {
-    background-color: #eb4d4b;
-}
 
 #tray {
     background-color: #2980b9;
