@@ -5,7 +5,7 @@
 }
 
 window#waybar {
-    background-color: @subtext1;
+    background-color: @text;
     color: @text;
     transition-property: background-color;
     transition-duration: .5s;

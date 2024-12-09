@@ -117,11 +117,9 @@ exec wl-paste -t text --watch clipman store --no-persist
 
 default_border pixel 5
 hide_edge_borders smart
-smart_gaps on
 
-client.focused "#3399ff" "#3399ff" "#3399ff" "#3399ff" "#3399ff"
-client.focused_inactive "#23242a" "#2b2b2b" "#888888" "#000000" "#000000"
-client.unfocused "#2c2c2c" "#2b2b2b" "#888888" "#000000" "#000000"
+client.focused "#7287fd" "#7287fd" "#7287fd" "#ea76cb" "#7287fd"
+client.unfocused "#7c7f93" "#7c7f93" "#7c7f93"
 
 
 
