@@ -10,7 +10,7 @@
     "fixed-center": "true",
     "reload_style_on_change": true,
     "modules-left": [
-      "sway/workspaces",
+      "hyprland/workspaces",
       "cpu",
       "memory",
       "temperature",
@@ -31,27 +31,27 @@
       "battery#bat2",
       "tray"
     ],
-    "sway/workspaces": {
+    "hyprland/workspaces": {
       "disable-scroll": true,
       "warp-on-scroll": false,
-      "format": "{icon} {name}",
+      "format": "{name} {icon}",
       "format-icons": {
-        "1:Web": " ",
-        "2:Code": "󰅩 ",
-        "3:Edu": "󰑴 ",
-        "4:Math": "󰿈 ",
-        "5:Science": " ",
-        "10:Plan": "󰃰 ",
-        "9:Media": "󰽯 "
+        "1": "Web  ",
+        "2": "Code 󰅩 ",
+        "3": "Edu 󰑴  ",
+        "4": "Math 󰿈 ",
+        "5": "Science  ",
+        "10": "Plan 󰃰 ",
+        "9": "Media 󰽯 "
       },
       "persistent-workspaces": {
-        "1:Web": [],
-        "2:Code": [],
-        "3:Edu": [],
-        "4:Math": [],
-        "5:Science": [],
-        "9:Media": [],
-        "10:Plan": []
+        "1": [],
+        "2": [],
+        "3": [],
+        "4": [],
+        "5": [],
+        "9": [],
+        "10": []
       }
     },
     "sway/mode": {

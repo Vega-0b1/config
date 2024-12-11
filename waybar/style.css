@@ -21,7 +21,7 @@ button:hover {
     box-shadow: inset 0 -3px @pink;
 }
 
-#workspaces button {
+#workspaces button.visible {
     padding: 0 5px;
     background-color: @base;
     color: @text;
@@ -32,7 +32,7 @@ button:hover {
     background: rgba(0, 0, 0, 0.2);
 }
 
-#workspaces button.focused {
+#workspaces button.active {
     background-color: @pink; 
     box-shadow: inset 0 -3px #ffffff; 
 }
@@ -41,9 +41,10 @@ button:hover {
 #memory,
 #temperature,
 #disk {
-    padding:0 0.6em;
+    padding:0 1em;
+    margin: 0.3em 0.1em;
     color: @crust;
-    border-radius: 0;    
+    border-radius: 0.5em;    
 }
 
 #clock,
@@ -61,8 +62,9 @@ button:hover {
 #power-profiles-daemon,
 #mpd {
     padding:0 1em;
+    margin: 0.3em 0.1em;
     color: @crust;
-    border-radius:1em;
+    border-radius:0.5em;
 }
 
 #idle_inhibitor:hover,

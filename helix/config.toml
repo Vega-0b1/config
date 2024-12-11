@@ -1,4 +1,4 @@
-theme = "pop-dark"
+theme = "base16_terminal"
 
 [editor.file-picker]
 hidden = false

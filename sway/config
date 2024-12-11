@@ -45,7 +45,7 @@ workspace $ws8  output HDMI-A-1
 workspace $ws9  output HDMI-A-1
 workspace $ws10 output HDMI-A-1
 
-output DP-1 bg ./wallpaper/1440p.jpg fill
+output DP-1 bg ./wallpaper/cute-astronaut-8k-8333x8333-17123.jpg fill
 output HDMI-A-1 bg ./wallpaper/4kPortrait.jpg fill
 #End of Desktop-----------------------------------------
 

@@ -4,8 +4,15 @@ local config = wezterm.config_builder()
 
 config.tab_bar_at_bottom = true
 config.use_fancy_tab_bar = false
-config.window_decorations = "RESIZE"
-config.color_scheme = 'dracula'
+config.window_decorations = 'RESIZE'
+config.color_scheme = 'Dracula (base16)'
+
+config.window_background_opacity = 0.8
+config.window_background_image_hsb = {
+    brightness = 0.9,  -- Reduce brightness for a more subtle effect
+    saturation = 0.8,  -- Slightly desaturate the image
+    hue = 1.0,         -- Keep hue unchanged
+}
 
 config.keys = {
   {
