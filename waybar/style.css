@@ -1,31 +1,27 @@
-@import "latte.css";
+@import "mocha.css";
 * {
     font-family: FontAwesome, Roboto, Helvetica, Arial, sans-serif;
     font-size: 16px;
 }
 
 window#waybar {
-    background-color: @text;
-    color: @text;
+    background-color: @base;
     transition-property: background-color;
     transition-duration: .5s;
 }
 
 button {
-    box-shadow: inset 0 -3px @mauve;
+    box-shadow: inset 0 -3px @green;
     border-radius: 0;
 }
 
 button:hover {
-    background: inherit;
-    box-shadow: inset 0 -3px @pink;
+    box-shadow: inset 0 -3px @blue;
 }
 
 #workspaces button.visible {
-    padding: 0 5px;
-    background-color: @base;
-    color: @text;
-    border:1px solid  @text;
+    padding: 0 10px;
+    border:1px solid  @red;
 }
 
 #workspaces button:hover {
@@ -33,7 +29,8 @@ button:hover {
 }
 
 #workspaces button.active {
-    background-color: @pink; 
+    background-color: @teal;
+    color: @crust; 
     box-shadow: inset 0 -3px #ffffff; 
 }
 
@@ -41,9 +38,10 @@ button:hover {
 #memory,
 #temperature,
 #disk {
+    background-color:@overlay1;
     padding:0 1em;
     margin: 0.3em 0.1em;
-    color: @crust;
+    color: @text;
     border-radius: 0.5em;    
 }
 
@@ -63,7 +61,8 @@ button:hover {
 #mpd {
     padding:0 1em;
     margin: 0.3em 0.1em;
-    color: @crust;
+    color: @text;
+    background-color: @overlay0;
     border-radius:0.5em;
 }
 
@@ -87,6 +86,8 @@ button:hover {
 #window,
 #workspaces {
     margin: 0 0;
+    color: @text;
+    background-color: @surface1;
 }
 
 /* If workspaces is the leftmost module, omit left margin */
@@ -100,20 +101,16 @@ button:hover {
 }
 
 #cpu {
-    margin-left:1em;
-    background-color:@mauve;
-    color:@crust;
+    border:3px solid @mauve;
     
 }
 
 #memory {
-    background-color:@peach;
-    color:@crust;
+    border:3px solid @green;
 }
 
 #temperature {
-    background-color:@red;
-    margin-right: 3em;
+    border:3px solid @red;
 }
 
 #temperature.critical {
@@ -123,11 +120,12 @@ button:hover {
 #disk {
 }
 #clock {
-    background-color: @lavender;
+    background-color: @surface2;
+    border: 3px solid @lavender;
 }
 
 #pulseaudio {
-    background-color: @yellow;
+    border:3px solid @yellow
 }
 
 
@@ -137,7 +135,7 @@ button:hover {
 }
 
 #bluetooth {
-        background-color: @blue; 
+    border:3px solid @blue; 
    }
 
 
@@ -163,7 +161,7 @@ button:hover {
     background-color: @yellow; 
 }
 #network {
-    background-color: @flamingo;
+    border:3px solid @flamingo;
 }
 
 
@@ -187,17 +185,20 @@ button:hover {
 }
 
 #power-profiles-daemon.performance {
-    background-color: @red;
+    background-color:@overlay0;
+    border:3px solid @red;
     
 }
 
 #power-profiles-daemon.balanced {
-    background-color: @blue;
+     background-color:@overlay0;
+     border:3px solid @blue;
     
 }
 
 #power-profiles-daemon.power-saver {
-    background-color: @green;
+     background-color:@overlay0;
+     border:3px solid @green;
 }
 
 #backlight {
@@ -205,8 +206,7 @@ button:hover {
 }
 
 #battery {
-    background-color: #ffffff;
-    color: #000000;
+    border:3px solid @green;
 }
 
 #battery.charging, #battery.plugged {
