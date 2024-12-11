@@ -13,16 +13,20 @@ window#waybar {
 button {
     box-shadow: inset 0 -3px @green;
     border-radius: 0;
+    margin: 0 0;
+    padding: 0 0.5em ;
 }
 
 button:hover {
     box-shadow: inset 0 -3px @blue;
 }
+#workspaces button{
+    border:1px solid @teal;
+    color:@text;
+}
 
 #workspaces button.visible {
-    padding: 0 10px;
-    border:1px solid  @red;
-    color:@red;
+
 }
 
 #workspaces button:hover {
@@ -31,8 +35,8 @@ button:hover {
 
 #workspaces button.active {
     background-color: @teal;
-    color: @red; 
-    box-shadow: inset 0 -3px #ffffff; 
+    color: @crust; 
+    box-shadow: inset 0 -3px @pink; 
 }
 
 #cpu,
@@ -40,7 +44,7 @@ button:hover {
 #temperature,
 #disk {
     background-color:@overlay1;
-    padding:0 1em;
+    padding:0 0.9em;
     margin: 0.3em 0.1em;
     color: @text;
     border-radius: 0.5em;    
@@ -60,7 +64,7 @@ button:hover {
 #scratchpad,
 #power-profiles-daemon,
 #mpd {
-    padding:0 1em;
+    padding:0 0.9em;
     margin: 0.3em 0.1em;
     color: @text;
     background-color: @overlay0;
@@ -86,9 +90,7 @@ button:hover {
 
 #window,
 #workspaces {
-    margin: 0 0;
-    color: @text;
-    background-color: @surface1;
+    
 }
 
 /* If workspaces is the leftmost module, omit left margin */
@@ -203,7 +205,7 @@ button:hover {
 }
 
 #backlight {
-    background-color: @lavender;
+    border:3px solid @text;
 }
 
 #battery {
@@ -272,12 +274,12 @@ button:hover {
 }
 
 #idle_inhibitor {
+    border:3px solid @sky;
     background-color: #2d3436;
 }
 
 #idle_inhibitor.activated {
-    background-color: #ecf0f1;
-    color: #2d3436;
+    border:3px solid @red;
 }
 
 #mpd {
