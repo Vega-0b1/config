@@ -124,30 +124,26 @@ button:hover {
 }
 
 #bluetooth {
-    border:3px solid @blue; 
+    border:3px solid @text; 
 }
 
 
-#bluetooth:active {
-    background-color: @blue; 
+#bluetooth:active { 
 }
 
 #bluetooth .status {
-    font-size: 12px;
-    margin-left: 5px;
-    color: #ffffff;
 }
 
 #bluetooth.connected {
-    background-color: @blue; 
+    border:3px solid @blue; 
 }
 
 #bluetooth.disconnected {
-    background-color: @overlay1; 
+     
 }
 
 #bluetooth.pairing {
-    background-color: @yellow; 
+     
 }
 #network {
     border:3px solid @flamingo;
