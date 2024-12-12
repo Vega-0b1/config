@@ -5,7 +5,7 @@
 }
 
 window#waybar {
-    background-color: @mantle;
+    background-color: transparent;
     transition-property: background-color;
     transition-duration: .5s;
 }
