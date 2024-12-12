@@ -14,7 +14,7 @@ button {
     box-shadow: inset 0 -3px @green;
     border-radius: 0;
     margin: 0 0;
-    padding: 0 0.5em ;
+    padding: 0 0.1em ;
 }
 
 button:hover {
@@ -34,9 +34,11 @@ button:hover {
 }
 
 #workspaces button.active {
-    background-color: @teal;
+    background-color: @sky;
+    transition-property: background-color;
+    transition-duration: 1s;
     color: @crust; 
-    box-shadow: inset 0 -3px @pink; 
+    box-shadow: inset 0 -3px @crust; 
 }
 
 
@@ -75,10 +77,6 @@ button:hover {
     background-color: @crust;
 }
 
-#window,
-#workspaces {
-    
-}
 
 /* If workspaces is the leftmost module, omit left margin */
 .modules-left > widget:first-child > #workspaces {
@@ -101,6 +99,7 @@ button:hover {
 
 #temperature {
     border:3px solid @red;
+    margin-right: 3em;
 }
 
 #temperature.critical {
@@ -243,7 +242,7 @@ button:hover {
 
 
 #tray {
-    background-color: #2980b9;
+    background-color:@overlay1;
 }
 
 #tray > .passive {

@@ -11,9 +11,6 @@
     "reload_style_on_change": true,
     "modules-left": [
       "hyprland/workspaces",
-      "cpu",
-      "memory",
-      "temperature",
       "sway/scratchpad",
       "sway/mode"
     ],
@@ -21,15 +18,17 @@
       "clock"
     ],
     "modules-right": [
+      "cpu",
+      "memory",
+      "temperature",
       "idle_inhibitor",
-      "pulseaudio",
       "bluetooth",
       "network",
       "power-profiles-daemon",
+      "pulseaudio",
       "backlight",
       "battery",
-      "battery#bat2",
-      "tray"
+      "battery#bat2"
     ],
     "hyprland/workspaces": {
       "disable-scroll": true,
@@ -102,27 +101,26 @@
       "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
       "tooltip": true,
       "format-icons": {
-        "default": "",
-        "performance": "",
-        "balanced": "",
-        "power-saver": ""
+        "default": " ",
+        "performance": " ",
+        "balanced": " ",
+        "power-saver": " "
       }
     },
     "network": {
-      "format-wifi": "",
-      "format-ethernet": "",
+      "format-wifi": " ",
+      "format-ethernet": " ",
       "tooltip-format": "{ifname} via {gwaddr} ",
       "format-linked": "{ifname} (No IP) ",
       "format-disconnected": "Disconnected ⚠",
-      "format-alt": "{ifname}: {ipaddr}/{cidr}",
-      "on-click": "wezterm -e nmtui"
+      "on-click": "nm-connection-editor"
     },
     "pulseaudio": {
-      "format": "{volume}% {icon} {format_source}",
+      "format": "{volume}% {icon}",
       "format-bluetooth": "{volume}% 󰂯 {format_source}",
       "format-bluetooth-muted": " {icon} {format_source}",
       "format-muted": " {format_source}",
-      "format-source": "{volume}% ",
+      "format-source": "{volume}",
       "format-source-muted": "",
       "format-icons": {
         "headphone": "",
