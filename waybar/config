@@ -9,13 +9,11 @@
     "reload_style_on_change": true,
     "output": "!DP-2",
     "modules-left": [
-      "hyprland/workspaces",
-      "sway/scratchpad",
-      "sway/mode",
-      "custom-media"
+      "hyprland/workspaces"
     ],
     "modules-center": [
-      "clock"
+      "clock",
+      "custom/media"
     ],
     "modules-right": [
       "cpu",
@@ -49,11 +47,16 @@
         "5": []
       }
     },
-    "custom-media":{
-      
-    },
-    "sway/mode": {
-      "format": "<span style=\"italic\">{}</span>"
+    "custom/media": {
+        "format": "{icon} {text}",
+        "return-type": "json",
+        "max-length": 40,
+        "format-icons": {
+            "spotify": "",
+            "default": "🎜"
+        },
+        "escape": true,
+        "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null"
     },
     "tray": {
       "icon-size": 21,
@@ -149,42 +152,11 @@
       "format-icons": ["", ""],
       "tooltip": true,
       "tooltip-format": "{app}: {title}"
-    },
-    "mpd": {
-      "format": "{stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ⸨{songPosition}|{queueLength}⸩ {volume}% ",
-      "format-disconnected": "Disconnected ",
-      "format-stopped": "{consumeIcon}{randomIcon}{repeatIcon}{singleIcon}Stopped ",
-      "unknown-tag": "N/A",
-      "interval": 5,
-      "consume-icons": {
-        "on": " "
-      },
-      "random-icons": {
-        "off": "<span color=\"#f53c3c\"></span> ",
-        "on": " "
-      },
-      "repeat-icons": {
-        "on": " "
-      },
-      "single-icons": {
-        "on": "1 "
-      },
-      "state-icons": {
-        "paused": "",
-        "playing": ""
-      },
-      "tooltip-format": "MPD (connected)",
-      "tooltip-format-disconnected": "MPD (disconnected)"
-    },
-    "sway/mode": {
-      "format": "<span style=\"italic\">{}</span>"
     }
-  },
 
-
-
-  
+},
 {
+
     "style": "/home/jcvega/.config/waybar/style.css",
     "layer": "top",
     "position": "top",
@@ -304,41 +276,5 @@
         "activated": "",
         "deactivated": ""
       }
-    },
-    "sway/scratchpad": {
-      "format": "{icon} {count}",
-      "show-empty": false,
-      "format-icons": ["", ""],
-      "tooltip": true,
-      "tooltip-format": "{app}: {title}"
-    },
-    "mpd": {
-      "format": "{stateIcon} {consumeIcon}{randomIcon}{repeatIcon}{singleIcon}{artist} - {album} - {title} ({elapsedTime:%M:%S}/{totalTime:%M:%S}) ⸨{songPosition}|{queueLength}⸩ {volume}% ",
-      "format-disconnected": "Disconnected ",
-      "format-stopped": "{consumeIcon}{randomIcon}{repeatIcon}{singleIcon}Stopped ",
-      "unknown-tag": "N/A",
-      "interval": 5,
-      "consume-icons": {
-        "on": " "
-      },
-      "random-icons": {
-        "off": "<span color=\"#f53c3c\"></span> ",
-        "on": " "
-      },
-      "repeat-icons": {
-        "on": " "
-      },
-      "single-icons": {
-        "on": "1 "
-      },
-      "state-icons": {
-        "paused": "",
-        "playing": ""
-      },
-      "tooltip-format": "MPD (connected)",
-      "tooltip-format-disconnected": "MPD (disconnected)"
-    },
-    "sway/mode": {
-      "format": "<span style=\"italic\">{}</span>"
     }
   }]
