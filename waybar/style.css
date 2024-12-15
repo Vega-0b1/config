@@ -25,10 +25,6 @@ button:hover {
     background-color: @surface1;
 }
 
-#workspaces button.visible {
-
-}
-
 #workspaces button:hover {
     background: rgba(0, 0, 0, 0.2);
 }
@@ -60,7 +56,10 @@ button:hover {
 #cpu,
 #memory,
 #temperature,
-#disk {
+#disk,
+#power-profiles-daemon.performance,
+#power-profiles-daemon.balanced,
+#power-profiles-daemon.power-saver {
     padding:0 0.9em;
     margin: 0.3em 0.1em;
     color: @text;
@@ -90,8 +89,7 @@ button:hover {
 }
 
 #cpu {
-    border:3px solid @mauve;
-    
+    border:3px solid @mauve;    
 }
 
 #memory {
@@ -127,62 +125,29 @@ button:hover {
     border:3px solid @text; 
 }
 
-
-#bluetooth:active { 
-}
-
-#bluetooth .status {
-}
-
 #bluetooth.connected {
     border:3px solid @blue; 
 }
 
-#bluetooth.disconnected {
-     
-}
-
-#bluetooth.pairing {
-     
-}
 #network {
     border:3px solid @flamingo;
 }
 
 
-#network:active {
-    background-color: #ffffff; 
-}
-
 #network.disconnected {
-    background-color: #666666;
-}
-
-
-
-#power-profiles-daemon {
-    color: #ffffff;
-    background-color: #2980b9; 
-}
-
-
-#power-profiles-daemon:active {
+    border:3px solid @text;
 }
 
 #power-profiles-daemon.performance {
-    background-color:@overlay0;
-    border:3px solid @red;
-    
+    border:3px solid @red;    
 }
 
 #power-profiles-daemon.balanced {
-     background-color:@overlay0;
      border:3px solid @blue;
     
 }
 
 #power-profiles-daemon.power-saver {
-     background-color:@overlay0;
      border:3px solid @green;
 }
 
@@ -195,8 +160,8 @@ button:hover {
 }
 
 #battery.charging, #battery.plugged {
-    color: #ffffff;
-    background-color: #26A65B;
+    color:@crust;
+    background-color: @green;
 }
 
 @keyframes blink {
@@ -216,16 +181,6 @@ button:hover {
     animation-direction: alternate;
 }
 
-
-#wireplumber {
-    background-color: #fff0f5;
-    color: #000000;
-}
-
-#wireplumber.muted {
-    background-color: #f53c3c;
-}
-
 #custom-media {
     background-color: #66cc99;
     color: #2a5c45;
@@ -239,8 +194,6 @@ button:hover {
 #custom-media.custom-vlc {
     background-color: #ffa000;
 }
-
-
 
 #tray {
     background-color:@overlay1;
@@ -261,74 +214,4 @@ button:hover {
 
 #idle_inhibitor.activated {
     border:3px solid @red;
-}
-
-#mpd {
-    background-color: #66cc99;
-    color: #2a5c45;
-}
-
-#mpd.disconnected {
-    background-color: #f53c3c;
-}
-
-#mpd.stopped {
-    background-color: #90b1b1;
-}
-
-#mpd.paused {
-    background-color: #51a37a;
-}
-
-#language {
-    background: #00b093;
-    color: #740864;
-    padding: 0 5px;
-    margin: 0 5px;
-    min-width: 16px;
-}
-
-#keyboard-state {
-    background: #97e1ad;
-    color: #000000;
-    padding: 0 0px;
-    margin: 0 5px;
-    min-width: 16px;
-}
-
-#keyboard-state > label {
-    padding: 0 5px;
-}
-
-#keyboard-state > label.locked {
-    background: rgba(0, 0, 0, 0.2);
-}
-
-#scratchpad {
-    background: rgba(0, 0, 0, 0.2);
-}
-
-#scratchpad.empty {
-	background-color: transparent;
-}
-
-#privacy {
-    padding: 0;
-}
-
-#privacy-item {
-    padding: 0 5px;
-    color: white;
-}
-
-#privacy-item.screenshare {
-    background-color: #cf5700;
-}
-
-#privacy-item.audio-in {
-    background-color: #1ca000;
-}
-
-#privacy-item.audio-out {
-    background-color: #0069d4;
 }

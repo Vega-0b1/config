@@ -11,7 +11,8 @@
     "modules-left": [
       "hyprland/workspaces",
       "sway/scratchpad",
-      "sway/mode"
+      "sway/mode",
+      "custom-media"
     ],
     "modules-center": [
       "clock"
@@ -47,6 +48,9 @@
         "4": [],
         "5": []
       }
+    },
+    "custom-media":{
+      
     },
     "sway/mode": {
       "format": "<span style=\"italic\">{}</span>"
