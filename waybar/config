@@ -9,11 +9,11 @@
     "reload_style_on_change": true,
     "output": "!DP-2",
     "modules-left": [
-      "hyprland/workspaces"
+      "hyprland/workspaces",
+      "custom/media"
     ],
     "modules-center": [
-      "clock",
-      "custom/media"
+      "clock"
     ],
     "modules-right": [
       "cpu",
@@ -48,16 +48,11 @@
       }
     },
     "custom/media": {
-        "format": "{icon} {text}",
-        "return-type": "json",
-        "max-length": 40,
-        "format-icons": {
-            "spotify": "",
-            "default": "🎜"
-        },
-        "escape": true,
-        "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null"
+      "format": "{icon} {text}",
+      "return-type": "json",
+      "escape": true
     },
+    
     "tray": {
       "icon-size": 21,
       "spacing": 10

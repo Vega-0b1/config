@@ -160,7 +160,7 @@ def parse_arguments():
     parser.add_argument("-x", "--exclude", "- Comma-separated list of excluded player")
 
     # Define for which player we"re listening
-    parser.add_argument("--spotify")
+    parser.add_argument("--player")
 
     parser.add_argument("--enable-logging", action="store_true")
 
