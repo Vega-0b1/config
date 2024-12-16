@@ -3,7 +3,7 @@
     "style": "/home/jcvega/.config/waybar/style.css",
     "layer": "top",
     "position": "top",
-    "height": 30,
+    "height": 42,
     "spacing": 4,
     "fixed-center": "true",
     "reload_style_on_change": true,
@@ -33,11 +33,11 @@
       "warp-on-scroll": false,
       "format": "{name} {icon}",
       "format-icons": {
-        "1": "Web  ",
-        "2": "Code 󰅩 ",
-        "3": "Edu 󰑴  ",
-        "4": "Math 󰿈 ",
-        "5": "Science  "
+        "1": "Math 󰿈 ",
+        "2": "Science  ",
+        "3": "Code 󰅩 ",
+        "4": "Edu 󰑴  ",
+        "5": "Web  "        
       },
       "persistent-workspaces": {
         "1": [],
@@ -47,12 +47,6 @@
         "5": []
       }
     },
-    "custom/media": {
-      "format": "{icon} {text}",
-      "return-type": "json",
-      "escape": true
-    },
-    
     "tray": {
       "icon-size": 21,
       "spacing": 10
@@ -140,22 +134,14 @@
         "activated": "",
         "deactivated": ""
       }
-    },
-    "sway/scratchpad": {
-      "format": "{icon} {count}",
-      "show-empty": false,
-      "format-icons": ["", ""],
-      "tooltip": true,
-      "tooltip-format": "{app}: {title}"
     }
-
 },
 {
 
     "style": "/home/jcvega/.config/waybar/style.css",
     "layer": "top",
     "position": "top",
-    "height": 30,
+    "height": 42,
     "spacing": 4,
     "fixed-center": "true",
     "reload_style_on_change": true,
@@ -163,11 +149,11 @@
     "modules-left": [
      ],
     "modules-center": [
-
     ],
     "modules-right": [
       "hyprland/workspaces"
     ],
+
     "hyprland/workspaces": {
       "disable-scroll": true,
       "warp-on-scroll": false,
@@ -179,97 +165,6 @@
       "persistent-workspaces": {
         "9": [],
         "10": []
-      }
-    },
-    "sway/mode": {
-      "format": "<span style=\"italic\">{}</span>"
-    },
-    "tray": {
-      "icon-size": 21,
-      "spacing": 10
-    },
-    "clock": {
-      "format": "{:%I:%M:%S %p}",
-      "interval": 1
-    },
-    "cpu": {
-      "format": "CPU {usage}% ",
-      "tooltip": false
-    },
-    "memory": {
-      "format": "RAM {}% "
-    },
-    "temperature": {
-      "critical-threshold": 80,
-      "format": "{temperatureC}°C {icon}",
-      "format-icons": ["", "", ""]
-    },
-    "backlight": {
-      "format": "{percent}% {icon}",
-      "format-icons": ["", "", "", "", "", "", "", "", ""]
-    },
-    "battery": {
-      "states": {
-        "good": 95,
-        "warning": 30,
-        "critical": 15
-      },
-      "format": "{capacity}% {icon}",
-      "format-full": "{capacity}% {icon}",
-      "format-charging": "{capacity}% ",
-      "format-plugged": "{capacity}% ",
-      "format-alt": "{time} {icon}",
-      "format-icons": ["", "", "", "", ""]
-    },
-    "battery#bat2": {
-      "bat": "BAT2"
-    },
-    "power-profiles-daemon": {
-      "format": "{icon}",
-      "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
-      "tooltip": true,
-      "format-icons": {
-        "default": " ",
-        "performance": " ",
-        "balanced": " ",
-        "power-saver": " "
-      }
-    },
-    "network": {
-      "format-wifi": " ",
-      "format-ethernet": " ",
-      "tooltip-format": "{ifname} via {gwaddr} ",
-      "format-linked": "{ifname} (No IP) ",
-      "format-disconnected": "Disconnected ⚠",
-      "on-click": "nm-connection-editor"
-    },
-    "pulseaudio": {
-      "format": "{volume}% {icon}",
-      "format-bluetooth": "{volume}% 󰂯 {format_source}",
-      "format-bluetooth-muted": " {icon} {format_source}",
-      "format-muted": " {format_source}",
-      "format-source": "{volume}",
-      "format-source-muted": "",
-      "format-icons": {
-        "headphone": "",
-        "hands-free": "",
-        "headset": "",
-        "phone": "",
-        "portable": "",
-        "car": "",
-        "default": ["", "", ""]
-      },
-      "on-click": "pavucontrol"
-    },
-    "bluetooth": {
-      "format": "",
-      "on-click": "blueman-manager"
-    },
-    "idle_inhibitor": {
-      "format": " {icon}",
-      "format-icons": {
-        "activated": "",
-        "deactivated": ""
       }
     }
   }]
