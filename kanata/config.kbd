@@ -1,0 +1,11 @@
+(defsrc
+	caps
+)
+
+(defalias
+	escctrl (tap-hold 300 300 esc lctrl)
+)
+
+(deflayer base
+	@escctrl
+)
