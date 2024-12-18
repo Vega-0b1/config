@@ -33,18 +33,11 @@
       "warp-on-scroll": false,
       "format": "{name} {icon}",
       "format-icons": {
-        "1": "Math 󰿈 ",
-        "2": "Science  ",
-        "3": "Code 󰅩 ",
-        "4": "Edu 󰑴  ",
-        "5": "Web  "        
-      },
-      "persistent-workspaces": {
-        "1": [],
-        "2": [],
-        "3": [],
-        "4": [],
-        "5": []
+        "1": "Math 󰿈",
+        "2": "Science ",
+        "3": "Code 󰅩",
+        "4": "Edu 󰑴",
+        "5": "Web "        
       }
     },
     "tray": {
@@ -159,12 +152,8 @@
       "warp-on-scroll": false,
       "format": "{name} {icon}",
       "format-icons": {
-        "10": "Plan 󰃰 ",
-        "9": "Media 󰽯 "
-      },
-      "persistent-workspaces": {
-        "9": [],
-        "10": []
+        "9": "Media 󰽯",
+        "10": "Plan 󰃰"
       }
     }
   }]
