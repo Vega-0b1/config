@@ -164,7 +164,7 @@
     "spacing": 4,
     "fixed-center": "true",
     "reload_style_on_change": true,
-    "output": "eDP-2",
+    "output": "eDP-1",
     "modules-left": [
       "hyprland/workspaces",
       "custom/media"
