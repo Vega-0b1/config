@@ -7,7 +7,7 @@
     "spacing": 4,
     "fixed-center": "true",
     "reload_style_on_change": true,
-    "output": "!DP-2",
+    "output": "DP-1",
     "modules-left": [
       "hyprland/workspaces",
       "custom/media"
@@ -33,11 +33,9 @@
       "warp-on-scroll": false,
       "format": "{name} {icon}",
       "format-icons": {
-        "1": "Math 󰿈",
-        "2": "Science ",
-        "3": "Code 󰅩",
-        "4": "Edu 󰑴",
-        "5": "Web "        
+        "1": "Mathematics 󰿈",
+        "2": "Computer Science 󰅩",
+        "3": "Web "        
       }
     },
     "tray": {
@@ -152,8 +150,140 @@
       "warp-on-scroll": false,
       "format": "{name} {icon}",
       "format-icons": {
-        "9": "Media 󰽯",
-        "10": "Plan 󰃰"
+        "4": "Media 󰽯",
+        "5": "Plan 󰃰"
       }
     }
-  }]
+  },
+
+{
+    "style": "/home/jcvega/.config/waybar/style.css",
+    "layer": "top",
+    "position": "top",
+    "height": 42,
+    "spacing": 4,
+    "fixed-center": "true",
+    "reload_style_on_change": true,
+    "output": "eDP-2",
+    "modules-left": [
+      "hyprland/workspaces",
+      "custom/media"
+    ],
+    "modules-center": [
+      "clock"
+    ],
+    "modules-right": [
+      "cpu",
+      "memory",
+      "temperature",
+      "idle_inhibitor",
+      "bluetooth",
+      "network",
+      "power-profiles-daemon",
+      "pulseaudio",
+      "backlight",
+      "battery",
+      "battery#bat2"
+    ],
+    "hyprland/workspaces": {
+      "disable-scroll": true,
+      "warp-on-scroll": false,
+      "format": "{name} {icon}",
+      "format-icons": {
+        "1": "Mathematics 󰿈",
+        "2": "Computer Science 󰅩",
+        "3": "Web ",        
+        "4": "Media 󰽯",
+        "5": "Plan 󰃰"
+      }
+    },
+    "tray": {
+      "icon-size": 21,
+      "spacing": 10
+    },
+    "clock": {
+      "format": "{:%I:%M:%S %p}",
+      "interval": 1
+    },
+    "cpu": {
+      "format": "CPU {usage}% ",
+      "tooltip": false
+    },
+    "memory": {
+      "format": "RAM {}% "
+    },
+    "temperature": {
+      "critical-threshold": 80,
+      "format": "{temperatureC}°C {icon}",
+      "format-icons": ["", "", ""]
+    },
+    "backlight": {
+      "format": "{percent}% {icon}",
+      "format-icons": ["", "", "", "", "", "", "", "", ""]
+    },
+    "battery": {
+      "states": {
+        "good": 95,
+        "warning": 30,
+        "critical": 15
+      },
+      "format": "{capacity}% {icon}",
+      "format-full": "{capacity}% {icon}",
+      "format-charging": "{capacity}% ",
+      "format-plugged": "{capacity}% ",
+      "format-alt": "{time} {icon}",
+      "format-icons": ["", "", "", "", ""]
+    },
+    "battery#bat2": {
+      "bat": "BAT2"
+    },
+    "power-profiles-daemon": {
+      "format": "{icon}",
+      "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+      "tooltip": true,
+      "format-icons": {
+        "default": " ",
+        "performance": " ",
+        "balanced": " ",
+        "power-saver": " "
+      }
+    },
+    "network": {
+      "format-wifi": " ",
+      "format-ethernet": " ",
+      "tooltip-format": "{ifname} via {gwaddr} ",
+      "format-linked": "{ifname} (No IP) ",
+      "format-disconnected": "Disconnected ⚠",
+      "on-click": "nm-connection-editor"
+    },
+    "pulseaudio": {
+      "format": "{volume}% {icon}",
+      "format-bluetooth": "{volume}% 󰂯 {format_source}",
+      "format-bluetooth-muted": " {icon} {format_source}",
+      "format-muted": " {format_source}",
+      "format-source": "{volume}",
+      "format-source-muted": "",
+      "format-icons": {
+        "headphone": "",
+        "hands-free": "",
+        "headset": "",
+        "phone": "",
+        "portable": "",
+        "car": "",
+        "default": ["", "", ""]
+      },
+      "on-click": "pavucontrol"
+    },
+    "bluetooth": {
+      "format": "",
+      "on-click": "blueman-manager"
+    },
+    "idle_inhibitor": {
+      "format": " {icon}",
+      "format-icons": {
+        "activated": "",
+        "deactivated": ""
+      }
+    }
+}
+]
