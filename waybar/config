@@ -33,11 +33,10 @@
       "warp-on-scroll": false,
       "format": "{name} {icon}",
       "format-icons": {
-        "1": "Mathematics 󰿈",
-        "2": "Computer Science 󰅩",
-        "3": "Web ",
-        "4": "Media",
-        "5": "Plan"        
+        "1": "Computer Science 󰅩",
+        "2": "Web ",
+        "3": "Media",
+        "4": "DP-2"        
       }
     },
     "tray": {

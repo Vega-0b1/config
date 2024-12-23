@@ -1,11 +1,16 @@
 (defsrc
-	caps
+    caps 
+    f
+    d    
 )
 
 (defalias
-	escctrl (tap-hold 300 300 esc lctrl)
+    fsuper (tap-hold 300 300 f lmeta)  
+    dctrl (tap-hold 300 300 d lctrl)  
 )
 
 (deflayer base
-	@escctrl
+    esc      
+    @fsuper
+    @dctrl
 )
