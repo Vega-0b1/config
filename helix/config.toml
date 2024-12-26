@@ -5,3 +5,5 @@ hidden = false
 
 [keys.normal]
 C-g = [":new", ":insert-output lazygit", ":buffer-close!", ":redraw"]
+C-j = "page_down"
+C-k = "page_up"

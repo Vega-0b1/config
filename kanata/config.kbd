@@ -1,16 +1,19 @@
 (defsrc
     caps 
     f
-    d    
+    d
+    a    
 )
 
 (defalias
-    fsuper (tap-hold 300 300 f lmeta)  
-    dctrl (tap-hold 300 300 d lctrl)  
+    Fsuper (tap-hold 200 200 f lmeta)  
+    Dalt (tap-hold 200 200 d lalt)  
+    Actrl (tap-hold 200 200 a lctrl)  
 )
 
 (deflayer base
     esc      
-    @fsuper
-    @dctrl
+    @Fsuper
+    @Dalt
+    @Actrl
 )
