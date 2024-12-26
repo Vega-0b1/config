@@ -6,9 +6,9 @@
 )
 
 (defalias
-    Fsuper (tap-hold 200 200 f lmeta)  
-    Dalt (tap-hold 200 200 d lalt)  
-    Actrl (tap-hold 200 200 a lctrl)  
+    Fsuper (tap-hold 1 200 f lmeta)  
+    Dalt (tap-hold 1 200 d lalt)  
+    Actrl (tap-hold 1 200 a lctrl)  
 )
 
 (deflayer base
