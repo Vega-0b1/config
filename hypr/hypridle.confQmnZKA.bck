@@ -1,7 +1,7 @@
 general {
      lock_cmd = pidof hyprlock || hyprlock       # avoid starting multiple hyprlock instances.
      before_sleep_cmd = loginctl lock-session    # lock before suspend.
-     after_sleep_cmd = hyprctl dispatch dpms on; notify-send "general script running"; ~/.config/hypr/scripts/monitor_setup.sh  # to avoid having to press a key twice to turn on the display.
+     after_sleep_cmd = hyprctl dispatch dpms on; ~/.config/hypr/scripts/monitor_setup.sh  # to avoid having to press a key twice to turn on the display.
 }
 
 # listener {
@@ -24,12 +24,10 @@ general {
 listener {
     timeout = 330                                
     on-timeout = hyprctl dispatch dpms off        # screen off when timeout has passed
-    on-resume = hyprctl dispatch dpms on; notify-send "second running script"; ~/.config/hypr/scripts/monitor_setup.sh    
+    on-resume = hyprctl dispatch dpms on; ~/.config/hypr/scripts/monitor_setup.sh    
 }
 
 listener {
     timeout = 1800                                
     on-timeout = systemctl hibernate               
 }
-
-
