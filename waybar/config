@@ -33,10 +33,11 @@
       "warp-on-scroll": false,
       "format": "{name} {icon}",
       "format-icons": {
-        "1": "Plan",
-        "2": "Work",
-        "3": "Code",
-        "4": "Chill"        
+        "1": "Study",
+        "2": "Code",
+        "3": "Monitor",
+        "4": "Media",
+        "7": "Scratch"        
       }
     },
     "tray": {
