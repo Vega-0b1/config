@@ -2,23 +2,18 @@
   {
     "style": "/home/jcvega/.config/waybar/style.css",
     "layer": "top",
-    "position": "top",
+    "position": "left",
     "height": 42,
-    "spacing": 4,
+    "spacing": 0,
     "fixed-center": "true",
     "reload_style_on_change": true,
     "output": "!DP-2",
     "modules-left": [
-      "hyprland/workspaces",
-      "custom/media"
+      "hyprland/workspaces"
     ],
     "modules-center": [
-      "clock"
     ],
     "modules-right": [
-      "cpu",
-      "memory",
-      "temperature",
       "idle_inhibitor",
       "network",
       "power-profiles-daemon",
@@ -26,18 +21,19 @@
       "backlight",
       "battery",
       "battery#bat2",
-      "tray"
+      "tray",
+      "clock"
     ],
     "hyprland/workspaces": {
       "disable-scroll": true,
       "warp-on-scroll": false,
       "format": "{name} {icon}",
       "format-icons": {
-        "1": "Code",
-        "2": "Study",
-        "3": "Monitor",
-        "4": "Media",
-        "7": "Scratch"        
+        "1": "C",
+        "2": "S",
+        "3": "M",
+        "4": "M",
+        "7": "S"        
       }
     },
     "tray": {
@@ -45,7 +41,7 @@
       "spacing": 10
     },
     "clock": {
-      "format": "{:%I:%M:%S %p}",
+      "format": "{:%I\n%M\n%S\n%p}",
       "interval": 1
     },
     "cpu": {
