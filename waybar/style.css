@@ -1,7 +1,7 @@
 @import "mocha.css";
 * {
     font-family: FontAwesome, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 16px;
+    font-size: 20px;
 }
 
 window#waybar {
@@ -12,8 +12,6 @@ window#waybar {
 
 button {
     border-radius: 0.25em;
-    margin: 0em 0em;
-    padding: 0.5em 0em;
 }
 
 button:hover {
@@ -21,8 +19,6 @@ button:hover {
 }
 #workspaces button{
     border:3px solid @teal;
-    color:@text;
-    background-color: @surface1;
 }
 
 #workspaces button:hover {
@@ -35,7 +31,6 @@ button:hover {
     transition-duration: 1s;
     padding: 1em 0em;
     color: @crust; 
-    box-shadow: inset 0 -3px @crust; 
 }
 
 
@@ -59,11 +54,15 @@ button:hover {
 #disk,
 #power-profiles-daemon.performance,
 #power-profiles-daemon.balanced,
-#power-profiles-daemon.power-saver {
-    padding:1em 0.1em;
-    margin: 0em 0em;
+#power-profiles-daemon.power-saver,
+#workspaces button {
+    padding:5px 3px;
+    margin-top:2px;
+    margin-bottom:2px;
+    margin-left:0px;
+    margin-right:2px;
     color: @text;
-    background-color: @surface1;
+    background-color: @transparent;
     border-radius:0.25em;
 }
 
@@ -181,7 +180,7 @@ button:hover {
 }
 
 #tray {
-    background-color:@overlay1;
+    border:solid 3px @text;
 }
 
 #tray > .passive {

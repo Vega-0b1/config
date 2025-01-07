@@ -3,20 +3,16 @@
     "style": "/home/jcvega/.config/waybar/style.css",
     "layer": "top",
     "position": "left",
-    "height": 42,
     "spacing": 0,
-    "fixed-center": "true",
     "reload_style_on_change": true,
-    "output": "!DP-2",
     "modules-left": [
       "hyprland/workspaces"
     ],
     "modules-center": [
+      "idle_inhibitor",
+      "power-profiles-daemon"
     ],
     "modules-right": [
-      "idle_inhibitor",
-      "network",
-      "power-profiles-daemon",
       "pulseaudio",
       "backlight",
       "battery",
@@ -41,7 +37,7 @@
       "spacing": 10
     },
     "clock": {
-      "format": "{:%I\n%M\n%S\n%p}",
+      "format": "{:%I\n %M\n  %S\n   %p}",
       "interval": 1
     },
     "cpu": {
@@ -57,7 +53,7 @@
       "format-icons": ["", "", ""]
     },
     "backlight": {
-      "format": "{percent}% {icon}",
+      "format": "{icon}",
       "format-icons": ["", "", "", "", "", "", "", "", ""]
     },
     "battery": {
@@ -66,7 +62,7 @@
         "warning": 30,
         "critical": 15
       },
-      "format": "{capacity}% {icon}",
+      "format": "{icon}",
       "format-full": "{capacity}% {icon}",
       "format-charging": "{capacity}% ",
       "format-plugged": "{capacity}% ",
@@ -96,7 +92,7 @@
       "on-click": "nm-connection-editor"
     },
     "pulseaudio": {
-      "format": "{volume}% {icon}",
+      "format": "{icon}",
       "format-bluetooth": "{volume}% 󰂯 {format_source}",
       "format-bluetooth-muted": " {icon} {format_source}",
       "format-muted": " {format_source}",
