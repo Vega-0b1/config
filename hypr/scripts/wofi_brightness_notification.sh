@@ -12,9 +12,11 @@ BRIGHTNESS=$(brightnessctl get)
 MAX_BRIGHTNESS=$(brightnessctl max)
 PERCENTAGE=$((BRIGHTNESS * 100 / MAX_BRIGHTNESS))
 
-# Display brightness level with Wofi
-echo "🔆 Brightness: $PERCENTAGE%" | wofi --dmenu --lines=1 --width=200
+# Create the brightness message
+MESSAGE="🔆 Brightness: $PERCENTAGE%"
 
+# Use the notification-specific Wofi config and style
+echo "$MESSAGE" | wofi --dmenu --lines=1 --width=200 --config ~/.config/wofi/notifications/brightness.css &
 WOFI_PID=$!
 
 # Close Wofi after 2 seconds
