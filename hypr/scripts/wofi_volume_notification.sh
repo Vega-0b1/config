@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Get the current volume and mute state
+VOLUME=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print int($2 * 100)}')
+MUTED=$(wpctl get-mute @DEFAULT_AUDIO_SINK@)
+
+if [[ "$MUTED" == "true" ]]; then
+    MESSAGE="🔇 Muted"
+else
+    MESSAGE="🔊 Volume: $VOLUME%"
+fi
+
+# Use the notification-specific Wofi config and style
+echo "$MESSAGE" | wofi --dmenu --lines=1 --width=200 --config ~/.config/wofi/notifications/volume.css &
+WOFI_PID=$!
+
+# Close Wofi after 2 seconds
+sleep 2
+kill "$WOFI_PID" 2>/dev/null
