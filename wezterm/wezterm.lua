@@ -3,87 +3,85 @@ local act = wezterm.action
 local config = wezterm.config_builder()
 
 config.tab_bar_at_bottom = true
-config.use_fancy_tab_bar = false
-config.window_decorations = 'RESIZE'
+config.use_fancy_tab_bar = true
+config.window_decorations = 'NONE'
 config.color_scheme = 'Dracula (base16)'
-
-config.window_background_opacity = 0.8
-config.window_background_image_hsb = {
-    brightness = 0.9,  -- Reduce brightness for a more subtle effect
-    saturation = 0.8,  -- Slightly desaturate the image
-    hue = 1.0,         -- Keep hue unchanged
-}
 
 config.keys = {
   {
     key = 'q',
-    mods = 'SUPER',
+    mods = 'CTRL',
     action = wezterm.action.CloseCurrentPane { confirm = true},
   },
 
   {
     key = 'j',
-    mods = 'SUPER|SHIFT',
+    mods = 'SHIFT|CTRL',
     action = act.AdjustPaneSize { 'Down', 5 },
   },
 
   
   {
     key = 'k',
-    mods = 'SUPER|SHIFT',
+    mods = 'SHIFT|CTRL',
     action = act.AdjustPaneSize { 'Up', 5 },
   },
 
   
   {
     key = 'h',
-    mods = 'SUPER|SHIFT',
+    mods = 'SHIFT|CTRL',
     action = act.AdjustPaneSize { 'Left', 5 },
   },
   
   {
     key = 'l',
-    mods = 'SUPER|SHIFT',
+    mods = 'SHIFT|CTRL',
     action = act.AdjustPaneSize { 'Right', 5 },
   },
 
   {
     key = 'v',
-    mods = 'SUPER',
+    mods = 'SHIFT|CTRL',
     action = act.SplitVertical {},
   },
 
   {
     key = 'b',
-    mods = 'SUPER',
+    mods = 'SHIFT|CTRL',
     action = act.SplitHorizontal {},
   },
 
   {
     key = 'h',
-    mods = 'SUPER',
+    mods = 'ALT',
     action = act.ActivatePaneDirection 'Left',
   },
 
   
   {
     key = 'j',
-    mods = 'SUPER',
+    mods = 'ALT',
     action = act.ActivatePaneDirection 'Down',
   },
 
   
   {
     key = 'k',
-    mods = 'SUPER',
+    mods = 'ALT',
     action = act.ActivatePaneDirection 'Up',
   },
 
   
   {
     key = 'l',
-    mods = 'SUPER',
+    mods = 'ALT',
     action = act.ActivatePaneDirection 'Right',
+  },
+  {
+    key = 't',
+    mods = 'SHIFT|CTRL',
+    action = act.SpawnTab 'CurrentPaneDomain',
   },
   
 }
