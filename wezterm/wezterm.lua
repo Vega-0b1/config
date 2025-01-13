@@ -83,6 +83,15 @@ config.keys = {
     mods = 'SHIFT|CTRL',
     action = act.SpawnTab 'CurrentPaneDomain',
   },
-  
+  {
+    key = 'h',
+    mods = 'ALT',
+    action = act.ActivateTabRelative(-1), 
+  },
+   {
+    key = 'l',
+    mods = 'ALT',
+    action = act.ActivateTabRelative(1), 
+  }, 
 }
 return config
