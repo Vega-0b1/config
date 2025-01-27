@@ -10,45 +10,45 @@ config.color_scheme = 'Dracula (base16)'
 config.keys = {
   {
     key = 'q',
-    mods = 'CTRL',
+    mods = 'ALT',
     action = wezterm.action.CloseCurrentPane { confirm = true},
   },
 
   {
     key = 'j',
-    mods = 'SHIFT|CTRL',
+    mods = 'SHIFT|ALT',
     action = act.AdjustPaneSize { 'Down', 5 },
   },
 
   
   {
     key = 'k',
-    mods = 'SHIFT|CTRL',
+    mods = 'SHIFT|ALT',
     action = act.AdjustPaneSize { 'Up', 5 },
   },
 
   
   {
     key = 'h',
-    mods = 'SHIFT|CTRL',
+    mods = 'SHIFT|ALT',
     action = act.AdjustPaneSize { 'Left', 5 },
   },
   
   {
     key = 'l',
-    mods = 'SHIFT|CTRL',
+    mods = 'SHIFT|ALT',
     action = act.AdjustPaneSize { 'Right', 5 },
   },
 
   {
     key = 'v',
-    mods = 'SHIFT|CTRL',
+    mods = 'SHIFT|ALT',
     action = act.SplitVertical {},
   },
 
   {
     key = 'b',
-    mods = 'SHIFT|CTRL',
+    mods = 'SHIFT|ALT',
     action = act.SplitHorizontal {},
   },
 
@@ -80,17 +80,17 @@ config.keys = {
   },
   {
     key = 't',
-    mods = 'SHIFT|CTRL',
+    mods = 'SHIFT|ALT',
     action = act.SpawnTab 'CurrentPaneDomain',
   },
   {
     key = 'h',
-    mods = 'ALT',
+    mods = 'CTRL',
     action = act.ActivateTabRelative(-1), 
   },
    {
     key = 'l',
-    mods = 'ALT',
+    mods = 'CTRL',
     action = act.ActivateTabRelative(1), 
   }, 
 }

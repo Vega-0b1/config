@@ -1,19 +1,17 @@
 (defsrc    
     caps
     f
-    a
-    spc   
+    spc
 )
 
 (defalias
-    Fsuper (tap-hold 1 200 f lmeta)  
-    aAlt (tap-hold 1 200 a lalt)
-    spaceCtrl (tap-hold 1 200 spc lctrl)  
+    Fsuper (tap-hold 1 100 f lmeta)  
+    spaceAlt (tap-hold 1 200 spc lalt)
+    escCtrl (tap-hold 1 200 esc lctrl)  
 )
 
 (deflayer base
-    esc
+    @escCtrl
     @Fsuper
-    @aAlt
-    @spaceCtrl
+    @spaceAlt
 )
