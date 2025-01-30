@@ -12,7 +12,7 @@ else
 fi
 
 # Use the notification-specific Wofi config and style
-echo "$MESSAGE" | wofi --config ~/.config/wofi/config --dmenu --height 8% --width 10% --style ~/.config/wofi/notifications/volume.css &
+echo "$MESSAGE" | wofi --conf ~/.config/wofi/notifications/config --dmenu --height 8% --width 10%  --style ~/.config/wofi/notifications/volume.css &
 WOFI_PID=$!
 
 # Close Wofi after 2 seconds

@@ -13,10 +13,10 @@ MAX_BRIGHTNESS=$(brightnessctl max)
 PERCENTAGE=$((BRIGHTNESS * 100 / MAX_BRIGHTNESS))
 
 # Create the brightness message
-MESSAGE="🔆 Brightness: $PERCENTAGE%"
+MESSAGE="  🔆 Brightness: $PERCENTAGE"
 
 # Use the notification-specific Wofi config and style
-echo "$MESSAGE" | wofi --dmenu --config ~/.config/wofi/config --height 8% --width 10% --style ~/.config/wofi/notifications/volume.css &
+echo "$MESSAGE" | wofi --dmenu --conf ~/.config/wofi/notifications/config --height 8% --width 10% --style ~/.config/wofi/notifications/volume.css &
 WOFI_PID=$!
 
 # Close Wofi after 2 seconds
