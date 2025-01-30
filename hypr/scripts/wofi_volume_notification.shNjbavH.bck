@@ -6,15 +6,17 @@ MUTED=$(wpctl get-mute @DEFAULT_AUDIO_SINK@)
 
 if [ "$MUTED" == "true" ]; then
     MESSAGE="🔇 Muted"
+elif ["$VOLUME" > "10"]; then
+    MESSAGE = "hello"
 else
-    MESSAGE="      Volume: $VOLUME"
+    MESSAGE="    Volume: $VOLUME"
 
 fi
 
 # Use the notification-specific Wofi config and style
-echo "$MESSAGE" | wofi --config ~/.config/wofi/config --dmenu --height 8% --width 10% --style ~/.config/wofi/notifications/volume.css &
+echo "$MESSAGE" | wofi --dmenu --conf ~/.config/wofi/notifications/config --style ~/.config/wofi/notifications/volume.css &
 WOFI_PID=$!
 
 # Close Wofi after 2 seconds
-sleep 1
+sleep 2
 kill "$WOFI_PID" 2>/dev/null
