@@ -93,5 +93,14 @@ config.keys = {
     mods = 'CTRL',
     action = act.ActivateTabRelative(1), 
   }, 
+   {
+    key = 'y',
+    mods = 'CTRL',
+    action = act.CopyTo 'Clipboard', 
+  },    {
+    key = 'p',
+    mods = 'CTRL',
+    action = act.PasteFrom 'Clipboard', 
+  }, 
 }
 return config
