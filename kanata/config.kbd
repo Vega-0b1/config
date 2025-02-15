@@ -6,7 +6,7 @@
 
 (defalias
     Fsuper (tap-hold 1 150 f lmeta)  
-    spaceAlt (tap-hold 1 150 spc lalt)
+    spaceAlt (tap-hold 1 200 spc lalt)
     escCtrl (tap-hold 1 150 esc lctrl)  
 )
 
