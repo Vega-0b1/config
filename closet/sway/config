@@ -1,0 +1,135 @@
+#!/bin/bash
+set $term wezterm
+set $menu wmenu-run
+set $mod Mod1
+set $ws1 "1:Web"          
+set $ws2 "2:Code"
+set $ws3 "3:Edu"     
+set $ws4 "4:Math"     
+set $ws5 "5:Science"         
+set $ws6 "6:empty"               
+set $ws7 "7:empty"                
+set $ws8 "8:Background Processes" 
+set $ws9 "9:Media"                
+set $ws10 "10:Plan" 
+
+# Desktop Specific-----------------------------------------
+output DP-1 {
+    resolution 2560x1440@164.958Hz
+    pos 0 0
+    scale 1
+    adaptive_sync on
+}
+
+output HDMI-A-1 {
+    resolution 3840x2160@60.000Hz
+    pos -2160 -1440
+    transform 90
+    scale 1.57
+    adaptive_sync on
+}
+
+output eDP-1 {
+    resolution 1920x1080@60.006Hz
+    scale 1
+}
+
+workspace $ws1  output DP-1
+workspace $ws2  output DP-1
+workspace $ws3  output DP-1
+workspace $ws4  output DP-1
+workspace $ws5  output DP-1
+workspace $ws6  output HDMI-A-1
+workspace $ws7  output HDMI-A-1
+workspace $ws8  output HDMI-A-1
+workspace $ws9  output HDMI-A-1
+workspace $ws10 output HDMI-A-1
+
+output DP-1 bg ./wallpaper/cute-astronaut-8k-8333x8333-17123.jpg fill
+output HDMI-A-1 bg ./wallpaper/4kPortrait.jpg fill
+#End of Desktop-----------------------------------------
+
+#Laptop Specific----------------------------------------
+output eDP-1 bg ./wallpaper/1440p.jpg fill
+#End of Laptop------------------------------------------
+
+
+bindsym $mod+1 workspace $ws1
+bindsym $mod+2 workspace $ws2
+bindsym $mod+3 workspace $ws3
+bindsym $mod+4 workspace $ws4
+bindsym $mod+5 workspace $ws5
+bindsym $mod+6 workspace $ws6
+bindsym $mod+7 workspace $ws7
+bindsym $mod+8 workspace $ws8
+bindsym $mod+9 workspace $ws9
+bindsym $mod+0 workspace $ws10
+
+bindsym $mod+Shift+1 move container to workspace $ws1 
+bindsym $mod+Shift+2 move container to workspace $ws2 
+bindsym $mod+Shift+3 move container to workspace $ws3 
+bindsym $mod+Shift+4 move container to workspace $ws4 
+bindsym $mod+Shift+5 move container to workspace $ws5 
+bindsym $mod+Shift+6 move container to workspace $ws6 
+bindsym $mod+Shift+7 move container to workspace $ws7 
+bindsym $mod+Shift+8 move container to workspace $ws8 
+bindsym $mod+Shift+9 move container to workspace $ws9 
+bindsym $mod+Shift+0 move container to workspace $ws10
+
+
+bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
+bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym XF86MonBrightnessUp exec brightnessctl set 5%+
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+bindsym XF86Search exec $menu
+bindsym $mod+Shift+p exec "pkill -x waybar; waybar"
+
+exec swayidle -w \
+	timeout 1800 'systemctl hibernate'\
+
+bindsym $mod+w exec firefox
+bindsym $mod+t exec thunar
+bindsym $mod+return exec wezterm
+bindsym $mod+q kill
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+r restart
+bindsym $mod+d exec $menu
+floating_modifier $mod normal
+bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway  This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+
+bindsym $mod+v split v
+bindsym $mod+b split h
+bindsym $mod+m fullscreen toggle
+bindsym Print exec grim
+
+
+exec wl-paste -t text --watch clipman store --no-persist
+
+default_border pixel 5
+hide_edge_borders smart
+
+client.focused "#7287fd" "#7287fd" "#7287fd" "#ea76cb" "#7287fd"
+client.unfocused "#7c7f93" "#7c7f93" "#7c7f93"
+
+
+
+
+
+bar {
+    swaybar_command waybar
+    mode "dock"
+   }
+   bindsym $mod+u exec /home/jcvega/.config/sway/scripts/toggle_bar_mode.sh
+   exec_always swaymsg workspace $ws10
+   exec_always swaymsg workspace $ws1
+   exec_always swaymsg workspace $ws1

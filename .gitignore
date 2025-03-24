@@ -1,15 +1,9 @@
 /*
 !.gitignore
-!/sway
 !/wezterm
-!/helix
 !/waybar
-!/themes
-!/icons
 !/hypr
-!/fish
 !/kanata
-!/kitty
 !/systemd
-!/ghostty
 !/wofi
+!/closet
