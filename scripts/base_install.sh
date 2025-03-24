@@ -1,10 +1,12 @@
 #!/bin/bash
 set -e
 pacman -Syu \
+sddm \
 hyprland \
 neovim \
 kitty \
 wofi \
+ttf-meslo-nerd \
 waybar \
 hyprpaper \
 cliphist \
@@ -24,12 +26,9 @@ wl-clipboard \
 ttf-fira-code \
 grim \
 slurp \
+lazygit \
 --noconfirm
 
-yay -S \
-wezterm-git \
-kanata \
---noconfirm 
 
 # Get current user (non-root) for messages, but no autologin used
 USER_NAME="${SUDO_USER:-$(whoami)}"
@@ -62,8 +61,8 @@ else
   echo "✅ Hyprland session file already exists."
 fi
 
-echo "🎯 SDDM will now show Hyprland as a session option on the login screen."
-echo "👉 At boot, choose 'Hyprland' from the session menu (gear icon) and log in normally."
-echo "✅ Setup complete. You can now reboot into SDDM and select Hyprland."
+systemctl start bluetooth
+systemctl enable bluetooth 
 
-
+git config --global user.name "jcvega"
+git config --global user.email "jcvega0b1@gmail.com"
