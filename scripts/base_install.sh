@@ -3,6 +3,7 @@ set -e
 pacman -Syu \
 sddm \
 hyprland \
+hyprlock \
 neovim \
 kitty \
 wofi \
@@ -27,6 +28,7 @@ ttf-fira-code \
 grim \
 slurp \
 lazygit \
+eos-sddm-theme \
 --noconfirm
 
 
