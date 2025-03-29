@@ -29,8 +29,14 @@ grim \
 slurp \
 lazygit \
 eos-sddm-theme \
+starship \
+bash-completion \
+zoxide \
+fzf \
+zsh \
 --noconfirm
 
+chsh -s /bin/zsh
 
 # Get current user (non-root) for messages, but no autologin used
 USER_NAME="${SUDO_USER:-$(whoami)}"
@@ -64,7 +70,13 @@ else
 fi
 
 systemctl start bluetooth
-systemctl enable bluetooth 
+systemctl enable bluetooth
+
+# zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-autosuggestions ~/.config/zsh/zsh-autosuggestions
+
+# zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.config/zsh/zsh-syntax-highlighting
 
 git config --global user.name "jcvega"
 git config --global user.email "jcvega0b1@gmail.com"
