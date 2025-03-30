@@ -34,9 +34,11 @@ bash-completion \
 zoxide \
 fzf \
 zsh \
+zsh-syntax-highlighting \
+zsh-autosuggestions \
 --noconfirm
 
-chsh -s /bin/zsh
+chsh -s $(which zsh)
 
 # Get current user (non-root) for messages, but no autologin used
 USER_NAME="${SUDO_USER:-$(whoami)}"
