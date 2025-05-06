@@ -21,3 +21,6 @@ zsh-autosuggestions \
 starship \
 --noconfirm
 
+git config --global user.name "jcvega"
+git config --global user.email "jcvega0b1@gmail.com"
+git config --global credential.helper store
