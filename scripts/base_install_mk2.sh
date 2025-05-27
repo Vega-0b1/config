@@ -3,7 +3,7 @@ set -e
 pacman -Syu \
 neovim \
 wezterm \
-blender \
+freecad \
 ttf-meslo-nerd \
 cliphist \
 poppler \
