@@ -20,6 +20,7 @@ zsh-syntax-highlighting \
 zsh-autosuggestions \
 starship \
 --noconfirm
+chsh -s $(which zsh)
 
 git config --global user.name "jcvega"
 git config --global user.email "jcvega0b1@gmail.com"

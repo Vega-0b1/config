@@ -2,53 +2,53 @@ local wezterm = require 'wezterm'
 local act = wezterm.action
 local config = wezterm.config_builder()
 
-config.tab_bar_at_bottom = true
+config.tab_bar_at_bottom = false
 config.use_fancy_tab_bar = true
-config.window_decorations = 'NONE'
+config.window_decorations = 'INTEGRATED_BUTTONS|RESIZE'
 config.color_scheme = 'Dracula (base16)'
 
 config.keys = {
   {
     key = 'q',
     mods = 'ALT',
-    action = wezterm.action.CloseCurrentPane { confirm = true},
+    action = wezterm.action.CloseCurrentPane { confirm = true },
   },
 
   {
     key = 'j',
-    mods = 'SHIFT|ALT',
+    mods = 'ALT|SHIFT',
     action = act.AdjustPaneSize { 'Down', 5 },
   },
 
-  
+
   {
     key = 'k',
-    mods = 'SHIFT|ALT',
+    mods = 'ALT|SHIFT',
     action = act.AdjustPaneSize { 'Up', 5 },
   },
 
-  
+
   {
     key = 'h',
-    mods = 'SHIFT|ALT',
+    mods = 'ALT|SHIFT',
     action = act.AdjustPaneSize { 'Left', 5 },
   },
-  
+
   {
     key = 'l',
-    mods = 'SHIFT|ALT',
+    mods = 'ALT|SHIFT',
     action = act.AdjustPaneSize { 'Right', 5 },
   },
 
   {
     key = 'v',
-    mods = 'SHIFT|ALT',
+    mods = 'ALT|SHIFT',
     action = act.SplitVertical {},
   },
 
   {
     key = 'b',
-    mods = 'SHIFT|ALT',
+    mods = 'ALT|SHIFT',
     action = act.SplitHorizontal {},
   },
 
@@ -58,21 +58,21 @@ config.keys = {
     action = act.ActivatePaneDirection 'Left',
   },
 
-  
+
   {
     key = 'j',
     mods = 'ALT',
     action = act.ActivatePaneDirection 'Down',
   },
 
-  
+
   {
     key = 'k',
     mods = 'ALT',
     action = act.ActivatePaneDirection 'Up',
   },
 
-  
+
   {
     key = 'l',
     mods = 'ALT',
@@ -86,21 +86,21 @@ config.keys = {
   {
     key = 'h',
     mods = 'CTRL',
-    action = act.ActivateTabRelative(-1), 
+    action = act.ActivateTabRelative(-1),
   },
-   {
+  {
     key = 'l',
     mods = 'CTRL',
-    action = act.ActivateTabRelative(1), 
-  }, 
-   {
+    action = act.ActivateTabRelative(1),
+  },
+  {
     key = 'y',
     mods = 'CTRL',
-    action = act.CopyTo 'Clipboard', 
-  },    {
-    key = 'p',
-    mods = 'CTRL',
-    action = act.PasteFrom 'Clipboard', 
-  }, 
+    action = act.CopyTo 'Clipboard',
+  }, {
+  key = 'p',
+  mods = 'CTRL',
+  action = act.PasteFrom 'Clipboard',
+},
 }
 return config
