@@ -2,7 +2,7 @@
 set -e
 pacman -Syu \
 neovim \
-wezterm \
+kitty \
 freecad \
 ttf-meslo-nerd \
 cliphist \
@@ -19,6 +19,17 @@ zsh \
 zsh-syntax-highlighting \
 zsh-autosuggestions \
 starship \
+
+hyprland \
+hypridle \
+hyprpaper \
+waybar \
+grim \
+slurp \
+dunst \
+wofi \
+wl-clipboard \
+
 --noconfirm
 chsh -s $(which zsh)
 
