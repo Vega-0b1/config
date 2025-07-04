@@ -19,7 +19,6 @@ zsh \
 zsh-syntax-highlighting \
 zsh-autosuggestions \
 starship \
-
 hyprland \
 hypridle \
 hyprpaper \
@@ -31,9 +30,9 @@ wofi \
 wl-clipboard \
 blueman \
 network-manager-applet \
-
 --noconfirm
-chsh -s $(which zsh)
+
+#chsh -s "$(which zsh)" "$USER"
 
 git config --global user.name "jcvega"
 git config --global user.email "jcvega0b1@gmail.com"
