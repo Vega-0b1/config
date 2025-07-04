@@ -29,6 +29,8 @@ slurp \
 dunst \
 wofi \
 wl-clipboard \
+blueman \
+network-manager-applet \
 
 --noconfirm
 chsh -s $(which zsh)
