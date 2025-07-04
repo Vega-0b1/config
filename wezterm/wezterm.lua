@@ -3,8 +3,8 @@ local act = wezterm.action
 local config = wezterm.config_builder()
 
 config.tab_bar_at_bottom = false
-config.use_fancy_tab_bar = true
-config.window_decorations = 'INTEGRATED_BUTTONS|RESIZE'
+config.use_fancy_tab_bar = true 
+config.window_decorations = 'RESIZE'
 config.color_scheme = 'Dracula (base16)'
 
 config.keys = {
