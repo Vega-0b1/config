@@ -2,7 +2,7 @@ local wezterm = require 'wezterm'
 local act = wezterm.action
 local config = wezterm.config_builder()
 
-config.use_fancy_tab_bar = false
+config.use_fancy_tab_bar = true
 config.window_decorations = 'RESIZE'
 config.color_scheme = 'Dracula (base16)'
 

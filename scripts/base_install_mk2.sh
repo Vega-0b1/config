@@ -40,3 +40,4 @@ git config --global credential.helper store
 
 systemctl start bluetooth
 systemctl enable bluetooth
+export EDITOR=nvim
