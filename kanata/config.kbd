@@ -2,16 +2,38 @@
     caps
     f
     spc
+    tab
+    k
+    j
+    h
+    l
 )
 
 (defalias
     Fsuper (tap-hold 1 150 f lmeta)  
     spaceAlt (tap-hold 1 200 spc lalt)
     escCtrl (tap-hold 1 150 esc lctrl)  
+    tab_arrows(tap-hold 1 100 tab (layer-toggle arrows) ) 
 )
 
 (deflayer base
     @escCtrl
     @Fsuper
     @spaceAlt
+    @tab_arrows
+    _
+    _
+    _
+    _
 )
+
+(deflayer arrows
+  _
+  _
+  _
+  _
+  up
+  down
+  left
+  right
+) 
