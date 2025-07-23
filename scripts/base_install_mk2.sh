@@ -30,6 +30,7 @@ wofi \
 wl-clipboard \
 blueman \
 network-manager-applet \
+yazi  \
 --noconfirm
 
 #chsh -s "$(which zsh)" "$USER"
