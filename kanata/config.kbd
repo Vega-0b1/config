@@ -13,7 +13,7 @@
     Fsuper (tap-hold 1 150 f lmeta)  
     spaceAlt (tap-hold 1 200 spc lalt)
     escCtrl (tap-hold 1 150 esc lctrl)  
-    tab_arrows(tap-hold 1 100 tab (layer-toggle arrows) ) 
+    tab_arrows(tap-hold 1 150 tab (layer-toggle arrows) ) 
 )
 
 (deflayer base
