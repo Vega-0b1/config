@@ -21,7 +21,6 @@ zsh-autosuggestions \
 starship \
 hyprland \
 hypridle \
-hyprpaper \
 waybar \
 grim \
 slurp \
