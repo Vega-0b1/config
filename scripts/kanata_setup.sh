@@ -19,7 +19,7 @@ EOF
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 
-
+cp /home/jcvega/.config/scripts/kanata.service /etc/systemd/
 # 8. Reload systemd user daemon
 systemctl --user daemon-reexec
 systemctl --user daemon-reload
