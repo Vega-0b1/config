@@ -1,5 +1,9 @@
 #!/bin/bash
-yay -S kanata --noconfirm
+yay -S kanata-bin \
+wezterm-git \
+grimblast \
+ags-hyprpanel-git \
+--noconfirm
 # Define user (adjust if running this for another user)
 KANATA_USER="${KANATA_USER:-$USER}"
 KANATA_GROUP="kanata"
@@ -19,7 +23,7 @@ EOF
 sudo udevadm control --reload-rules
 sudo udevadm trigger
 
-cp /home/jcvega/.config/scripts/kanata.service /etc/systemd/
+cp /home/jcvega/.config/scripts/kanata.service /etc/systemd/system
 # 8. Reload systemd user daemon
 systemctl --user daemon-reexec
 systemctl --user daemon-reload

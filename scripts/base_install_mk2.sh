@@ -1,7 +1,15 @@
 #!/bin/bash
+#chsh -s $(which zsh) $USER
 echo "installing main packages"
 set -e
 pacman -Syu \
+sddm \
+thunar \
+thunar-archive-plugin \
+thunar-volman \ bash-language-server \
+brightnessctl \
+hyprpicker \
+btop \
 neovim \
 kitty \
 freecad \
@@ -46,7 +54,10 @@ systemctl enable bluetooth
 echo "done"
 
 export EDITOR=nvim
-
+cp /home/jcvega/.config/zsh/.zshrc /home/jcvega
+cp /home/jcvega/.config/scripts/kanata.service /etc/systemd/system
+systemctl enable sddm
+systemctl start sddm
 echo "running yay install"
 ./kanata_setup.sh
 echo "yay is done
