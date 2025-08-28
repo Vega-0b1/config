@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 pacman -Sy --needed \
-hyprland \
+wezterm \
 bash-language-server \
 lua-language-server \
 wl-clipboard \
@@ -20,7 +20,7 @@ zsh \
 zsh-syntax-highlighting \
 zsh-autosuggestions \
 starship \
-yazi  \
+yazi  \ 
 --noconfirm
 
 chsh -s $(which zsh) jcvega
