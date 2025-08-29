@@ -4,6 +4,10 @@ local config = wezterm.config_builder()
 
 config.color_scheme = "Dracula (base16)"
 
+config.colors = {
+	background = "#000000",
+}
+
 config.keys = {
 	{
 		key = "q",

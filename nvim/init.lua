@@ -1,57 +1,126 @@
--- Auto-install packer if missing
-local fn = vim.fn
-local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
-if fn.empty(fn.glob(install_path)) > 0 then
-	fn.system({ "git", "clone", "--depth", "1", "https://github.com/wbthomason/packer.nvim", install_path })
-	vim.cmd([[packadd packer.nvim]])
+-- BOOTSTRAP lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		lazypath,
+	})
 end
+vim.opt.rtp:prepend(lazypath)
 
--- Auto-sync on save
-vim.cmd([[
-  augroup packer_user_config
-    autocmd!
-    autocmd BufWritePost init.lua source <afile> | PackerSync
-  augroup end
-]])
-
--- Plugins
-require("clipboard")
-
--- Remap all yanks to use system clipboard
-vim.keymap.set({ "n", "v" }, "y", '"+y', { noremap = true, silent = true })
-vim.keymap.set("n", "yy", '"+yy', { noremap = true, silent = true })
-
--- Remap all pastes from system clipboard
-vim.keymap.set({ "n", "v" }, "p", '"+p', { noremap = true, silent = true })
-vim.keymap.set({ "n", "v" }, "P", '"+P', { noremap = true, silent = true })
-
-require("packer").startup(function(use)
-	use("wbthomason/packer.nvim")
+-- PLUGINS
+require("lazy").setup({
 
 	-- UI
-	use("rebelot/kanagawa.nvim")
-	use("nvim-lualine/lualine.nvim")
+	{ "rebelot/kanagawa.nvim" },
+	{ "nvim-lualine/lualine.nvim", config = true },
 
 	-- LSP & Autocomplete
-	use("neovim/nvim-lspconfig")
-	use("hrsh7th/nvim-cmp")
-	use("hrsh7th/cmp-nvim-lsp")
+	{ "neovim/nvim-lspconfig" },
+	{ "hrsh7th/nvim-cmp", config = true },
+	{ "hrsh7th/cmp-nvim-lsp" },
 
 	-- Formatter/linter
-	use("nvimtools/none-ls.nvim")
+	{ "nvimtools/none-ls.nvim" },
 
 	-- Treesitter
-	use({ "nvim-treesitter/nvim-treesitter", run = ":TSUpdate" })
-	use({ "nvim-treesitter/nvim-treesitter-textobjects", after = "nvim-treesitter" })
+	{
+		"nvim-treesitter/nvim-treesitter",
+		build = ":TSUpdate",
+		config = function()
+			require("nvim-treesitter.configs").setup({
+				ensure_installed = { "lua", "python", "json", "bash", "javascript", "typescript" },
+				highlight = { enable = true },
+				indent = { enable = true },
+				textobjects = {
+					select = {
+						enable = true,
+						lookahead = true,
+						keymaps = {
+							["af"] = "@function.outer",
+							["if"] = "@function.inner",
+							["ac"] = "@class.outer",
+							["ic"] = "@class.inner",
+						},
+					},
+				},
+			})
+		end,
+	},
+	{
+		"nvim-treesitter/nvim-treesitter-textobjects",
+		dependencies = { "nvim-treesitter/nvim-treesitter" },
+	},
 
-	-- Fuzzy finder
-	use({ "nvim-telescope/telescope.nvim", requires = { "nvim-lua/plenary.nvim" } })
+	-- Telescope
+	{
+		"nvim-telescope/telescope.nvim",
+		dependencies = { "nvim-lua/plenary.nvim" },
+		config = true,
+	},
 
 	-- File explorer
-	use("stevearc/oil.nvim")
-end)
+	{
+		"stevearc/oil.nvim",
+		config = function()
+			require("oil").setup()
+			vim.keymap.set("n", "-", require("oil").open, { desc = "Open parent directory" })
+		end,
+	},
+	{
+		"williamboman/mason.nvim",
+		build = ":MasonUpdate",
+		config = true,
+	},
 
--- General Settings
+	{
+		"williamboman/mason-lspconfig.nvim",
+		dependencies = {
+			"neovim/nvim-lspconfig",
+			"hrsh7th/cmp-nvim-lsp",
+		},
+		config = function()
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+			require("mason").setup()
+
+			require("mason-lspconfig").setup({
+				ensure_installed = {
+					"lua_ls",
+					"ts_ls",
+					"pyright",
+					"bashls",
+				},
+				automatic_installation = true,
+				automatic_enable = true,
+			})
+
+			vim.lsp.config("lua_ls", {
+				capabilities = capabilities,
+				settings = {
+					Lua = {
+						runtime = { version = "LuaJIT" },
+						diagnostics = { globals = { "vim", "require" } },
+						workspace = {
+							library = vim.api.nvim_get_runtime_file("", true),
+							checkThirdParty = false,
+						},
+						telemetry = { enable = false },
+					},
+				},
+			})
+
+			-- Optional custom config for other servers
+			vim.lsp.config("ts_ls", { capabilities = capabilities })
+			vim.lsp.config("pyright", { capabilities = capabilities })
+			vim.lsp.config("bashls", { capabilities = capabilities })
+		end,
+	},
+})
+-- GENERAL SETTINGS
 vim.o.number = true
 vim.o.relativenumber = true
 vim.o.termguicolors = true
@@ -63,69 +132,23 @@ vim.o.shiftwidth = 2
 vim.o.tabstop = 2
 vim.g.mapleader = " "
 
--- Theme
+-- THEME
 vim.cmd("colorscheme kanagawa")
 
--- Statusline
+-- STATUSLINE
 require("lualine").setup()
 
--- File browser
-require("oil").setup()
-vim.keymap.set("n", "-", require("oil").open, { desc = "Open parent directory" })
+-- SYSTEM CLIPBOARD MAPPINGS
+vim.keymap.set({ "n", "v" }, "y", '"+y', { noremap = true, silent = true })
+vim.keymap.set("n", "yy", '"+yy', { noremap = true, silent = true })
+vim.keymap.set({ "n", "v" }, "p", '"+p', { noremap = true, silent = true })
+vim.keymap.set({ "n", "v" }, "P", '"+P', { noremap = true, silent = true })
 
--- Treesitter
-require("nvim-treesitter.configs").setup({
-	ensure_installed = { "lua", "python", "json", "bash", "javascript", "typescript" },
-	highlight = { enable = true },
-	indent = { enable = true },
-	textobjects = {
-		select = {
-			enable = true,
-			lookahead = true,
-			keymaps = {
-				["af"] = "@function.outer",
-				["if"] = "@function.inner",
-				["ac"] = "@class.outer",
-				["ic"] = "@class.inner",
-			},
-		},
-	},
-})
-
--- Telescope
-require("telescope").setup()
+-- TELESCOPE KEYMAPS
 vim.keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Find Files" })
 vim.keymap.set("n", "<leader>fg", "<cmd>Telescope live_grep<cr>", { desc = "Live Grep" })
 
--- LSP (system-installed)
-local lspconfig = require("lspconfig")
-local capabilities = require("cmp_nvim_lsp").default_capabilities()
-
--- System-managed LSPs
-local servers = { "ts_ls", "pyright", "bashls" }
-
-for _, server in ipairs(servers) do
-	lspconfig[server].setup({
-		capabilities = capabilities,
-	})
-end
-
--- Lua LSP with Neovim-specific config
-lspconfig.lua_ls.setup({
-	capabilities = capabilities,
-	settings = {
-		Lua = {
-			diagnostics = { globals = { "vim" } },
-			workspace = {
-				library = vim.api.nvim_get_runtime_file("", true),
-				checkThirdParty = false,
-			},
-			telemetry = { enable = false },
-		},
-	},
-})
-
--- Completion
+-- COMPLETION
 local cmp = require("cmp")
 cmp.setup({
 	mapping = cmp.mapping.preset.insert({
@@ -136,7 +159,7 @@ cmp.setup({
 	sources = { { name = "nvim_lsp" } },
 })
 
--- Format-on-save
+-- FORMAT ON SAVE
 local null_ls = require("null-ls")
 null_ls.setup({
 	sources = {
@@ -144,7 +167,7 @@ null_ls.setup({
 		null_ls.builtins.formatting.stylua, -- Lua
 	},
 	on_attach = function(client, bufnr)
-		if client.supports_method("textDocument/formatting") then
+		if client:supports_method("textDocument/formatting") then
 			vim.api.nvim_create_autocmd("BufWritePre", {
 				buffer = bufnr,
 				callback = function()
@@ -155,7 +178,7 @@ null_ls.setup({
 	end,
 })
 
--- LSP Keymaps
+-- LSP KEYMAPS
 vim.keymap.set("n", "gd", vim.lsp.buf.definition, {})
 vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
 vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, {})
