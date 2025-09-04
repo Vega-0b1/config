@@ -20,13 +20,11 @@ zsh \
 zsh-syntax-highlighting \
 zsh-autosuggestions \
 starship \
-yazi  \ 
---noconfirm
+yazi
 
 chsh -s $(which zsh) jcvega
-sudo git config --global user.name "jcvega"
-sudo git config --global user.email "jcvega0b1@gmail.com"
-sudo git config --global credential.helper store
+
+
 
 systemctl start bluetooth
 systemctl enable bluetooth
