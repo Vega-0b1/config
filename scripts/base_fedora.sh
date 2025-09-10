@@ -13,8 +13,15 @@ dnf install -y \
   clang-tools-extra \
   black \
   rust \
-  cargo
-  
+  cargo \
+  zsh \
+  zsh-autosuggestions \
+  zsh-syntax-highlighting
+ chsh -s $(which zsh) jcvega
+ curl -sS https://starship.rs/install.sh | sh
+
+ 
 cargo install stylua
+cargo install kanata
 export PATH="$HOME/.cargo/bin:$PATH"
 
