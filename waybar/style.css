@@ -29,7 +29,7 @@ button:hover {
     background-color: @sky;
     transition-property: background-color;
     transition-duration: 1s;
-    padding: 1em 0em;
+    padding: 0.5em 1em;
     color: @crust; 
 }
 
@@ -56,11 +56,11 @@ button:hover {
 #power-profiles-daemon.balanced,
 #power-profiles-daemon.power-saver,
 #workspaces button {
-    padding:5px 3px;
-    margin-top:2px;
-    margin-bottom:2px;
-    margin-left:0px;
-    margin-right:2px;
+    padding:0.5em 1em;
+    margin-top:1px;
+    margin-bottom:1px;
+    margin-left:1px;
+    margin-right:1px;
     color: @text;
     background-color: @transparent;
     border-radius:0.25em;

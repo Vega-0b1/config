@@ -2,7 +2,7 @@
   {
     "style": "/home/jcvega/.config/waybar/style.css",
     "layer": "top",
-    "position": "left",
+    "position": "top",
     "spacing": 0,
     "reload_style_on_change": true,
     "modules-left": [
@@ -25,10 +25,10 @@
       "warp-on-scroll": false,
       "format": "{name} {icon}",
       "format-icons": {
-        "1": "󰃯",
-        "2": "󰿈",
-        "3": "󰅩",
-        "4": ""        
+        "1": "Physic",
+        "2": "Intro to Automata",
+        "3": "Operating Systems",
+        "4": "Societal And Ethical Issues in CS"        
       }
     },
     "tray": {
@@ -36,7 +36,7 @@
       "spacing": 10
     },
     "clock": {
-      "format": "{:%I\n %M\n  %S\n   %p}",
+      "format": "{:%I:%M:%S%p}",
       "interval": 1
     },
     "cpu": {
