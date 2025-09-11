@@ -2,7 +2,7 @@
 dnf copr enable -y wezfurlong/wezterm-nightly
 dnf copr enable -y lihaohong/yazi 
 dnf copr enable -y agriffis/neovim-nightly
-
+dnf copr enable -y solopasha/hyprland
 dnf install -y \
   git \
   wezterm \
@@ -24,7 +24,16 @@ dnf install -y \
   thunar-archive-plugin \
   thunar-volman \
   btop \
-  wofi
+  wofi \
+  pavucontrol \
+  blueman \
+  network-manager-applet \
+  hyprpaper \
+  hypridle \
+  hyprlock \
+  hyprpolkitagent \
+  waypaper
+
 
 wget https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/Meslo.zip
 unzip Meslo.zip -d ~/MesloNerdFont
