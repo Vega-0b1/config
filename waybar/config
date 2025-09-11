@@ -25,7 +25,7 @@
       "warp-on-scroll": false,
       "format": "{name} {icon}",
       "format-icons": {
-        "1": "Physic",
+        "1": "Physics",
         "2": "Intro to Automata",
         "3": "Operating Systems",
         "4": "Societal And Ethical Issues in CS"        
