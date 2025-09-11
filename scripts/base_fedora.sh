@@ -16,7 +16,22 @@ dnf install -y \
   cargo \
   zsh \
   zsh-autosuggestions \
-  zsh-syntax-highlighting
+  zsh-syntax-highlighting \
+  hyprland \
+  waybar \
+  fira-code-fonts \
+  thunar \
+  thunar-archive-plugin \
+  thunar-volman \
+  btop \
+  wofi
+
+wget https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/Meslo.zip
+unzip Meslo.zip -d ~/MesloNerdFont
+mkdir -p ~/.local/share/fonts
+cp ~/MesloNerdFont/*.ttf ~/.local/share/fonts/
+fc-cache -fv
+
  chsh -s $(which zsh) jcvega
  curl -sS https://starship.rs/install.sh | sh
 

@@ -1,7 +1,7 @@
 @import "mocha.css";
 * {
-    font-family: FontAwesome, Roboto, Helvetica, Arial, sans-serif;
-    font-size: 20px;
+    font-family: FontAwesome, Roboto, Helvetica, Arial, sans-serif, fira-code;
+    font-size: 1.05em;
 }
 
 window#waybar {
@@ -29,7 +29,7 @@ button:hover {
     background-color: @sky;
     transition-property: background-color;
     transition-duration: 1s;
-    padding: 0.5em 1em;
+    padding: 0.3em 0.3em;
     color: @crust; 
 }
 
@@ -52,11 +52,12 @@ button:hover {
 #memory,
 #temperature,
 #disk,
+#tray,
 #power-profiles-daemon.performance,
 #power-profiles-daemon.balanced,
 #power-profiles-daemon.power-saver,
 #workspaces button {
-    padding:0.5em 1em;
+    padding:0.3em 0.5em;
     margin-top:1px;
     margin-bottom:1px;
     margin-left:1px;
