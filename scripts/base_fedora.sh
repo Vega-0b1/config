@@ -5,11 +5,13 @@ dnf copr enable -y agriffis/neovim-nightly
 dnf copr enable -y solopasha/hyprland
 dnf install -y \
   git \
-  wezterm \
   yazi \
+  alacritty \
   neovim \
   python3-neovim \
   clang \
+  cmake \
+  hyprland-scanner-devel \
   clang-tools-extra \
   black \
   rust \
@@ -18,6 +20,9 @@ dnf install -y \
   zsh-autosuggestions \
   zsh-syntax-highlighting \
   hyprland \
+  hypridle \
+  hyprlock \
+  hyprpaper \
   waybar \
   fira-code-fonts \
   thunar \

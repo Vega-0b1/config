@@ -79,7 +79,7 @@ button:hover {
 #power-profiles-daemon.power-saver:hover {
     background-color: @crust;
 }
-
+#modules-right {font-size: 40px;}
 /* ===========================
    Individual Module Borders
    =========================== */
