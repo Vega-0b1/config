@@ -1,0 +1,12 @@
+[Unit]
+Description=Dunst notification daemon
+After=hyprland-session.target
+PartOf=hyprland-session.target
+
+[Service]
+ExecStart=/usr/bin/dunst
+Restart=on-failure
+
+[Install]
+WantedBy=hyprland-session.target
+
