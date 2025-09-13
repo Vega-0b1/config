@@ -10,8 +10,6 @@ dnf install -y \
   neovim \
   python3-neovim \
   clang \
-  cmake \
-  hyprland-scanner-devel \
   clang-tools-extra \
   black \
   rust \
@@ -20,35 +18,16 @@ dnf install -y \
   zsh-autosuggestions \
   zsh-syntax-highlighting \
   hyprland \
-  hypridle \
-  hyprlock \
-  hyprpaper \
-  waybar \
   fira-code-fonts \
   thunar \
   thunar-archive-plugin \
   thunar-volman \
   btop \
-  wofi \
-  pavucontrol \
   blueman \
   network-manager-applet \
-  hyprpaper \
-  hypridle \
-  hyprlock \
-  hyprpolkitagent \
-  waypaper
-
-
-wget https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/Meslo.zip
-unzip Meslo.zip -d ~/MesloNerdFont
-mkdir -p ~/.local/share/fonts
-cp ~/MesloNerdFont/*.ttf ~/.local/share/fonts/
-fc-cache -fv
 
  chsh -s $(which zsh) jcvega
  curl -sS https://starship.rs/install.sh | sh
-
  
 cargo install stylua
 cargo install kanata
