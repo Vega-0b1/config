@@ -1,9 +1,9 @@
 #!/bin/bash
-dnf copr enable -y wezfurlong/wezterm-nightly
 dnf copr enable -y lihaohong/yazi 
 dnf copr enable -y agriffis/neovim-nightly
 dnf copr enable -y solopasha/hyprland
-dnf install -y \
+
+dnf install \
   git \
   yazi \
   alacritty \
@@ -17,17 +17,37 @@ dnf install -y \
   zsh \
   zsh-autosuggestions \
   zsh-syntax-highlighting \
+  sddm \
   hyprland \
-  fira-code-fonts \
   thunar \
   thunar-archive-plugin \
   thunar-volman \
-  btop \
-  blueman \
-  network-manager-applet \
 
- chsh -s $(which zsh) jcvega
- curl -sS https://starship.rs/install.sh | sh
+
+
+dnf install \
+  wireplumber \
+  upower \
+  libgtop2 \
+  bluez \
+  bluez-tools \
+  grimblast \
+  hyprpicker \
+  btop \
+  NetworkManager \
+  wl-clipboard \
+  swww \
+  brightnessctl \
+  gnome-bluetooth \
+  power-profiles-daemon \
+  gvfs \
+  nodejs \
+  gtksourceview3 \
+  libsoup3 \
+
+cp /home/jcvega/.config/zsh/.zshrc /home/jcvega/.zshrc
+chsh -s $(which zsh) jcvega
+curl -sS https://starship.rs/install.sh | sh
  
 cargo install stylua
 cargo install kanata
