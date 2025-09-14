@@ -20,6 +20,7 @@ dnf install \
   zsh-syntax-highlighting \
   sddm \
   hyprland \
+  hyprlock \
   thunar \
   thunar-archive-plugin \
   thunar-volman \
@@ -48,7 +49,7 @@ dnf install \
   libsoup3 \
   hyprpanel
 
-cp /home/jcvega/.config/zsh/.zshrc /home/jcvega/.zshrc
+sudo cp /home/jcvega/.config/zsh/.zshrc /home/jcvega/.zshrc
 chsh -s $(which zsh) jcvega
 curl -sS https://starship.rs/install.sh | sh
  
