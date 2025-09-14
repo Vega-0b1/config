@@ -7,6 +7,7 @@ dnf install \
   git \
   yazi \
   alacritty \
+  firefox \
   neovim \
   python3-neovim \
   clang \
@@ -26,6 +27,7 @@ dnf install \
 
 
 dnf install \
+  tar \
   wireplumber \
   upower \
   libgtop2 \
@@ -44,6 +46,7 @@ dnf install \
   nodejs \
   gtksourceview3 \
   libsoup3 \
+  hyprpanel
 
 cp /home/jcvega/.config/zsh/.zshrc /home/jcvega/.zshrc
 chsh -s $(which zsh) jcvega
