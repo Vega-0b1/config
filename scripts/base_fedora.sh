@@ -58,5 +58,9 @@ curl -sS https://starship.rs/install.sh | sh
  
 cargo install stylua
 cargo install kanata
+sudo cp ~/.cargo/bin/kanata /usr/local/bin/kanata
+sudo chmod 755 /usr/local/bin/kanata
+systemctl daemon-reload
+systemctl enable --now kanata.service
 export PATH="$HOME/.cargo/bin:$PATH"
 
