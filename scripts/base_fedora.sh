@@ -7,7 +7,9 @@ dnf install \
   git \
   yazi \
   alacritty \
+  tmux \
   firefox \
+  chromium \
   neovim \
   python3-neovim \
   clang \
@@ -21,6 +23,7 @@ dnf install \
   sddm \
   hyprland \
   hyprlock \
+  hypridle \
   thunar \
   thunar-archive-plugin \
   thunar-volman \
