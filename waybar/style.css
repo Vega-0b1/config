@@ -1,34 +1,32 @@
 @import "mocha.css";
 
 /* ===========================
-   Shared Layout
+   Base Style
    =========================== */
 * {
-    font-family: FontAwesome, Roboto, Helvetica, Arial, sans-serif, fira-code;
-    font-size: 20px;
-    font-weight:bold;
+    font-family: "FiraCode Nerd Font", FontAwesome, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    box-shadow: none;
 }
 
 window#waybar {
-    background-color: transparent;
-    transition: background-color 0.5s;
+    background-color: rgba(30, 30, 46, 0.85); /* Mocha crust w/ some transparency */
+    border-radius: 10px;
+    margin: 6px 10px;
+    padding: 6px 10px;
+    transition: background-color 0.3s ease;
 }
 
-button {
-    border-radius: 0.25em;
-}
-
-button:hover {
-    box-shadow: inset 0 -3px @blue;
-}
-
-/* Common look for all modules */
+/* ===========================
+   Modules (Shared Style)
+   =========================== */
 #clock,
 #battery,
 #backlight,
 #network,
 #pulseaudio,
-#wireplumber,
 #bluetooth,
 #custom-media,
 #tray,
@@ -42,30 +40,33 @@ button:hover {
 #temperature,
 #disk,
 #workspaces button {
-    padding: 0.5em 0.5em;
-    margin: 0.5em 0.5em;
+    padding: 6px 10px;
+    margin: 4px 6px;
+    background-color: rgba(49, 50, 68, 0.7); /* overlay0 w/ alpha */
     color: @text;
-    background-color: @transparent;
-    border-radius: 0.25em;
-    border: 0.2em solid @teal;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* ===========================
    Workspaces
    =========================== */
-
-#workspaces button:hover {
-    background: rgba(0, 0, 0, 0.2);
+#workspaces button {
+    background: transparent;
+    color: @subtext0;
+    border-radius: 8px;
+    padding: 6px 10px;
+    transition: all 0.2s ease;
 }
 
 #workspaces button.active {
-    background-color: @sky;
-    transition: background-color 1s;
+    background-color: @blue;
     color: @crust;
 }
 
-.modules-left > widget:first-child > #workspaces { margin-left: 0; }
-.modules-right > widget:last-child > #workspaces { margin-right: 0; }
+#workspaces button:hover {
+    background-color: rgba(108, 112, 134, 0.2);
+}
 
 /* ===========================
    Hover Effects
@@ -74,55 +75,35 @@ button:hover {
 #network:hover,
 #pulseaudio:hover,
 #bluetooth:hover,
-#power-profiles-daemon.performance:hover,
-#power-profiles-daemon.balanced:hover,
-#power-profiles-daemon.power-saver:hover {
-    background-color: @crust;
+#power-profiles-daemon:hover {
+    background-color: rgba(108, 112, 134, 0.3);
 }
-#modules-right {font-size: 40px;}
+
 /* ===========================
-   Individual Module Borders
+   Optional Color Hints
    =========================== */
-#cpu             { border: 3px solid @mauve; }
-#memory          { border: 3px solid @green; }
-#temperature     { border: 3px solid @red; }
-#clock           { border: 3px solid @lavender; }
-#pulseaudio      { border: 3px solid @yellow; }
-#bluetooth       { border: 3px solid @text; }
-#network         { border: 3px solid @flamingo; }
-#backlight       { border: 3px solid @text; }
-#battery         { border: 3px solid @green; }
-#tray            { border: 3px solid @text; }
-#idle_inhibitor  { border: 3px solid @sky; }
+#cpu             { color: @mauve; }
+#memory          { color: @green; }
+#temperature     { color: @red; }
+#clock           { color: @lavender; }
+#pulseaudio      { color: @yellow; }
+#bluetooth       { color: @blue; }
+#network         { color: @sky; }
+#battery         { color: @green; }
+#idle_inhibitor  { color: @peach; }
 
 /* ===========================
    States
    =========================== */
 #temperature.critical {
     background-color: @red;
+    color: @base;
 }
-
-#pulseaudio.muted {
-    color: @subtext1;
-    border: 3px solid @subtext1;
-}
-
-#bluetooth.connected {
-    border: 3px solid @blue;
-}
-
-#network.disconnected {
-    border: 3px solid @text;
-}
-
-#power-profiles-daemon.performance { border: 3px solid @red; }
-#power-profiles-daemon.balanced    { border: 3px solid @blue; }
-#power-profiles-daemon.power-saver { border: 3px solid @green; }
 
 #battery.charging,
 #battery.plugged {
-    color: @crust;
     background-color: @green;
+    color: @crust;
 }
 
 #battery.critical:not(.charging) {
@@ -131,17 +112,38 @@ button:hover {
     animation: blink 1s steps(12) infinite alternate;
 }
 
+#pulseaudio.muted {
+    color: @subtext1;
+}
+
+#bluetooth.connected {
+    color: @blue;
+}
+
+#network.disconnected {
+    color: @overlay1;
+}
+
+#power-profiles-daemon.performance { color: @red; }
+#power-profiles-daemon.balanced    { color: @blue; }
+#power-profiles-daemon.power-saver { color: @green; }
+
 #idle_inhibitor.activated {
-    border: 3px solid @red;
+    background-color: @red;
+    color: @crust;
 }
 
 /* ===========================
    Tray
    =========================== */
-#tray > .passive         { -gtk-icon-effect: dim; }
+#tray > .passive {
+    opacity: 0.5;
+}
+
 #tray > .needs-attention {
-    -gtk-icon-effect: highlight;
     background-color: #eb4d4b;
+    color: white;
+    border-radius: 6px;
 }
 
 /* ===========================

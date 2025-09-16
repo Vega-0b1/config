@@ -23,13 +23,17 @@
     "hyprland/workspaces": {
       "disable-scroll": true,
       "warp-on-scroll": false,
-      "format": "{name} {icon}",
+      "format": "{icon}",
       "format-icons": {
         "1": "Physics",
         "2": "Intro to Automata",
         "3": "Operating Systems",
         "4": "Societal And Ethical Issues in CS"        
       }
+    },
+    "persisten-workspaces":{
+      "eDP-1": [1,2,3,4],
+      "DP-1": [1,2,3,4]
     },
     "tray": {
       "icon-size": 21,
