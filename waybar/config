@@ -10,6 +10,7 @@
     ],
     "modules-center": [
       "idle_inhibitor",
+      "clock",
       "power-profiles-daemon"
     ],
     "modules-right": [
@@ -17,18 +18,17 @@
       "backlight",
       "battery",
       "battery#bat2",
-      "tray",
-      "clock"
+      "tray"
     ],
     "hyprland/workspaces": {
       "disable-scroll": true,
       "warp-on-scroll": false,
       "format": "{icon}",
       "format-icons": {
-        "1": "Physics",
-        "2": "Intro to Automata",
-        "3": "Operating Systems",
-        "4": "Societal And Ethical Issues in CS"        
+        "1": "browser",
+        "2": "terminal",
+        "3": "files",
+        "4": "fun"        
       }
     },
     "persisten-workspaces":{

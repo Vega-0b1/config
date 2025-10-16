@@ -6,7 +6,7 @@ After=local-fs.target
 
 [Service]
 ExecStartPre=/usr/bin/modprobe uinput
-ExecStart=/usr/local/bin/kanata -c /home/jcvega/.config/kanata/config.kbd
+ExecStart=/usr/bin/kanata -c /home/jcvega/.config/kanata/config.kbd
 Restart=no
 
 [Install]
