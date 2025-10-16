@@ -13,7 +13,7 @@ map("n", "<leader>fg", "<cmd>Telescope live_grep<CR>", { desc = "Live Grep" })
 
 -- File Explorer (Oil)
 map("n", "-", function()
-  require("oil").open()
+	require("oil").open()
 end, { desc = "Open parent directory" })
 
 -- LSP keymaps
@@ -26,3 +26,16 @@ map("n", "]d", vim.diagnostic.goto_next, {})
 
 -- Escape in terminal: switch to normal mode
 map("t", "<Esc>", [[<C-\><C-n>]], { noremap = true, silent = true, desc = "Exit terminal mode" })
+
+-- Keep cursor centered after search and scroll
+map("n", "n", "nzzzv", opts)
+map("n", "N", "Nzzzv", opts)
+map("n", "*", "*zzzv", opts)
+map("n", "#", "#zzzv", opts)
+map("n", "g*", "g*zzzv", opts)
+map("n", "g#", "g#zzzv", opts)
+
+map("n", "<C-d>", "<C-d>zz", opts)
+map("n", "<C-u>", "<C-u>zz", opts)
+map("n", "<C-f>", "<C-f>zz", opts)
+map("n", "<C-b>", "<C-b>zz", opts)
