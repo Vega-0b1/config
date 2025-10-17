@@ -26,6 +26,7 @@ wofi \
 cargo \
 python-black \
 stylua \
-clang
+clang \
+blueman
 
 
