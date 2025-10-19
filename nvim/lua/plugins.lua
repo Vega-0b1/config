@@ -12,30 +12,19 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
 	-- UI
-
-	{
-		"catppuccin/nvim",
-		name = "catppuccin",
-		priority = 1000, -- load colors early
-		config = function()
-			require("catppuccin").setup({
-				flavour = "mocha",
-				transparent_background = false, -- keep bg managed by theme
-				color_overrides = {
-					mocha = {
-						base = "#000000", -- editor background
-						mantle = "#000000", -- secondary bg (splits, etc.)
-						crust = "#000000", -- deepest bg (popups, etc.)
-					},
-				},
-			})
-			vim.cmd("colorscheme catppuccin")
-		end,
-	},
-
-	{ "HiPhish/rainbow-delimiters.nvim" },
-	-- Terminal integration
-
+  
+ {
+    "rebelot/kanagawa.nvim",
+    priority = 1000,
+    lazy = false,
+    config = function()
+      vim.o.termguicolors = true
+      -- pick one:
+      vim.cmd.colorscheme("kanagawa-wave")   -- dark
+      --vim.cmd.colorscheme("kanagawa-dragon") -- darker
+      --vim.cmd.colorscheme("kanagawa-lotus")     -- light
+    end,
+  },
 	{
 		"akinsho/toggleterm.nvim",
 		version = "*",

@@ -16,9 +16,4 @@ require("remaps")
 require("plugins")
 require("cmp")
 require("lsp")
-
--- Theme + UI
--- Rose Pine setup
-
-vim.cmd("colorscheme catppuccin")
 require("lualine").setup()
