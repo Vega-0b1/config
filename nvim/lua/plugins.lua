@@ -21,6 +21,8 @@ require("lazy").setup({
       vim.o.termguicolors = true
       -- pick one:
       vim.cmd.colorscheme("kanagawa-wave")   -- dark
+
+      vim.cmd("hi Normal guibg=#000000 ctermbg=black")
       --vim.cmd.colorscheme("kanagawa-dragon") -- darker
       --vim.cmd.colorscheme("kanagawa-lotus")     -- light
     end,

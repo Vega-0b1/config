@@ -12,7 +12,7 @@
 }
 
 window#waybar {
-    background-color: rgba(30, 30, 46, 0.85); /* Mocha crust w/ some transparency */
+    background-color: #000000; /* Mocha crust w/ some transparency */
     border-radius: 10px;
     margin: 6px 10px;
     padding: 6px 10px;
