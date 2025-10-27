@@ -10,4 +10,5 @@
 !/zsh
 !/bash
 !/nvim
-!starship.toml
+!/starship.toml
+!/ghostty
