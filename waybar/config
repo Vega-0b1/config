@@ -30,12 +30,11 @@
         "1": "browser",
         "2": "terminal",
         "3": "files",
-        "4": "music"        
+        "4": "3d Print"        
       }
     },
-    "persisten-workspaces":{
-      "eDP-1": [1,2,3,4],
-      "DP-1": [1,2,3,4]
+    "persistent-workspaces":{
+      "*": [1,2,3,4]
     },
     "tray": {
       "icon-size": 21,
