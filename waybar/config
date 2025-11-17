@@ -37,8 +37,8 @@
       "*": [1,2,3,4]
     },
     "tray": {
-      "icon-size": 21,
-      "spacing": 10
+      "icon-size": 20,
+      "spacing": 20
     },
     "clock": {
       "format": "{:%I:%M:%S%p}",
@@ -97,25 +97,16 @@
     },
     "pulseaudio": {
       "format": "{icon}",
-      "format-bluetooth": "󰂯",
+      "format-bluetooth": "",
       "format-bluetooth-muted": " ",
       "format-muted": " ",
       "format-source": "{volume}",
       "format-source-muted": "",
       "format-icons": {
         "headphone": "",
-        "hands-free": "",
-        "headset": "",
-        "phone": "",
-        "portable": "",
-        "car": "",
         "default": ["", "", ""]
       },
       "on-click": "pavucontrol"
-    },
-    "bluetooth": {
-      "format": "",
-      "on-click": "blueman-manager"
     },
     "idle_inhibitor": {
       "format": " {icon}",

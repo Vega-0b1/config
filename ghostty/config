@@ -52,5 +52,4 @@
 # Regular (recommended)
 font-family = "FiraCode Nerd Font Mono"
 font-feature = liga, clig, calt
-background = #000000
 background-opacity = 1.0
