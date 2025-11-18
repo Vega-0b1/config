@@ -11,11 +11,6 @@ map({ "n", "v" }, "P", '"+P', opts)
 map("n", "<leader>ff", "<cmd>Telescope find_files<CR>", { desc = "Find Files" })
 map("n", "<leader>fg", "<cmd>Telescope live_grep<CR>", { desc = "Live Grep" })
 
--- File Explorer (Oil)
-map("n", "-", function()
-	require("oil").open()
-end, { desc = "Open parent directory" })
-
 -- LSP keymaps
 map("n", "gd", vim.lsp.buf.definition, {})
 map("n", "K", vim.lsp.buf.hover, {})

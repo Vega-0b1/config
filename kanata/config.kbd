@@ -1,8 +1,8 @@
 (defsrc    
     caps
-    f
     spc
     tab
+    ret
     k
     j
     h
@@ -14,17 +14,18 @@
     spaceAlt (tap-hold 1 200 spc lalt)
     escCtrl (tap-hold 1 150 esc lctrl)  
     tab_arrows(tap-hold 1 150 tab (layer-toggle arrows) ) 
+    return_ctrl(tap-hold 1 150 ret rctrl)
 )
 
 (deflayer base
     @escCtrl
-    @Fsuper
     @spaceAlt
     @tab_arrows
-    _
-    _
-    _
-    _
+    @return_ctrl
+    k
+    j
+    h
+    l
 )
 
 (deflayer arrows
