@@ -27,9 +27,9 @@
       "warp-on-scroll": false,
       "format": "{icon}",
       "format-icons": {
-        "1": "browser",
-        "2": "terminal",
-        "3": "files",
+        "1": "1",
+        "2": "2",
+        "3": "3",
         "4": "3d Print"        
       }
     },
