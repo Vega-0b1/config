@@ -10,8 +10,7 @@
 )
 
 (defalias
-    Fsuper (tap-hold 1 150 f lmeta)  
-    spaceAlt (tap-hold 1 200 spc lalt)
+    space_Super (tap-hold 1 150 spc lmet)
     escCtrl (tap-hold 1 150 esc lctrl)  
     tab_arrows(tap-hold 1 150 tab (layer-toggle arrows) ) 
     return_ctrl(tap-hold 1 150 ret rctrl)
@@ -19,7 +18,7 @@
 
 (deflayer base
     @escCtrl
-    @spaceAlt
+    @space_Super
     @tab_arrows
     @return_ctrl
     k
