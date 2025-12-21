@@ -2,13 +2,11 @@
   {
     "style": "/home/jcvega/.config/waybar/style.css",
     "layer": "top",
-    "position": "top",
+    "position": "left",
     "spacing": 0,
     "reload_style_on_change": true,
     "modules-left": [
-      "hyprland/workspaces",
-      "cpu",
-      "memory"
+      "hyprland/workspaces"
     ],
     "modules-center": [
       "idle_inhibitor",
@@ -38,11 +36,11 @@
       "spacing": 20
     },
     "clock": {
-      "format": "{:%I:%M:%S%p}",
+      "format": "{:%I\n %M\n  %S}",
       "interval": 1
     },
     "cpu": {
-      "format": "CPU {usage} ",
+      "format": "CPU{usage} ",
       "tooltip": false
     },
     "memory": {

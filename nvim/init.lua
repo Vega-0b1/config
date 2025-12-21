@@ -1,4 +1,5 @@
 -- Core settings
+vim.opt.splitbelow = true
 vim.opt.scrolloff = 999
 vim.o.number = true
 vim.o.relativenumber = true
@@ -10,7 +11,6 @@ vim.o.expandtab = true
 vim.o.shiftwidth = 2
 vim.o.tabstop = 2
 vim.g.mapleader = " "
-
 -- Load other config modules
 require("remaps")
 require("plugins")
@@ -24,8 +24,11 @@ null_ls.setup({
 	sources = {
 		null_ls.builtins.formatting.stylua,
 		null_ls.builtins.completion.spell,
-		null_ls.builtins.formatting.clang_format,
+		null_ls.builtins.formatting.clang_format.with({
+			filetypes = { "c", "cpp", "proto", "cuda", "cs" },
+		}),
 		null_ls.builtins.diagnostics.cppcheck,
+		null_ls.builtins.formatting.google_java_format,
 		require("none-ls.diagnostics.eslint"), -- requires none-ls-extras.nvim
 	},
 })

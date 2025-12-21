@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 pacman -Syu --needed \
-alacritty \
+ghostty \
 bash-language-server \
 sddm \
 wl-clipboard \
@@ -27,6 +27,9 @@ cargo \
 python-black \
 stylua \
 clang \
-blueman
+blueman \
+xarchiver \
+gvfs \
+udisks2
 
 

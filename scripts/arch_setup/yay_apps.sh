@@ -2,5 +2,9 @@
 set -e
 yay -Syu --needed \
   kanata \
-  zen-browser-bin \
+  brave-bin \
+  orca-slicer-bin \
+  grimblast-git \
+  popsicle-bin \
+  arduino-ide-bin
   
