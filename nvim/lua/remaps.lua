@@ -12,15 +12,15 @@ map("n", "<leader>ff", "<cmd>Telescope find_files<CR>", { desc = "Find Files" })
 map("n", "<leader>fg", "<cmd>Telescope live_grep<CR>", { desc = "Live Grep" })
 
 -- LSP keymaps
-map("n", "gd", vim.lsp.buf.definition, {})
-map("n", "K", vim.lsp.buf.hover, {})
-map("n", "<leader>rn", vim.lsp.buf.rename, {})
-map("n", "<leader>ca", vim.lsp.buf.code_action, {})
-map("n", "[d", vim.diagnostic.goto_prev, {})
-map("n", "]d", vim.diagnostic.goto_next, {})
+--map("n", "gd", vim.lsp.buf.definition, {})
+--map("n", "K", vim.lsp.buf.hover, {})
+--map("n", "<leader>rn", vim.lsp.buf.rename, {})
+--map("n", "<leader>ca", vim.lsp.buf.code_action, {})
+--map("n", "[d", vim.diagnostic.goto_prev, {})
+--map("n", "]d", vim.diagnostic.goto_next, {})
 
 -- Escape in terminal: switch to normal mode
-map("t", "<Esc>", [[<C-\><C-n>]], { noremap = true, silent = true, desc = "Exit terminal mode" })
+--map("t", "<Esc>", [[<C-\><C-n>]], { noremap = true, silent = true, desc = "Exit terminal mode" })
 
 -- Keep cursor centered after search and scroll
 map("n", "n", "nzzzv", opts)
@@ -35,8 +35,15 @@ map("n", "<C-u>", "<C-u>zz", opts)
 map("n", "<C-f>", "<C-f>zz", opts)
 map("n", "<C-b>", "<C-b>zz", opts)
 
--- Run current file/project in a bottom terminal (Rust/Java/C/C++/Python), reuse the same split
+------------------------------------------------------------------------------------------------------------------------
+---Terminal Stuff
+------------------------------------------------------------------------------------------------------------------------
 local runterm = { win = nil, buf = nil }
+
+local function term_to_normal()
+	local keys = vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true)
+	vim.api.nvim_feedkeys(keys, "n", false)
+end
 
 local function ensure_run_term()
 	if runterm.win and vim.api.nvim_win_is_valid(runterm.win) then
@@ -44,22 +51,33 @@ local function ensure_run_term()
 		return
 	end
 
-	vim.cmd("botright 20split | terminal") -- change 20 to 6/10/etc
+	vim.cmd("botright 20split | terminal")
 	runterm.win = vim.api.nvim_get_current_win()
 	runterm.buf = vim.api.nvim_get_current_buf()
 	vim.wo.winfixheight = true
 
-	-- close terminal split easily:
-	vim.keymap.set("t", "<C-q>", [[<C-\><C-n><cmd>close<CR>]], { buffer = runterm.buf, silent = true })
+	-- Start in terminal-normal so 'q' closes immediately
+	term_to_normal()
+
+	-- In this run terminal: q closes, i enters terminal input
+	-- terminal-mode -> terminal-normal
+	vim.keymap.set("t", "<Esc>", "<C-\\><C-n>", { buffer = runterm.buf, silent = true, desc = "Terminal normal mode" })
 	vim.keymap.set("n", "q", "<cmd>close<CR>", { buffer = runterm.buf, silent = true })
+	vim.keymap.set("n", "i", "<cmd>startinsert<CR>", { buffer = runterm.buf, silent = true })
+
+	-- Optional: allow Ctrl-q to close even if you manually go into terminal input
+	vim.keymap.set("t", "<C-q>", [[<C-\><C-n><cmd>close<CR>]], { buffer = runterm.buf, silent = true })
 end
 
 local function term_send(cmd)
 	ensure_run_term()
 	vim.fn.chansend(vim.b.terminal_job_id, cmd .. "\n")
-	vim.cmd("startinsert")
+	term_to_normal() -- stay in normal after launching
 end
 
+------------------------------------------------------------------------------------------------------------------------
+---Compile and run
+------------------------------------------------------------------------------------------------------------------------
 local function project_root(markers)
 	return vim.fs.root(0, markers) or vim.fn.expand("%:p:h")
 end

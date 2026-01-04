@@ -1,4 +1,8 @@
-#add to /etc/systemd/system/kanata.service
+#run cargo install kanata
+#sudo ln -sf /home/jcvega/.cargo/bin/kanata /usr/local/bin/kanata
+#cp to /etc/systemd/system/kanata.service
+#daemon-reload and then enable
+
 [Unit]
 Description=Kanata Service
 Requires=local-fs.target
@@ -6,7 +10,7 @@ After=local-fs.target
 
 [Service]
 ExecStartPre=/usr/bin/modprobe uinput
-ExecStart=/usr/bin/kanata -c /home/jcvega/.config/kanata/config.kbd
+ExecStart=/home/jcvega/.cargo/bin/kanata -c /home/jcvega/.config/kanata/config.kbd
 Restart=no
 
 [Install]
