@@ -1,4 +1,3 @@
-
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
 	vim.fn.system({
@@ -14,11 +13,15 @@ vim.opt.rtp:prepend(lazypath)
 -----------------------------------------------plugin wrapper start---------------------------------------
 require("lazy").setup({
 
-{ "rebelot/kanagawa.nvim", 
-  priority = 1000, lazy = false, 
-  config = function() vim.o.termguicolors = true 
-     vim.cmd.colorscheme("kanagawa-wave") -- dark --
-    end, },
+	{
+		"rebelot/kanagawa.nvim",
+		priority = 1000,
+		lazy = false,
+		config = function()
+			vim.o.termguicolors = true
+			vim.cmd.colorscheme("kanagawa-wave") -- dark --
+		end,
+	},
 
 	-- Indent guides
 	{
@@ -33,50 +36,48 @@ require("lazy").setup({
 		dependencies = { "nvim-lua/plenary.nvim" },
 		config = function()
 			local builtin = require("telescope.builtin")
-
 		end,
 	},
 
+	{
+		"stevearc/conform.nvim",
+		event = { "BufWritePre" },
+		cmd = { "ConformInfo" },
+		opts = {
+			formatters_by_ft = {
+				-- Web / config
+				javascript = { "prettier" },
+				typescript = { "prettier" },
+				javascriptreact = { "prettier" },
+				typescriptreact = { "prettier" },
+				json = { "prettier" },
+				jsonc = { "prettier" },
+				yaml = { "prettier" },
+				html = { "prettier" },
+				css = { "prettier" },
+				markdown = { "prettier" },
 
-{
-  "stevearc/conform.nvim",
-  event = { "BufWritePre" },
-  cmd = { "ConformInfo" },
-  opts = {
-    formatters_by_ft = {
-      -- Web / config
-      javascript = { "prettier" },
-      typescript = { "prettier" },
-      javascriptreact = { "prettier" },
-      typescriptreact = { "prettier" },
-      json = { "prettier" },
-      jsonc = { "prettier" },
-      yaml = { "prettier" },
-      html = { "prettier" },
-      css = { "prettier" },
-      markdown = { "prettier" },
+				-- Systems languages
+				c = { "clang-format" },
+				cpp = { "clang-format" },
+				rust = { "rustfmt" },
+				go = { "gofmt" },
 
-      -- Systems languages
-      c = { "clang-format" },
-      cpp = { "clang-format" },
-      rust = { "rustfmt" },
-      go = { "gofmt" },
+				-- Scripting
+				python = { "black" },
+				lua = { "stylua" },
 
-      -- Scripting
-      python = { "black" },
-      lua = { "stylua" },
+				-- Shell
+				sh = { "shfmt" },
+				bash = { "shfmt" },
+				zsh = { "shfmt" },
 
-      -- Shell
-      sh = { "shfmt" },
-      bash = { "shfmt" },
-      zsh = { "shfmt" },
+				-- Java
+				java = { "google-java-format" },
+			},
 
-      -- Java
-      java = { "google-java-format" },
-    },
-
-    format_on_save = { timeout_ms = 1000, lsp_fallback = true },
-  },
-}
- --end 
+			format_on_save = { timeout_ms = 1000, lsp_fallback = true },
+		},
+	},
+	--end
 })
