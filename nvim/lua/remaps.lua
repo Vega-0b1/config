@@ -11,16 +11,74 @@ map({ "n", "v" }, "P", '"+P', opts)
 map("n", "<leader>ff", "<cmd>Telescope find_files<CR>", { desc = "Find Files" })
 map("n", "<leader>fg", "<cmd>Telescope live_grep<CR>", { desc = "Live Grep" })
 
--- LSP keymaps
---map("n", "gd", vim.lsp.buf.definition, {})
---map("n", "K", vim.lsp.buf.hover, {})
---map("n", "<leader>rn", vim.lsp.buf.rename, {})
---map("n", "<leader>ca", vim.lsp.buf.code_action, {})
---map("n", "[d", vim.diagnostic.goto_prev, {})
---map("n", "]d", vim.diagnostic.goto_next, {})
+--harpoon stuff
+local harpoon = require("harpoon")
+harpoon:setup({})
 
--- Escape in terminal: switch to normal mode
---map("t", "<Esc>", [[<C-\><C-n>]], { noremap = true, silent = true, desc = "Exit terminal mode" })
+-- basic telescope configuration
+local conf = require("telescope.config").values
+local function toggle_telescope(harpoon_files)
+	local file_paths = {}
+	for _, item in ipairs(harpoon_files.items) do
+		table.insert(file_paths, item.value)
+	end
+
+	require("telescope.pickers")
+		.new({}, {
+			prompt_title = "Harpoon",
+			finder = require("telescope.finders").new_table({
+				results = file_paths,
+			}),
+			previewer = conf.file_previewer({}),
+			sorter = conf.generic_sorter({}),
+		})
+		:find()
+end
+
+map("n", "<C-e>", function()
+	toggle_telescope(harpoon:list())
+end, { desc = "Open harpoon window" })
+map("n", "<leader>a", function()
+	harpoon:list():add()
+end)
+
+map("n", "<leader>u", function()
+	harpoon:list():select(1)
+end)
+map("n", "<leader>i", function()
+	harpoon:list():select(2)
+end)
+map("n", "<leader>o", function()
+	harpoon:list():select(3)
+end)
+map("n", "<leader>p", function()
+	harpoon:list():select(4)
+end)
+
+-- Toggle previous & next buffers stored within Harpoon list
+map("n", "<C-S-P>", function()
+	harpoon:list():prev()
+end)
+map("n", "<C-S-N>", function()
+	harpoon:list():next()
+end)
+
+-- LSP keymaps
+map("n", "gd", vim.lsp.buf.definition, {})
+map("n", "gr", vim.lsp.buf.references, {})
+map("n", "gI", vim.lsp.buf.implementation, {})
+map("n", "gy", vim.lsp.buf.type_definition, {})
+map("n", "gD", vim.lsp.buf.declaration, {})
+map("n", "K", vim.lsp.buf.hover, {})
+map("n", "gK", vim.lsp.buf.signature_help, {})
+map("i", "<C-k>", vim.lsp.buf.signature_help, {})
+
+map({ "n", "x" }, "<leader>ca", vim.lsp.buf.code_action, {})
+map("n", "<leader>cr", vim.lsp.buf.rename, {})
+
+map("n", "[d", vim.diagnostic.goto_prev, {})
+map("n", "]d", vim.diagnostic.goto_next, {})
+map("n", "<leader>e", vim.diagnostic.open_float, {})
 
 -- Keep cursor centered after search and scroll
 map("n", "n", "nzzzv", opts)

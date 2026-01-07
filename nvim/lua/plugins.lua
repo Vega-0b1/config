@@ -39,6 +39,9 @@ require("lazy").setup({
 		end,
 	},
 
+	-------------------------------------------------------------------------
+	---formatters
+	-------------------------------------------------------------------------
 	{
 		"stevearc/conform.nvim",
 		event = { "BufWritePre" },
@@ -79,5 +82,49 @@ require("lazy").setup({
 			format_on_save = { timeout_ms = 1000, lsp_fallback = true },
 		},
 	},
-	--end
+
+	-- Minimal LSPs (plain lazy.nvim)
+	{
+		"neovim/nvim-lspconfig",
+		dependencies = {
+			{ "mason-org/mason.nvim", config = true },
+			"mason-org/mason-lspconfig.nvim",
+		},
+		config = function()
+			require("mason-lspconfig").setup({
+				ensure_installed = {
+					"lua_ls",
+					"pyright",
+					"jdtls",
+					"rust_analyzer",
+					"jsonls",
+					"html",
+					"cssls",
+					"clangd",
+					"ts_ls",
+				},
+			})
+
+			-- Neovim 0.11+
+			if vim.lsp.config then
+				vim.lsp.config("lua_ls", { settings = { Lua = { diagnostics = { globals = { "vim" } } } } })
+				return
+			end
+
+			-- Neovim 0.10 and older
+			require("lspconfig").lua_ls.setup({
+				settings = { Lua = { diagnostics = { globals = { "vim" } } } },
+			})
+		end,
+	},
+
+	---harpoon plugin
+	---
+	{
+		"ThePrimeagen/harpoon",
+		branch = "harpoon2",
+		dependencies = { "nvim-lua/plenary.nvim" },
+	},
+
+	----------------------------end----------------------------------
 })
