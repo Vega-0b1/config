@@ -12,7 +12,32 @@ vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 vim.g.mapleader = " "
 
---imports
-require("plugins")
+vim.api.nvim_create_autocmd("FileType", {
+	pattern = { "lua", "python", "java", "rust", "json", "html", "css", "javascript", "typescript", "tsx" },
+	callback = function()
+		vim.treesitter.start()
+	end,
+})
+vim.diagnostic.config({
+	virtual_text = true,
+})
+
+--plugins
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+	vim.fn.system({
+		"git",
+		"clone",
+		"--filter=blob:none",
+		"https://github.com/folke/lazy.nvim.git",
+		lazypath,
+	})
+end
+vim.opt.rtp:prepend(lazypath)
+
+require("lazy").setup({
+	{ import = "plugins" },
+})
+
+--remaps
 require("remaps")
-require("lsp")
