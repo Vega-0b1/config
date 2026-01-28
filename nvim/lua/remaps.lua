@@ -1,7 +1,6 @@
 local map = vim.keymap.set
 local opts = { noremap = true, silent = true }
 
--- Clipboard
 map({ "n", "v" }, "y", '"+y', opts)
 map("n", "yy", '"+yy', opts)
 map({ "n", "v" }, "p", '"+p', opts)
@@ -203,8 +202,28 @@ end
 local function python_run()
 	vim.cmd("write")
 	local file = vim.fn.expand("%:p")
+
+	-- project root for "plain file" runs
 	local root = project_root({ "pyproject.toml", "requirements.txt", ".git" })
-	-- uses python3 from your PATH (Arch: usually available)
+
+	-- If we're inside a runnable package (has __main__.py), run `python -m <pkg>`
+	local main_path = vim.fs.find("__main__.py", {
+		path = vim.fn.expand("%:p:h"),
+		upward = true,
+		stop = root,
+	})[1]
+
+	if main_path then
+		-- package dir is the folder containing __main__.py
+		local pkg_dir = vim.fn.fnamemodify(main_path, ":h")
+		local pkg_name = vim.fn.fnamemodify(pkg_dir, ":t")
+		local parent = vim.fn.fnamemodify(pkg_dir, ":h")
+
+		term_send(string.format("cd %q && python3 -m %s", parent, pkg_name))
+		return
+	end
+
+	-- fallback: run current file
 	term_send(string.format("cd %q && python3 %q", root, file))
 end
 
