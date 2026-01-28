@@ -95,6 +95,7 @@ map("n", "<C-b>", "<C-b>zz", opts)
 ------------------------------------------------------------------------------------------------------------------------
 ---Terminal Stuff
 ------------------------------------------------------------------------------------------------------------------------
+
 local runterm = { win = nil, buf = nil }
 
 local function term_to_normal()
@@ -132,6 +133,12 @@ local function term_send(cmd)
 	term_to_normal() -- stay in normal after launching
 end
 
+vim.keymap.set("n", "<leader>t", function()
+	ensure_run_term()
+	vim.schedule(function()
+		vim.cmd("startinsert")
+	end)
+end, { desc = "Summon terminal (insert)" })
 ------------------------------------------------------------------------------------------------------------------------
 ---Compile and run
 ------------------------------------------------------------------------------------------------------------------------
