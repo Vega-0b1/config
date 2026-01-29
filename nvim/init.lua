@@ -1,4 +1,6 @@
 --core settings
+
+vim.opt.shortmess:append("I")
 vim.opt.splitbelow = true
 vim.opt.scrolloff = 999
 vim.opt.number = true
