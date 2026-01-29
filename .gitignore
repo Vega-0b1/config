@@ -13,3 +13,4 @@
 !/starship.toml
 !/ghostty
 !/mako
+!.tmux.conf
