@@ -34,11 +34,15 @@ local function toggle_telescope(harpoon_files)
 		:find()
 end
 
-map("n", "<C-e>", function()
+map("n", "<leader>fh", function()
 	toggle_telescope(harpoon:list())
 end, { desc = "Open harpoon window" })
-map("n", "<leader>a", function()
-	harpoon:list():add()
+map("n", "<leader>au", function()
+	harpoon:list():replace_at(1)
+end)
+
+map("n", "<leader>ai", function()
+	harpoon:list():replace_at(2)
 end)
 
 map("n", "<leader>u", function()
