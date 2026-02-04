@@ -16,6 +16,8 @@ return {
 			"javascript",
 			"typescript",
 			"tsx",
+			"bash",
+			"regex",
 		})
 	end,
 }
