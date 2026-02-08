@@ -1,7 +1,7 @@
 /*
 !.gitignore
-!.config/wezterm
-!.config/waybar
+!.config/wezterm/*
+!.config/waybar/
 !.config/hypr
 !.config/kanata
 !.config/wofi
