@@ -1,0 +1,66 @@
+#!/bin/bash
+dnf copr enable -y lihaohong/yazi 
+dnf copr enable -y agriffis/neovim-nightly
+dnf copr enable -y solopasha/hyprland
+
+dnf install \
+  git \
+  yazi \
+  alacritty \
+  tmux \
+  firefox \
+  chromium \
+  neovim \
+  python3-neovim \
+  clang \
+  clang-tools-extra \
+  black \
+  rust \
+  cargo \
+  zsh \
+  zsh-autosuggestions \
+  zsh-syntax-highlighting \
+  sddm \
+  hyprland \
+  hyprlock \
+  hypridle \
+  thunar \
+  thunar-archive-plugin \
+  thunar-volman \
+
+
+
+dnf install \
+  tar \
+  wireplumber \
+  upower \
+  libgtop2 \
+  bluez \
+  bluez-tools \
+  grimblast \
+  hyprpicker \
+  btop \
+  NetworkManager \
+  wl-clipboard \
+  swww \
+  brightnessctl \
+  gnome-bluetooth \
+  power-profiles-daemon \
+  gvfs \
+  nodejs \
+  gtksourceview3 \
+  libsoup3 \
+  hyprpanel
+
+sudo cp /home/jcvega/.config/zsh/.zshrc /home/jcvega/.zshrc
+chsh -s $(which zsh) jcvega
+curl -sS https://starship.rs/install.sh | sh
+ 
+cargo install stylua
+cargo install kanata
+sudo cp ~/.cargo/bin/kanata /usr/local/bin/kanata
+sudo chmod 755 /usr/local/bin/kanata
+systemctl daemon-reload
+systemctl enable --now kanata.service
+export PATH="$HOME/.cargo/bin:$PATH"
+

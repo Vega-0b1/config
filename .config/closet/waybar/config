@@ -1,0 +1,114 @@
+[
+  {
+    "style": "/home/jcvega/.config/waybar/style.css",
+    "layer": "top",
+    "position": "left",
+    "spacing": 0,
+    "reload_style_on_change": true,
+    "modules-left": [
+      "hyprland/workspaces"
+    ],
+    "modules-center": [
+      "idle_inhibitor",
+      "clock",
+      "power-profiles-daemon"
+    ],
+    "modules-right": [
+      "pulseaudio",
+      "backlight",
+      "battery",
+      "battery#bat2",
+      "tray"
+    ],
+    "hyprland/workspaces": {
+      "disable-scroll": true,
+      "warp-on-scroll": false,
+      "format": "{icon}",
+      "format-icons": {
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4"        
+      }
+    },
+    "tray": {
+      "icon-size": 20,
+      "spacing": 20
+    },
+    "clock": {
+      "format": "{:%I\n %M\n  %S}",
+      "interval": 1
+    },
+    "cpu": {
+      "format": "CPU{usage} ",
+      "tooltip": false
+    },
+    "memory": {
+      "format": "RAM {} "
+    },
+    "temperature": {
+      "critical-threshold": 80,
+      "format": "{temperatureC}°C {icon}",
+      "format-icons": ["", "", ""]
+    },
+    "backlight": {
+      "format": "{icon}",
+      "format-icons": ["", "", "", "", "", "", "", "", ""]
+    },
+    "battery": {
+      "states": {
+        "good": 95,
+        "warning": 30,
+        "critical": 15
+      },
+      "format": "{capacity} {icon}",
+      "format-full": "{capacity}% {icon}",
+      "format-charging": "{capacity}% {icon}",
+      "format-plugged": "{capacity}% {icon}",
+      "format-alt": "{time} {icon}",
+      "format-icons": ["", "", "", "", ""]
+    },
+    "battery#bat2": {
+      "bat": "BAT2"
+    },
+    "power-profiles-daemon": {
+      "format": "{icon}",
+      "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+      "tooltip": true,
+      "format-icons": {
+        "default": "",
+        "performance": "",
+        "balanced": " ",
+        "power-saver": ""
+      }
+    },
+    "network": {
+      "format-wifi": " ",
+      "format-ethernet": " ",
+      "tooltip-format": "{ifname} via {gwaddr} ",
+      "format-linked": "{ifname} (No IP) ",
+      "format-disconnected": "Disconnected ⚠",
+      "on-click": "nm-connection-editor"
+    },
+    "pulseaudio": {
+      "format": "{icon}",
+      "format-bluetooth": "",
+      "format-bluetooth-muted": " ",
+      "format-muted": " ",
+      "format-source": "{volume}",
+      "format-source-muted": "",
+      "format-icons": {
+        "headphone": "",
+        "default": ["", "", ""]
+      },
+      "on-click": "pavucontrol"
+    },
+    "idle_inhibitor": {
+      "format": " {icon}",
+      "format-icons": {
+        "activated": "  ",
+        "deactivated": "  "
+      }
+    }
+}
+]
