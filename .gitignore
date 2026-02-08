@@ -13,5 +13,5 @@
 !.config/starship.toml
 !.config/ghostty
 !.config/mako
-!.config.tmux.conf
+!.config/tmux.conf
 !.bashrc
