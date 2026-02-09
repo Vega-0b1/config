@@ -17,4 +17,5 @@
 !.config/ghostty/
 !.config/mako/
 !.config/tmux.conf
+!.config/cosmic/
 !.bashrc
