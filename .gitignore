@@ -19,4 +19,5 @@
 !.config/tmux.conf
 !.config/cosmic/
 !.config/wallpaper/
+!.config/alacritty/
 !.bashrc
