@@ -2,7 +2,7 @@
     output: "all",
     source: Path("/home/jcvega/.config/wallpaper"),
     filter_by_theme: true,
-    rotation_frequency: 1800,
+    rotation_frequency: 300,
     filter_method: Lanczos,
     scaling_mode: Zoom,
     sampling_method: Alphanumeric,
