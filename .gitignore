@@ -13,7 +13,6 @@
 !.config/zsh/
 !.config/bash/
 !.config/nvim/
-!.config/starship.toml
 !.config/ghostty/
 !.config/mako/
 !.config/tmux.conf
