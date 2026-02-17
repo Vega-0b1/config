@@ -11,10 +11,6 @@ return {
 			javascriptreact = { "eslint_d" },
 			typescriptreact = { "eslint_d" },
 
-			-- CSS/SCSS
-			css = { "stylelint" },
-			scss = { "stylelint" },
-
 			-- HTML
 			html = { "htmlhint" },
 		}

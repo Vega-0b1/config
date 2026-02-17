@@ -1,0 +1,10 @@
+[
+    Home,
+    Documents,
+    Downloads,
+    Music,
+    Pictures,
+    Videos,
+    Path("/home/jcvega/edu/web"),
+    Path("/home/jcvega/edu/paradigms"),
+]

@@ -1,3 +1,5 @@
 Some([
     "com.system76.CosmicAppletTime",
+    "com.system76.CosmicAppletStatusArea",
+    "com.system76.CosmicAppList",
 ])
