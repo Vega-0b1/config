@@ -7,7 +7,7 @@ return {
 		require("kanagawa").setup({
 			transparent = true,
 			colors = {
-				them = { all = { ui = { bg_gutter = "none" } } },
+				theme = { all = { ui = { bg_gutter = "none" } } },
 			},
 		})
 		vim.cmd.colorscheme("kanagawa-wave") -- dark --

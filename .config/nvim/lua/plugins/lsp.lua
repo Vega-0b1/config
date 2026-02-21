@@ -3,9 +3,7 @@ return {
 	{
 		"neovim/nvim-lspconfig",
 		config = function()
-			local capabilities = vim.lsp.protocol.make_client_capabilities()
-			-- If you use nvim-cmp, uncomment:
-			-- capabilities = require("cmp_nvim_lsp").default_capabilities(capabilities)
+			local capabilities = require('blink.cmp').get_lsp_capabilities(vim.lsp.protocol.make_client_capabilities())
 
 			-- Define configs (Neovim 0.11+ + lspconfig new API)
 			vim.lsp.config("rust_analyzer", {

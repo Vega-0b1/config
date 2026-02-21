@@ -12,14 +12,10 @@ vim.opt.cursorline = true
 vim.opt.expandtab = true
 vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
+vim.opt.undofile = true
+vim.opt.undodir = vim.fn.stdpath("data") .. "/undo"
 vim.g.mapleader = " "
 
-vim.api.nvim_create_autocmd("FileType", {
-	pattern = { "lua", "python", "java", "rust", "json", "html", "css", "javascript", "typescript", "tsx" },
-	callback = function()
-		vim.treesitter.start()
-	end,
-})
 vim.diagnostic.config({
 	virtual_text = true,
 })
