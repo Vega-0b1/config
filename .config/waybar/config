@@ -62,12 +62,13 @@
         "warning": 30,
         "critical": 15
       },
-      "format": "{capacity} {icon}",
-      "format-full": "{capacity}% {icon}",
-      "format-charging": "{capacity}% {icon}",
-      "format-plugged": "{capacity}% {icon}",
+      "format": "{icon}",
+      "format-full": "{icon}",
+      "format-charging": "{icon}",
+      "format-plugged": "{icon}",
       "format-alt": "{time} {icon}",
-      "format-icons": ["", "", "", "", ""]
+      "format-icons": ["", "", "", "", ""],
+      "tooltip-format": "{capacity}% - {timeTo}"
     },
     "battery#bat2": {
       "bat": "BAT2"
