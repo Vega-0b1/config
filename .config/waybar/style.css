@@ -1,0 +1,262 @@
+@import "mocha.css";
+
+/* ===========================
+   Base Style
+   =========================== */
+* {
+    font-family: "FiraCode Nerd Font", FontAwesome, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    box-shadow: none;
+    min-height: 0;
+    min-width: 0;
+}
+
+window#waybar {
+    background: alpha(@crust, 0.85);
+    border-radius: 16px;
+    border: 1px solid alpha(@surface0, 0.4);
+    margin: 8px 0 8px 8px;
+    padding: 8px 4px;
+}
+
+tooltip {
+    background: @base;
+    border: 1px solid @surface0;
+    border-radius: 12px;
+    padding: 8px 12px;
+}
+
+tooltip label {
+    color: @text;
+}
+
+/* ===========================
+   Module Containers
+   =========================== */
+#clock,
+#battery,
+#backlight,
+#network,
+#pulseaudio,
+#bluetooth,
+#tray,
+#idle_inhibitor,
+#power-profiles-daemon {
+    padding: 8px 0;
+    margin: 4px 6px;
+    min-width: 28px;
+    background: alpha(@surface0, 0.5);
+    border-radius: 12px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===========================
+   Workspaces
+   =========================== */
+#workspaces {
+    background: alpha(@surface0, 0.3);
+    border-radius: 14px;
+    margin: 4px 6px;
+    padding: 6px 4px;
+}
+
+#workspaces button {
+    background: transparent;
+    color: @overlay1;
+    border-radius: 10px;
+    padding: 6px 0;
+    margin: 3px 4px;
+    min-width: 24px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#workspaces button:hover {
+    background: alpha(@surface1, 0.6);
+    color: @text;
+}
+
+#workspaces button.active {
+    background: linear-gradient(135deg, @blue, @sapphire);
+    color: @crust;
+    box-shadow: 0 2px 8px alpha(@blue, 0.4);
+}
+
+#workspaces button.urgent {
+    background: @red;
+    color: @crust;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ===========================
+   Clock - Hero Element
+   =========================== */
+#clock {
+    background: linear-gradient(180deg, alpha(@lavender, 0.2), alpha(@blue, 0.08));
+    color: @lavender;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 0;
+    margin: 6px 6px;
+    border: 1px solid alpha(@lavender, 0.25);
+    letter-spacing: 1px;
+    text-shadow: 0 0 12px alpha(@lavender, 0.4);
+}
+
+/* ===========================
+   Individual Module Colors
+   =========================== */
+#pulseaudio {
+    color: @yellow;
+}
+
+#pulseaudio:hover {
+    background: alpha(@yellow, 0.15);
+    border: 1px solid alpha(@yellow, 0.3);
+}
+
+#backlight {
+    color: @peach;
+}
+
+#backlight:hover {
+    background: alpha(@peach, 0.15);
+}
+
+#battery {
+    color: @green;
+}
+
+#battery:hover {
+    background: alpha(@green, 0.15);
+}
+
+#network {
+    color: @sky;
+}
+
+#network:hover {
+    background: alpha(@sky, 0.15);
+}
+
+#bluetooth {
+    color: @blue;
+}
+
+#bluetooth:hover {
+    background: alpha(@blue, 0.15);
+}
+
+#idle_inhibitor {
+    color: @flamingo;
+}
+
+#idle_inhibitor:hover {
+    background: alpha(@flamingo, 0.15);
+}
+
+#power-profiles-daemon {
+    color: @mauve;
+}
+
+#power-profiles-daemon:hover {
+    background: alpha(@mauve, 0.15);
+}
+
+/* ===========================
+   States
+   =========================== */
+#battery.charging,
+#battery.plugged {
+    background: linear-gradient(180deg, alpha(@green, 0.25), alpha(@teal, 0.15));
+    color: @green;
+    border: 1px solid alpha(@green, 0.3);
+}
+
+#battery.warning:not(.charging) {
+    color: @peach;
+    background: alpha(@peach, 0.15);
+}
+
+#battery.critical:not(.charging) {
+    background: linear-gradient(180deg, alpha(@red, 0.3), alpha(@maroon, 0.2));
+    color: @red;
+    border: 1px solid alpha(@red, 0.4);
+    animation: pulse 1s ease-in-out infinite;
+}
+
+#pulseaudio.muted {
+    color: @overlay0;
+    background: alpha(@surface0, 0.3);
+}
+
+#network.disconnected {
+    color: @overlay0;
+}
+
+#power-profiles-daemon.performance {
+    color: @red;
+    background: alpha(@red, 0.12);
+}
+
+#power-profiles-daemon.balanced {
+    color: @blue;
+}
+
+#power-profiles-daemon.power-saver {
+    color: @green;
+    background: alpha(@green, 0.12);
+}
+
+#idle_inhibitor.activated {
+    background: linear-gradient(180deg, alpha(@red, 0.25), alpha(@maroon, 0.15));
+    color: @red;
+    border: 1px solid alpha(@red, 0.3);
+}
+
+/* ===========================
+   Tray
+   =========================== */
+#tray {
+    padding: 6px 0;
+}
+
+#tray > .passive {
+    opacity: 0.5;
+}
+
+#tray > .needs-attention {
+    background: @red;
+    color: @crust;
+    border-radius: 8px;
+}
+
+#tray menu {
+    background: @base;
+    border: 1px solid @surface0;
+    border-radius: 12px;
+    padding: 8px;
+}
+
+#tray menu menuitem {
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+}
+
+#tray menu menuitem:hover {
+    background: @surface0;
+}
+
+/* ===========================
+   Animations
+   =========================== */
+@keyframes pulse {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0.6;
+    }
+}

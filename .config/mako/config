@@ -1,0 +1,31 @@
+# Catppuccin Mocha theme
+background-color=#1e1e2edd
+text-color=#cdd6f4
+border-color=#89b4fa
+border-size=2
+border-radius=12
+padding=12
+margin=10
+width=300
+
+font=FiraCode Nerd Font 11
+default-timeout=3000
+
+# Volume notifications
+[app-name=volume]
+border-color=#f9e2af
+default-timeout=1200
+
+# Brightness notifications
+[app-name=brightness]
+border-color=#fab387
+default-timeout=1200
+
+# Bluetooth notifications
+[app-name=bluetooth]
+border-color=#89b4fa
+default-timeout=3000
+
+[urgency=critical]
+border-color=#f38ba8
+default-timeout=0

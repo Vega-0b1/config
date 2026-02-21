@@ -36,7 +36,8 @@
       "spacing": 20
     },
     "clock": {
-      "format": "{:%I\n %M\n  %S}",
+      "format": "{:%I\n·\n%M\n·\n%S}",
+      "tooltip-format": "{:%A, %B %d, %Y}",
       "interval": 1
     },
     "cpu": {
