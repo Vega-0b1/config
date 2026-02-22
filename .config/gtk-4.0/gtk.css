@@ -1,0 +1,413 @@
+/* COSMIC Dark Theme for GTK 4 */
+
+@define-color accent_color #92cf9c;
+@define-color accent_bg_color #92cf9c;
+@define-color accent_fg_color #1b1b1b;
+
+@define-color destructive_color #fda1a0;
+@define-color destructive_bg_color #fda1a0;
+@define-color destructive_fg_color #1b1b1b;
+
+@define-color success_color #5edb8c;
+@define-color success_bg_color #5edb8c;
+@define-color success_fg_color #1b1b1b;
+
+@define-color warning_color #f7e062;
+@define-color warning_bg_color #f7e062;
+@define-color warning_fg_color #1b1b1b;
+
+@define-color error_color #fda1a0;
+@define-color error_bg_color #fda1a0;
+@define-color error_fg_color #1b1b1b;
+
+@define-color window_bg_color #1b1b1b;
+@define-color window_fg_color #e8e8e8;
+
+@define-color view_bg_color #161616;
+@define-color view_fg_color #e8e8e8;
+
+@define-color headerbar_bg_color #2e2e2e;
+@define-color headerbar_fg_color #e8e8e8;
+@define-color headerbar_border_color #444444;
+@define-color headerbar_backdrop_color #242424;
+@define-color headerbar_shade_color rgba(0, 0, 0, 0.3);
+
+@define-color card_bg_color #2e2e2e;
+@define-color card_fg_color #e8e8e8;
+@define-color card_shade_color rgba(0, 0, 0, 0.3);
+
+@define-color dialog_bg_color #2e2e2e;
+@define-color dialog_fg_color #e8e8e8;
+
+@define-color popover_bg_color #2e2e2e;
+@define-color popover_fg_color #e8e8e8;
+
+@define-color sidebar_bg_color #242424;
+@define-color sidebar_fg_color #e8e8e8;
+@define-color sidebar_backdrop_color #1f1f1f;
+@define-color sidebar_shade_color rgba(0, 0, 0, 0.3);
+
+@define-color secondary_sidebar_bg_color #1f1f1f;
+@define-color secondary_sidebar_fg_color #e8e8e8;
+@define-color secondary_sidebar_backdrop_color #1b1b1b;
+@define-color secondary_sidebar_shade_color rgba(0, 0, 0, 0.3);
+
+@define-color shade_color rgba(0, 0, 0, 0.3);
+@define-color scrollbar_outline_color rgba(0, 0, 0, 0.5);
+
+@define-color borders #444444;
+@define-color unfocused_borders #383838;
+
+/* Window */
+window, .background {
+    background-color: @window_bg_color;
+    color: @window_fg_color;
+}
+
+/* Headerbar */
+headerbar {
+    background-color: @headerbar_bg_color;
+    color: @headerbar_fg_color;
+    border-bottom: 1px solid @headerbar_border_color;
+    box-shadow: inset 0 -1px @headerbar_shade_color;
+}
+
+headerbar:backdrop {
+    background-color: @headerbar_backdrop_color;
+}
+
+/* Window controls */
+windowcontrols button {
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    min-width: 24px;
+    min-height: 24px;
+    padding: 4px;
+}
+
+windowcontrols button:hover {
+    background-color: alpha(#e8e8e8, 0.1);
+}
+
+/* Buttons */
+button {
+    background-color: #434343;
+    color: @window_fg_color;
+    border: 1px solid @borders;
+    border-radius: 8px;
+    padding: 6px 12px;
+    transition: all 200ms ease;
+}
+
+button:hover {
+    background-color: #505050;
+}
+
+button:active, button:checked {
+    background-color: #585858;
+}
+
+button.suggested-action {
+    background-color: @accent_bg_color;
+    color: @accent_fg_color;
+    border-color: @accent_bg_color;
+}
+
+button.suggested-action:hover {
+    background-color: color-mix(in srgb, @accent_bg_color 90%, black);
+}
+
+button.destructive-action {
+    background-color: @destructive_bg_color;
+    color: @destructive_fg_color;
+    border-color: @destructive_bg_color;
+}
+
+button.destructive-action:hover {
+    background-color: color-mix(in srgb, @destructive_bg_color 90%, black);
+}
+
+button.flat {
+    background: transparent;
+    border: none;
+}
+
+button.flat:hover {
+    background-color: alpha(#e8e8e8, 0.1);
+}
+
+button.pill {
+    border-radius: 999px;
+}
+
+button.circular {
+    border-radius: 50%;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0;
+}
+
+/* Text entries */
+entry, spinbutton {
+    background-color: @view_bg_color;
+    color: @view_fg_color;
+    border: 1px solid @borders;
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+
+entry:focus, spinbutton:focus {
+    border-color: @accent_color;
+    outline: 2px solid alpha(@accent_color, 0.25);
+    outline-offset: -2px;
+}
+
+/* Views and lists */
+.view, columnview, listview, gridview {
+    background-color: @view_bg_color;
+    color: @view_fg_color;
+}
+
+listview > row {
+    border-radius: 8px;
+    margin: 2px 4px;
+}
+
+listview > row:selected {
+    background-color: alpha(@accent_color, 0.3);
+}
+
+listview > row:hover {
+    background-color: alpha(#e8e8e8, 0.05);
+}
+
+/* Sidebar */
+.sidebar, .navigation-sidebar {
+    background-color: @sidebar_bg_color;
+}
+
+.sidebar > row:selected, .navigation-sidebar > row:selected {
+    background-color: alpha(@accent_color, 0.25);
+}
+
+/* Cards */
+.card {
+    background-color: @card_bg_color;
+    color: @card_fg_color;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px @card_shade_color;
+}
+
+/* Checkboxes and radio buttons */
+check, radio {
+    border: 2px solid @borders;
+    border-radius: 4px;
+    background-color: @view_bg_color;
+    min-width: 20px;
+    min-height: 20px;
+}
+
+check:checked, radio:checked {
+    background-color: @accent_color;
+    border-color: @accent_color;
+    color: @accent_fg_color;
+}
+
+radio {
+    border-radius: 50%;
+}
+
+/* Switches */
+switch {
+    background-color: #434343;
+    border-radius: 16px;
+    min-width: 48px;
+    min-height: 28px;
+}
+
+switch:checked {
+    background-color: @accent_color;
+}
+
+switch > image {
+    color: transparent;
+}
+
+/* Scales/sliders */
+scale trough {
+    background-color: #434343;
+    border-radius: 8px;
+}
+
+scale highlight {
+    background-color: @accent_color;
+    border-radius: 8px;
+}
+
+scale slider {
+    background-color: #e8e8e8;
+    border-radius: 50%;
+    min-width: 20px;
+    min-height: 20px;
+}
+
+/* Progress bars */
+progressbar trough {
+    background-color: #434343;
+    border-radius: 8px;
+}
+
+progressbar progress {
+    background-color: @accent_color;
+    border-radius: 8px;
+}
+
+/* Scrollbars */
+scrollbar {
+    background-color: transparent;
+}
+
+scrollbar slider {
+    background-color: alpha(#e8e8e8, 0.3);
+    border-radius: 8px;
+    min-width: 8px;
+    min-height: 8px;
+}
+
+scrollbar slider:hover {
+    background-color: alpha(#e8e8e8, 0.5);
+}
+
+/* Popovers */
+popover, popover.background {
+    background-color: @popover_bg_color;
+    color: @popover_fg_color;
+    border: 1px solid @borders;
+    border-radius: 12px;
+    padding: 6px;
+}
+
+popover modelbutton {
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+popover modelbutton:hover {
+    background-color: alpha(@accent_color, 0.15);
+}
+
+/* Tooltips */
+tooltip {
+    background-color: #2e2e2e;
+    color: #e8e8e8;
+    border: 1px solid @borders;
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+
+/* Tabs */
+tabbar tabbox {
+    background-color: @headerbar_bg_color;
+}
+
+tabbar tab {
+    border-radius: 8px 8px 0 0;
+    padding: 6px 12px;
+}
+
+tabbar tab:checked {
+    background-color: @window_bg_color;
+}
+
+/* Selection */
+selection {
+    background-color: alpha(@accent_color, 0.3);
+    color: @window_fg_color;
+}
+
+/* Links */
+link, .link {
+    color: #63d0df;
+}
+
+/* Banners/infobars */
+.info {
+    background-color: alpha(#63d0df, 0.2);
+}
+
+.warning {
+    background-color: alpha(@warning_color, 0.2);
+}
+
+.error {
+    background-color: alpha(@error_color, 0.2);
+}
+
+.success {
+    background-color: alpha(@success_color, 0.2);
+}
+
+/* Separators */
+separator {
+    background-color: @borders;
+}
+
+/* Toasts */
+toast {
+    background-color: @popover_bg_color;
+    color: @popover_fg_color;
+    border-radius: 999px;
+    padding: 8px 16px;
+}
+
+/* AdwActionRow, AdwPreferencesRow */
+row.activatable {
+    border-radius: 8px;
+}
+
+row.activatable:hover {
+    background-color: alpha(#e8e8e8, 0.05);
+}
+
+row.activatable:selected {
+    background-color: alpha(@accent_color, 0.2);
+}
+
+/* Preferences groups */
+preferencesgroup > box > box {
+    background-color: @card_bg_color;
+    border-radius: 12px;
+}
+
+/* Status pages */
+statuspage {
+    background-color: @window_bg_color;
+}
+
+/* Spinners */
+spinner {
+    color: @accent_color;
+}
+
+/* Calendar */
+calendar {
+    background-color: @view_bg_color;
+    border-radius: 8px;
+}
+
+calendar > header {
+    border-radius: 8px 8px 0 0;
+}
+
+calendar:selected {
+    background-color: @accent_color;
+    color: @accent_fg_color;
+}
+
+/* Dialogs */
+dialog, messagedialog, window.dialog {
+    background-color: @dialog_bg_color;
+    color: @dialog_fg_color;
+    border-radius: 12px;
+}

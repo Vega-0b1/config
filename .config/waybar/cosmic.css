@@ -1,0 +1,28 @@
+/* COSMIC Dark Theme Colors for Waybar */
+
+@define-color base #1b1b1b;
+@define-color surface #2e2e2e;
+@define-color surface-hover #434343;
+@define-color surface-pressed #585858;
+@define-color divider #444444;
+
+@define-color text #e8e8e8;
+@define-color text-muted #c0c0c0;
+@define-color text-dim #9e9e9e;
+
+/* COSMIC Accent (green) */
+@define-color accent #92cf9c;
+@define-color accent-hover #89b991;
+
+/* Semantic colors from COSMIC palette */
+@define-color green #5edb8c;
+@define-color red #fda1a0;
+@define-color yellow #f7e062;
+@define-color orange #ffad00;
+@define-color blue #63d0df;
+@define-color purple #e79cfe;
+@define-color pink #ff9cb1;
+@define-color indigo #a1c0eb;
+
+/* Warm grey for muted elements */
+@define-color warm-grey #9b8a87;

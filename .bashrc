@@ -11,3 +11,4 @@ alias nixconfig='cd "/etc/nixos"'
 alias edu='cd "$HOME/edu"'
 alias web='cd "$HOME/edu/web"'
 alias para='cd "$HOME/edu/paradigms"'
+export PATH="$HOME/.local/bin:$PATH"
