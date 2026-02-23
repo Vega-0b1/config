@@ -10,8 +10,7 @@
     ],
     "modules-center": [
       "idle_inhibitor",
-      "clock",
-      "power-profiles-daemon"
+      "clock"
     ],
     "modules-right": [
       "pulseaudio",
@@ -72,17 +71,6 @@
     },
     "battery#bat2": {
       "bat": "BAT2"
-    },
-    "power-profiles-daemon": {
-      "format": "{icon}",
-      "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
-      "tooltip": true,
-      "format-icons": {
-        "default": "",
-        "performance": "",
-        "balanced": " ",
-        "power-saver": ""
-      }
     },
     "network": {
       "format-wifi": " ",

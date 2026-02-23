@@ -10,6 +10,9 @@ get_random_wallpaper() {
 set_wallpaper() {
     local wallpaper="$1"
 
+    # Get currently loaded wallpapers before changing
+    local old_wallpapers=$(hyprctl hyprpaper listloaded)
+
     # Get all monitors
     monitors=$(hyprctl monitors | grep "Monitor" | awk '{print $2}')
 
@@ -21,8 +24,14 @@ set_wallpaper() {
         hyprctl hyprpaper wallpaper "$monitor,$wallpaper"
     done
 
-    # Unload unused wallpapers to free memory
-    hyprctl hyprpaper unload all
+    # Unload old wallpapers to free memory (but not the current one)
+    if [ -n "$old_wallpapers" ] && [ "$old_wallpapers" != "no wallpapers loaded" ]; then
+        echo "$old_wallpapers" | while read -r old_wp; do
+            if [ "$old_wp" != "$wallpaper" ]; then
+                hyprctl hyprpaper unload "$old_wp" 2>/dev/null
+            fi
+        done
+    fi
 }
 
 # Initial wallpaper
