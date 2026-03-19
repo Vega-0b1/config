@@ -43,12 +43,10 @@ if (( muted )); then
     notify-send -a "volume" -r 9990 -t 1500 \
         -h "string:x-canonical-private-synchronous:volume" \
         -h "int:value:0" \
-        "Volume Muted" "░░░░░░░░░░" \
-        -i "$icon"
+        "Volume Muted" "░░░░░░░░░░"
 else
     notify-send -a "volume" -r 9990 -t 1200 \
         -h "string:x-canonical-private-synchronous:volume" \
         -h "int:value:${pct}" \
-        "Volume ${pct}%" "$bar" \
-        -i "$icon"
+        "Volume ${pct}%" "$bar"
 fi

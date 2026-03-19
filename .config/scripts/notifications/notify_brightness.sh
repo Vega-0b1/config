@@ -64,5 +64,4 @@ bar="$(printf '█%.0s' $(seq 1 $filled 2>/dev/null) || true)$(printf '░%.0s' 
 notify-send -a "brightness" -r 9991 -t 1200 \
     -h "string:x-canonical-private-synchronous:brightness" \
     -h "int:value:${pct_after}" \
-    "Brightness ${pct_after}%" "$bar" \
-    -i "$icon"
+    "Brightness ${pct_after}%" "$bar"

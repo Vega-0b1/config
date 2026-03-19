@@ -11,17 +11,13 @@ notify() {
     local icon
 
     if [[ "$action" == "connected" ]]; then
-        icon="bluetooth-active-symbolic"
         notify-send -a "bluetooth" -r 9992 -t 3000 \
             -h "string:x-canonical-private-synchronous:bluetooth" \
-            "Bluetooth Connected" "$device" \
-            -i "$icon"
+            "Bluetooth Connected" "$device"
     else
-        icon="bluetooth-disabled-symbolic"
         notify-send -a "bluetooth" -r 9992 -t 3000 \
             -h "string:x-canonical-private-synchronous:bluetooth" \
-            "Bluetooth Disconnected" "$device" \
-            -i "$icon"
+            "Bluetooth Disconnected" "$device"
     fi
 }
 
