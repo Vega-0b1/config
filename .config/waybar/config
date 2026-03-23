@@ -10,7 +10,8 @@
     ],
     "modules-center": [
       "idle_inhibitor",
-      "clock"
+      "clock",
+      "power-profiles-daemon"
     ],
     "modules-right": [
       "pulseaudio",
@@ -31,13 +32,24 @@
       }
     },
     "tray": {
-      "icon-size": 20,
-      "spacing": 20
+      "icon-size": 15,
+      "spacing": 10
     },
     "clock": {
       "format": "{:%I\n·\n%M\n·\n%S}",
       "tooltip-format": "{:%A, %B %d, %Y}",
       "interval": 1
+    },
+    "power-profiles-daemon": {
+      "format": "{icon}",
+      "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+      "tooltip": true,
+      "format-icons": {
+        "default": "",
+        "performance": "",
+        "balanced": "",
+        "power-saver": ""
+      }
     },
     "cpu": {
       "format": "CPU{usage} ",

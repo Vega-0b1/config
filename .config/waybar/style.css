@@ -1,37 +1,31 @@
 @import "cosmic.css";
 
-/* ===========================
-   COSMIC-Style Waybar
-   Transparent with blur effect
-   =========================== */
-
 * {
-    font-family: "Noto Sans", "MesloLGS Nerd Font", FontAwesome, sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    border: none;
-    box-shadow: none;
-    min-height: 0;
-    min-width: 0;
+  font-family: "Noto Sans", "MesloLGS Nerd Font", FontAwesome, sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  border: none;
+  box-shadow: none;
+  min-height: 0;
+  padding: 4px 0;
+  margin: 3px 0;
 }
 
 window#waybar {
-    background: alpha(@base, 0.6);
-    border-radius: 16px;
-    border: 1px solid alpha(@divider, 0.3);
-    margin: 8px 0 8px 8px;
-    padding: 8px 4px;
+  background: transparent;
+  margin: 4px 4px 4px 0;
+  padding: 0;
 }
 
 tooltip {
-    background: alpha(@base, 0.95);
-    border: 1px solid @divider;
-    border-radius: 8px;
-    padding: 8px 12px;
+  background: alpha(@base, 0.95);
+  border: 1px solid @divider;
+  border-radius: 8px;
+  padding: 8px 12px;
 }
 
 tooltip label {
-    color: @text;
+  color: @text;
 }
 
 /* ===========================
@@ -46,13 +40,12 @@ tooltip label {
 #tray,
 #idle_inhibitor,
 #power-profiles-daemon {
-    padding: 8px 0;
-    margin: 4px 6px;
-    min-width: 28px;
-    background: alpha(@surface, 0.4);
-    border-radius: 8px;
-    color: @text-muted;
-    transition: all 0.2s ease;
+  background: alpha(@surface, 0.4);
+  border-radius: 8px;
+  color: @text-muted;
+  transition: all 0.2s ease;
+  padding: 6px 0;
+  margin: 3px 0;
 }
 
 #clock:hover,
@@ -63,215 +56,159 @@ tooltip label {
 #bluetooth:hover,
 #idle_inhibitor:hover,
 #power-profiles-daemon:hover {
-    background: alpha(@surface-hover, 0.5);
-    color: @text;
+  background: alpha(@surface-hover, 0.5);
+  color: @text;
 }
 
 /* ===========================
    Workspaces
    =========================== */
 #workspaces {
-    background: alpha(@surface, 0.3);
-    border-radius: 16px;
-    margin: 4px 6px;
-    padding: 6px 4px;
+  background: alpha(@surface, 0.3);
+  border-radius: 10px;
+  margin: 4px 0;
+  padding: 4px 0;
 }
 
 #workspaces button {
-    background: transparent;
-    color: @text-dim;
-    border-radius: 8px;
-    padding: 6px 0;
-    margin: 3px 4px;
-    min-width: 24px;
-    transition: all 0.2s ease;
+  background: transparent;
+  color: @text-dim;
+  border-radius: 6px;
+  padding: 5px 0;
+  margin: 2px 0;
+  transition: all 0.2s ease;
 }
 
 #workspaces button:hover {
-    background: alpha(@surface-hover, 0.5);
-    color: @text;
+  background: alpha(@surface-hover, 0.5);
+  color: @text;
 }
 
 #workspaces button.active {
-    background: @accent;
-    color: @base;
+  background: @accent;
+  color: @base;
 }
 
 #workspaces button.urgent {
-    background: @red;
-    color: @base;
-    animation: pulse 1.5s ease-in-out infinite;
+  background: @red;
+  color: @base;
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
 /* ===========================
    Clock
    =========================== */
 #clock {
-    background: alpha(@accent, 0.15);
-    color: @accent;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 12px 0;
-    margin: 6px 6px;
-    border: 1px solid alpha(@accent, 0.2);
+  background: alpha(@accent, 0.15);
+  color: @accent;
+  border: 1px solid alpha(@accent, 0.2);
 }
 
 #clock:hover {
-    background: alpha(@accent, 0.25);
+  background: alpha(@accent, 0.25);
 }
 
 /* ===========================
    Module Colors
    =========================== */
-#pulseaudio {
-    color: @orange;
-}
+#pulseaudio { color: @orange; }
+#pulseaudio:hover { background: alpha(@orange, 0.15); }
 
-#pulseaudio:hover {
-    background: alpha(@orange, 0.15);
-}
+#backlight { color: @yellow; }
+#backlight:hover { background: alpha(@yellow, 0.15); }
 
-#backlight {
-    color: @yellow;
-}
+#battery { color: @green; }
+#battery:hover { background: alpha(@green, 0.15); }
 
-#backlight:hover {
-    background: alpha(@yellow, 0.15);
-}
+#network { color: @blue; }
+#network:hover { background: alpha(@blue, 0.15); }
 
-#battery {
-    color: @green;
-}
+#bluetooth { color: @indigo; }
+#bluetooth:hover { background: alpha(@indigo, 0.15); }
 
-#battery:hover {
-    background: alpha(@green, 0.15);
-}
+#idle_inhibitor { color: @pink; }
+#idle_inhibitor:hover { background: alpha(@pink, 0.15); }
 
-#network {
-    color: @blue;
-}
-
-#network:hover {
-    background: alpha(@blue, 0.15);
-}
-
-#bluetooth {
-    color: @indigo;
-}
-
-#bluetooth:hover {
-    background: alpha(@indigo, 0.15);
-}
-
-#idle_inhibitor {
-    color: @pink;
-}
-
-#idle_inhibitor:hover {
-    background: alpha(@pink, 0.15);
-}
-
-#power-profiles-daemon {
-    color: @purple;
-}
-
-#power-profiles-daemon:hover {
-    background: alpha(@purple, 0.15);
-}
+#power-profiles-daemon { color: @purple; }
+#power-profiles-daemon:hover { background: alpha(@purple, 0.15); }
 
 /* ===========================
    States
    =========================== */
 #battery.charging,
 #battery.plugged {
-    background: alpha(@green, 0.2);
-    color: @green;
-    border: 1px solid alpha(@green, 0.3);
+  background: alpha(@green, 0.2);
+  color: @green;
+  border: 1px solid alpha(@green, 0.3);
 }
 
 #battery.warning:not(.charging) {
-    color: @orange;
-    background: alpha(@orange, 0.15);
+  color: @orange;
+  background: alpha(@orange, 0.15);
 }
 
 #battery.critical:not(.charging) {
-    background: alpha(@red, 0.25);
-    color: @red;
-    border: 1px solid alpha(@red, 0.3);
-    animation: pulse 1s ease-in-out infinite;
+  background: alpha(@red, 0.25);
+  color: @red;
+  border: 1px solid alpha(@red, 0.3);
+  animation: pulse 1s ease-in-out infinite;
 }
 
 #pulseaudio.muted {
-    color: @text-dim;
-    background: alpha(@surface, 0.3);
+  color: @text-dim;
+  background: alpha(@surface, 0.3);
 }
 
-#network.disconnected {
-    color: @text-dim;
-}
+#network.disconnected { color: @text-dim; }
 
 #power-profiles-daemon.performance {
-    color: @red;
-    background: alpha(@red, 0.12);
+  color: @red;
+  background: alpha(@red, 0.12);
 }
 
-#power-profiles-daemon.balanced {
-    color: @blue;
-}
+#power-profiles-daemon.balanced { color: @blue; }
 
 #power-profiles-daemon.power-saver {
-    color: @green;
-    background: alpha(@green, 0.12);
+  color: @green;
+  background: alpha(@green, 0.12);
 }
 
 #idle_inhibitor.activated {
-    background: alpha(@red, 0.2);
-    color: @red;
-    border: 1px solid alpha(@red, 0.25);
+  background: alpha(@red, 0.2);
+  color: @red;
+  border: 1px solid alpha(@red, 0.25);
 }
 
 /* ===========================
    Tray
    =========================== */
-#tray {
-    padding: 6px 0;
-}
-
-#tray > .passive {
-    opacity: 0.5;
-}
-
+#tray { padding: 4px 0; }
+#tray > .passive { opacity: 0.5; }
 #tray > .needs-attention {
-    background: @red;
-    color: @base;
-    border-radius: 8px;
+  background: @red;
+  color: @base;
+  border-radius: 8px;
 }
 
 #tray menu {
-    background: alpha(@base, 0.95);
-    border: 1px solid @divider;
-    border-radius: 8px;
-    padding: 8px;
+  background: alpha(@base, 0.95);
+  border: 1px solid @divider;
+  border-radius: 8px;
+  padding: 8px;
 }
 
 #tray menu menuitem {
-    padding: 6px 12px;
-    border-radius: 4px;
-    transition: background 0.15s ease;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: background 0.15s ease;
 }
 
-#tray menu menuitem:hover {
-    background: @surface-hover;
-}
+#tray menu menuitem:hover { background: @surface-hover; }
 
 /* ===========================
    Animations
    =========================== */
 @keyframes pulse {
-    from {
-        opacity: 1;
-    }
-    to {
-        opacity: 0.6;
-    }
+  from { opacity: 1; }
+  to { opacity: 0.6; }
 }
