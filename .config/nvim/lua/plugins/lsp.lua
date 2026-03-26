@@ -4,6 +4,10 @@ return {
 		"neovim/nvim-lspconfig",
 		config = function()
 			local capabilities = require('blink.cmp').get_lsp_capabilities(vim.lsp.protocol.make_client_capabilities())
+			capabilities.textDocument.foldingRange = {
+				dynamicRegistration = false,
+				lineFoldingOnly = true,
+			}
 
 			-- Define configs (Neovim 0.11+ + lspconfig new API)
 			vim.lsp.config("rust_analyzer", {

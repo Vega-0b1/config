@@ -14,6 +14,10 @@ vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 vim.opt.undofile = true
 vim.opt.undodir = vim.fn.stdpath("data") .. "/undo"
+vim.o.foldcolumn = "1"
+vim.o.foldlevel = 99
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
 vim.g.mapleader = " "
 
 vim.diagnostic.config({
