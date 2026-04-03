@@ -1,0 +1,14 @@
+/home/jcvega/.config/scripts/notifications/notify_workspace/target/release/deps/serde-bdf99782fade702a.d: /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/jcvega/.config/scripts/notifications/notify_workspace/target/release/build/serde-5305a079c5d0efe8/out/private.rs
+
+/home/jcvega/.config/scripts/notifications/notify_workspace/target/release/deps/libserde-bdf99782fade702a.rlib: /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/jcvega/.config/scripts/notifications/notify_workspace/target/release/build/serde-5305a079c5d0efe8/out/private.rs
+
+/home/jcvega/.config/scripts/notifications/notify_workspace/target/release/deps/libserde-bdf99782fade702a.rmeta: /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs /home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs /home/jcvega/.config/scripts/notifications/notify_workspace/target/release/build/serde-5305a079c5d0efe8/out/private.rs
+
+/home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/lib.rs:
+/home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/integer128.rs:
+/home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/mod.rs:
+/home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/de.rs:
+/home/jcvega/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde-1.0.228/src/private/ser.rs:
+/home/jcvega/.config/scripts/notifications/notify_workspace/target/release/build/serde-5305a079c5d0efe8/out/private.rs:
+
+# env-dep:OUT_DIR=/home/jcvega/.config/scripts/notifications/notify_workspace/target/release/build/serde-5305a079c5d0efe8/out

@@ -1,0 +1,1 @@
+/home/jcvega/.config/scripts/notifications/notify_workspace/target/release/notify_workspace: /home/jcvega/.config/scripts/notifications/notify_workspace/src/main.rs
