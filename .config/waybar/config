@@ -23,13 +23,7 @@
     "hyprland/workspaces": {
       "disable-scroll": true,
       "warp-on-scroll": false,
-      "format": "{icon}",
-      "format-icons": {
-        "1": "1",
-        "2": "2",
-        "3": "3",
-        "4": "4"        
-      }
+      "format": "{id}"
     },
     "tray": {
       "icon-size": 15,
