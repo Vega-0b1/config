@@ -10,7 +10,7 @@
 !.config/wofi/
 !.config/closet/
 !.config/scripts/
-.config/scripts/notifications/notify_workspace/target/
+.config/scripts/notifications/hypr-osd/target/
 !.config/zsh/
 !.config/bash/
 !.config/nvim/

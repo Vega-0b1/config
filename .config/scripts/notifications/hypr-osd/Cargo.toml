@@ -1,7 +1,8 @@
 [package]
-name = "notify_workspace"
+name = "hypr-osd"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+futures = "0.3.32"
 notify-rust = "4.12.0"
