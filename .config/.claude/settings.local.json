@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(fc-list:*)",
+      "WebFetch(domain:search.nixos.org)",
+      "WebSearch",
+      "WebFetch(domain:crates.io)",
+      "WebFetch(domain:docs.rs)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:wiki.hyprland.org)",
+      "WebFetch(domain:wiki.hypr.land)"
+    ]
+  }
+}

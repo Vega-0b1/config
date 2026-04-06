@@ -25,3 +25,6 @@
 !.config/gtk-4.0/
 !.bashrc
 !CLAUDE.md
+!.claude/
+.claude/*
+!.claude/commands/
