@@ -21,7 +21,7 @@ vim.o.foldenable = true
 vim.g.mapleader = " "
 
 vim.diagnostic.config({
-	virtual_text = true,
+	virtual_text = false,
 })
 
 --plugins
