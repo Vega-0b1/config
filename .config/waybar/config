@@ -2,35 +2,33 @@
   {
     "style": "/home/jcvega/.config/waybar/style.css",
     "layer": "top",
-    "position": "left",
+    "position": "top",
     "spacing": 0,
     "reload_style_on_change": true,
     "modules-left": [
       "hyprland/workspaces"
     ],
     "modules-center": [
-      "idle_inhibitor",
-      "clock",
-      "power-profiles-daemon"
+      "clock"
     ],
     "modules-right": [
       "pulseaudio",
-      "backlight",
       "battery",
       "battery#bat2",
+      "power-profiles-daemon",
       "tray"
     ],
     "hyprland/workspaces": {
       "disable-scroll": true,
       "warp-on-scroll": false,
-      "format": "{id}"
+      "format": "{name}"
     },
     "tray": {
       "icon-size": 15,
       "spacing": 10
     },
     "clock": {
-      "format": "{:%I\n·\n%M\n·\n%S}",
+      "format": "{:%a, %b %d  %I:%M:%S %p}",
       "tooltip-format": "{:%A, %B %d, %Y}",
       "interval": 1
     },
