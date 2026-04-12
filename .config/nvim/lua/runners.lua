@@ -66,17 +66,57 @@ function M.c_run(term_send)
 	term_send(cmd)
 end
 
-function M.cpp_run(term_send)
-	if vim.fn.executable("g++") == 0 then
-		vim.notify("g++ not found in PATH", vim.log.levels.ERROR)
+function M.cmake_run(term_send)
+	if vim.fn.executable("cmake") == 0 then
+		vim.notify("cmake not found in PATH", vim.log.levels.ERROR)
 		return
 	end
 	vim.cmd("write")
 
-	local file = vim.fn.expand("%:p")
-	local name = vim.fn.expand("%:t:r")
+	local root = project_root({ "CMakeLists.txt", ".git" })
+	local cmake_file = root .. "/CMakeLists.txt"
+
+	-- Extract executable target name from add_executable / qt_add_executable
+	local exe_name
+	for line in io.lines(cmake_file) do
+		exe_name = line:match("qt_add_executable%s*%(%s*(%S+)")
+			or line:match("add_executable%s*%(%s*(%S+)")
+		if exe_name then
+			break
+		end
+	end
+
+	if not exe_name then
+		vim.notify("Could not find executable target in CMakeLists.txt", vim.log.levels.ERROR)
+		return
+	end
+
+	local exe = string.format("%s/build/%s", root, exe_name)
+	local cmd = string.format(
+		"cd %q && cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON && cmake --build build && %q",
+		root, exe
+	)
+	term_send(cmd)
+end
+
+function M.cpp_run(term_send)
+	vim.cmd("write")
+
 	local root = project_root({ "compile_commands.json", "CMakeLists.txt", "Makefile", ".git" })
 
+	-- Delegate to cmake_run if a CMakeLists.txt exists at the project root
+	if vim.fn.filereadable(root .. "/CMakeLists.txt") == 1 then
+		M.cmake_run(term_send)
+		return
+	end
+
+	if vim.fn.executable("g++") == 0 then
+		vim.notify("g++ not found in PATH", vim.log.levels.ERROR)
+		return
+	end
+
+	local file = vim.fn.expand("%:p")
+	local name = vim.fn.expand("%:t:r")
 	local bindir = root .. "/.nvim-bin"
 	vim.fn.mkdir(bindir, "p")
 	local exe = bindir .. "/" .. name
