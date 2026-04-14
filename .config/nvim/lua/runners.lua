@@ -1,4 +1,3 @@
--- Language-specific compile and run utilities
 local M = {}
 
 local function project_root(markers)
@@ -169,6 +168,25 @@ function M.html_run(term_send)
 	term_send(string.format("cd %q && live-server -p 8080 . & sleep 1 && xdg-open http://127.0.0.1:8080", file_dir))
 end
 
+function M.kotlin_run(term_send)
+	if vim.fn.executable("kotlinc") == 0 then
+		vim.notify("kotlinc not found in PATH", vim.log.levels.ERROR)
+		return
+	end
+	vim.cmd("write")
+
+	local file = vim.fn.expand("%:p")
+	local name = vim.fn.expand("%:t:r")
+	local root = project_root({ "build.gradle", "settings.gradle", ".git" })
+
+	local outdir = root .. "/.nvim-kotlin"
+	vim.fn.mkdir(outdir, "p")
+	local jar = outdir .. "/" .. name .. ".jar"
+
+	local cmd = string.format("cd %q && kotlinc %q -include-runtime -d %q && java -jar %q", root, file, jar, jar)
+	term_send(cmd)
+end
+
 function M.run_current_file(term_send)
 	local ft = vim.bo.filetype
 	if ft == "rust" then
@@ -183,6 +201,8 @@ function M.run_current_file(term_send)
 		M.python_run(term_send)
 	elseif ft == "html" then
 		M.html_run(term_send)
+	elseif ft == "kotlin" then
+		M.kotlin_run(term_send)
 	else
 		vim.notify("No runner for filetype: " .. (ft or "?"), vim.log.levels.WARN)
 	end
