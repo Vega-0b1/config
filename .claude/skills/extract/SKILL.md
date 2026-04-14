@@ -8,9 +8,8 @@ Scan all files in the specified weekly folder (e.g., `wk9/`) and extract all qui
 ## Instructions
 
 1. **Glob the target week folder** to list all files
-2. **Skip low-value files:** weekly overviews, reading assignments, and any clearly unrelated files
-3. **Read and extract from all remaining files** — PDFs, DOCX, PPTX — in parallel where possible
-4. **Write a single markdown file** to `extracted/<week>_notes.md` with the following sections (include only what's present):
+2. **Read all files** — PDFs, DOCX, PPTX — in parallel where possible. Weekly overviews and reading assignments may contain quiz focus clues (key topics, guiding questions), so include them. Skip only files that are clearly unrelated (e.g., syllabus, administrative forms).
+3. **Write a single markdown file** to `extracted/<week>_notes.md` with the following sections (include only what's present):
    - Algorithm pseudocode (exact, verbatim)
    - Definitions and key concepts
    - Running time analysis with recurrences and proofs
@@ -21,7 +20,7 @@ Scan all files in the specified weekly folder (e.g., `wk9/`) and extract all qui
    - All quiz questions with correct answers
    - Summary table and common mistakes
 
-5. **Goal:** After extraction, future quiz sessions only need the markdown file — no PDFs.
+4. **Goal:** After extraction, future quiz sessions only need the markdown file — no PDFs.
 
 ## Usage
 

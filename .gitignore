@@ -28,3 +28,4 @@
 !.claude/
 .claude/*
 !.claude/skills/
+!.claude/skills/**
