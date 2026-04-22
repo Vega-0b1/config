@@ -4,6 +4,8 @@ local opts = { noremap = true, silent = true }
 -- System clipboard integration
 map({ "n", "v" }, "y", '"+y', opts)
 map("n", "yy", '"+yy', opts)
+map({ "n", "v" }, "d", '"+d', opts)
+map("n", "dd", '"+dd', opts)
 map({ "n", "v" }, "p", '"+p', opts)
 map({ "n", "v" }, "P", '"+P', opts)
 
