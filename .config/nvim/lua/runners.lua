@@ -187,6 +187,36 @@ function M.kotlin_run(term_send)
 	term_send(cmd)
 end
 
+function M.pio_run(term_send, target)
+	if vim.fn.executable("pio") == 0 then
+		vim.notify("pio not found in PATH", vim.log.levels.ERROR)
+		return
+	end
+	vim.cmd("write")
+	local root = vim.fs.root(0, { "platformio.ini" })
+	if not root then
+		vim.notify("No platformio.ini found", vim.log.levels.ERROR)
+		return
+	end
+	local cmd = target
+		and string.format("cd %q && pio run -t %s", root, target)
+		or string.format("cd %q && pio run", root)
+	term_send(cmd)
+end
+
+function M.pio_monitor(term_send)
+	if vim.fn.executable("pio") == 0 then
+		vim.notify("pio not found in PATH", vim.log.levels.ERROR)
+		return
+	end
+	local root = vim.fs.root(0, { "platformio.ini" })
+	if not root then
+		vim.notify("No platformio.ini found", vim.log.levels.ERROR)
+		return
+	end
+	term_send(string.format("cd %q && pio device monitor", root))
+end
+
 function M.run_current_file(term_send)
 	local ft = vim.bo.filetype
 	if ft == "rust" then
@@ -194,9 +224,17 @@ function M.run_current_file(term_send)
 	elseif ft == "java" then
 		M.java_run(term_send)
 	elseif ft == "c" then
-		M.c_run(term_send)
+		if vim.fs.root(0, { "platformio.ini" }) then
+			M.pio_run(term_send, "upload")
+		else
+			M.c_run(term_send)
+		end
 	elseif ft == "cpp" or ft == "cc" or ft == "cxx" then
-		M.cpp_run(term_send)
+		if vim.fs.root(0, { "platformio.ini" }) then
+			M.pio_run(term_send, "upload")
+		else
+			M.cpp_run(term_send)
+		end
 	elseif ft == "python" then
 		M.python_run(term_send)
 	elseif ft == "html" then
