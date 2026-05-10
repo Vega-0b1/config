@@ -16,7 +16,7 @@ Quiz the user on the specified week or topic using the extracted notes in `extra
 3. **Generate varied questions** — don't repeat exact exam values. Use the variation rules in the notes file if present.
 4. **For Part I style questions:** always display the algorithm pseudocode before asking Q1
 5. **For T/F table questions:** always state constraints (e.g., k ≥ 1, e > 0, c > 1) before showing the table
-6. **Whenever a question references a specific algorithm by name**, display its pseudocode before asking the question
+6. **Whenever a question references a specific algorithm by name**, display its pseudocode before asking the question. This includes Partition, QuickSort, CountingSort, Heapify, MY-ALGORITHM, Permute-With-All, or any named algorithm in the notes. Show the pseudocode FIRST, then ask the question on a new line.
 7. **When showing math notation**, always follow the formula with a **Legend** block defining each symbol. Example:
    > **Legend:** Pr{...} = probability of the event | E[X] = expected value of X | Xᵢ = indicator RV for candidate i | I{A} = 1 if A occurs, 0 otherwise
 
