@@ -4,7 +4,7 @@ return {
 	opts = {
 		keymap = { preset = "super-tab" },
 		sources = {
-			min_keyword_length = 3, -- start suggesting after 3 chars :contentReference[oaicite:1]{index=1}
+			min_keyword_length = 5,
 		},
 		completion = {
 			menu = { auto_show = false },

@@ -1,14 +1,14 @@
 ---
 name: getInstructions
-description: Read a file once (PDF, image, DOCX, etc.) and extract a detailed structured summary of its instructions — steps, requirements, visual examples, constraints, and grading criteria — saved to instructions/<name>.md for token-efficient future reference.
+description: Read a file once (PDF, image, DOCX, etc.) and extract a detailed structured summary of its instructions — steps, requirements, visual examples, constraints, and grading criteria — saved to extracted/instructions/<name>.md for token-efficient future reference.
 version: 1.0
 ---
 
-Read the specified file and extract all instructional content into a structured markdown file saved to `instructions/`.
+Read the specified file and extract all instructional content into a structured markdown file saved to `extracted/instructions/`.
 
 ## Instructions
 
-1. **Resolve the file path.** Accept a bare filename (e.g., `lab9.pdf`) or a relative path. Derive the output filename by stripping the extension: `lab9.pdf` → `instructions/lab9.md`.
+1. **Resolve the file path.** Accept a bare filename (e.g., `lab9.pdf`) or a relative path. Derive the output filename by stripping the extension: `lab9.pdf` → `extracted/instructions/lab9.md`. Create `extracted/instructions/` if it doesn't exist.
 
 2. **Read the file** using the Read tool. Read all pages in full — do not summarize early or skip sections.
 
@@ -28,7 +28,7 @@ Read the specified file and extract all instructional content into a structured 
 
    - **If non-visual assignment** (algorithms, math, theory, etc.): Extract only the informational content from images (diagrams, pseudocode, graph examples, data structures). Skip color/font/layout descriptions — they are irrelevant.
 
-4. **Write `instructions/<name>.md`** with these sections (omit empty ones):
+4. **Write `extracted/instructions/<name>.md`** with these sections (omit empty ones):
 
    ### Overview
    One paragraph: what the assignment is and its main goal.
@@ -51,7 +51,7 @@ Read the specified file and extract all instructional content into a structured 
    ### Notes
    Warnings, hints, clarifications, or edge cases outside the main task sections.
 
-5. **Confirm.** After writing, output: `Saved to instructions/<name>.md`
+5. **Confirm.** After writing, output: `Saved to extracted/instructions/<name>.md`
 
 ## Usage
 

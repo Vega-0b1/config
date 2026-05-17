@@ -29,6 +29,7 @@ return {
 
 			vim.lsp.config("clangd", {
 				capabilities = capabilities,
+				cmd = { "clangd", "--function-arg-placeholders=false" },
 			})
 			vim.lsp.enable("clangd")
 
