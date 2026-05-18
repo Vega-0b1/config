@@ -60,8 +60,9 @@ function M.c_run(term_send)
 	local bindir = root .. "/.nvim-bin"
 	vim.fn.mkdir(bindir, "p")
 	local exe = bindir .. "/" .. name
+	local file_dir = vim.fn.expand("%:p:h")
 
-	local cmd = string.format("cd %q && gcc -std=c11 -Wall -Wextra -O0 -g %q -o %q && %q", root, file, exe, exe)
+	local cmd = string.format("cd %q && gcc -std=c11 -Wall -Wextra -O0 -g %q -o %q && cd %q && %q", root, file, exe, file_dir, exe)
 	term_send(cmd)
 end
 
@@ -119,8 +120,9 @@ function M.cpp_run(term_send)
 	local bindir = root .. "/.nvim-bin"
 	vim.fn.mkdir(bindir, "p")
 	local exe = bindir .. "/" .. name
+	local file_dir = vim.fn.expand("%:p:h")
 
-	local cmd = string.format("cd %q && g++ -std=c++20 -Wall -Wextra -O0 -g %q -o %q && %q", root, file, exe, exe)
+	local cmd = string.format("cd %q && g++ -std=c++20 -Wall -Wextra -O0 -g %q -o %q && cd %q && %q", root, file, exe, file_dir, exe)
 	term_send(cmd)
 end
 
@@ -152,8 +154,9 @@ function M.python_run(term_send)
 		return
 	end
 
-	-- fallback: run current file
-	term_send(string.format("cd %q && python3 %q", root, file))
+	-- fallback: run current file from its own directory
+	local file_dir = vim.fn.expand("%:p:h")
+	term_send(string.format("cd %q && python3 %q", file_dir, file))
 end
 
 function M.html_run(term_send)
