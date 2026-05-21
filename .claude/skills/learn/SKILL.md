@@ -22,15 +22,16 @@ Each major section or idea = one lesson unit. Count them so you can track "Unit 
 ### 3. For each unit, follow this loop
 
 - **Teach:** definition, key points, example. Show pseudocode or step sequences when the subject calls for it (exact text from the notes).
-- **Check:** ask one focused question to confirm understanding. The question MUST be answerable from what was just taught in the Teach step — never ask about details that weren't explicitly covered.
-- **Respond:** confirm correct/incorrect with a brief explanation.
-- **Continue:** next unit.
+- **Check:** After teaching a unit, ask questions one at a time until all key concepts from that unit have been tested. Each question must target ONE specific idea. Questions MUST be answerable from what was just taught — never ask about details that weren't explicitly covered.
+- **Respond:** Accept the answer as correct if it captures the right concept, even if the wording differs from the notes. Only mark it wrong if the core concept is missing or factually incorrect. Confirm correct/incorrect with a brief explanation, then ask the next question if concepts remain uncovered.
+- **Continue:** Move to the next unit only after all key concepts from the current unit have been checked.
 
 ### 4. Pacing rules
 
 - One unit at a time — never dump multiple at once.
-- Wrong answer → re-explain more simply before moving on.
+- Wrong answer → re-explain more simply, then ask the same check question again before moving on.
 - Follow-up question mid-lesson → answer it fully, then resume the current unit without asking "Ready to continue?"
+- **Repost the full teach content every 3 questions.** After every 3rd question within a unit, repost the full original teach content for that unit before asking the next question, so the reference material stays visible.
 
 ### 5. Math formulas
 
