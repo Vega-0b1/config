@@ -62,7 +62,7 @@ function M.c_run(term_send)
 	local exe = bindir .. "/" .. name
 	local file_dir = vim.fn.expand("%:p:h")
 
-	local cmd = string.format("cd %q && gcc -std=c11 -Wall -Wextra -O0 -g %q -o %q && cd %q && %q", root, file, exe, file_dir, exe)
+	local cmd = string.format("cd %q && gcc -std=gnu11 -Wall -Wextra -O0 -g %q -o %q -lrt && cd %q && %q", root, file, exe, file_dir, exe)
 	term_send(cmd)
 end
 
