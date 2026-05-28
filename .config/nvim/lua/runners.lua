@@ -201,9 +201,13 @@ function M.pio_run(term_send, target)
 		vim.notify("No platformio.ini found", vim.log.levels.ERROR)
 		return
 	end
-	local cmd = target
+	local has_compiledb = vim.fn.filereadable(root .. "/compile_commands.json") == 1
+	local base = target
 		and string.format("cd %q && pio run -t %s", root, target)
 		or string.format("cd %q && pio run", root)
+	local cmd = has_compiledb
+		and base
+		or base .. string.format(" && pio run -t compiledb && cp .pio/build/$(ls .pio/build | head -1)/compile_commands.json %q", root)
 	term_send(cmd)
 end
 

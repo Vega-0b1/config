@@ -69,10 +69,10 @@ map("n", "#", "#zzzv", opts)
 map("n", "g*", "g*zzzv", opts)
 map("n", "g#", "g#zzzv", opts)
 
-map("n", "<C-d>", "<C-d>zz", opts)
-map("n", "<C-u>", "<C-u>zz", opts)
-map("n", "<C-f>", "<C-f>zz", opts)
-map("n", "<C-b>", "<C-b>zz", opts)
+map("n", "<C-d>", "<C-d>", opts)
+map("n", "<C-u>", "<C-u>", opts)
+map("n", "<C-f>", "<C-f>", opts)
+map("n", "<C-b>", "<C-b>", opts)
 
 -- Terminal
 local terminal = require("terminal")
@@ -85,16 +85,4 @@ map("n", "<leader>r", function()
 end, { desc = "Run (Rust/Java/C/C++/Python/HTML)" })
 
 -- PlatformIO / Microcontroller
-map("n", "<leader>mu", function() runners.pio_run(terminal.term_send, "upload") end, { desc = "PIO: Build + Upload" })
-map("n", "<leader>mb", function() runners.pio_run(terminal.term_send, nil) end,      { desc = "PIO: Build" })
-map("n", "<leader>mm", function() runners.pio_monitor(terminal.term_send) end,       { desc = "PIO: Serial Monitor" })
-map("n", "<leader>mc", function() runners.pio_run(terminal.term_send, "clean") end,  { desc = "PIO: Clean" })
-map("n", "<leader>mg", function()
-	local root = vim.fs.root(0, { "platformio.ini" })
-	if root then
-		terminal.term_send(string.format(
-			"cd %q && pio run -t compiledb && cp .pio/build/$(ls .pio/build | head -1)/compile_commands.json .",
-			root
-		))
-	end
-end, { desc = "PIO: Generate compile_commands.json" })
+map("n", "<leader>sm", function() runners.pio_monitor(terminal.term_send) end,       { desc = "PIO: Serial Monitor" })
