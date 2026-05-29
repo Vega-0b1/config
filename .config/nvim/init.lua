@@ -15,19 +15,18 @@ vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
 vim.opt.undofile = true
 vim.opt.undodir = vim.fn.stdpath("data") .. "/undo"
-vim.o.foldcolumn = "1"
-vim.o.foldlevel = 99
-vim.o.foldlevelstart = 99
-vim.o.foldenable = true
 vim.g.mapleader = " "
 
 vim.diagnostic.config({
-	virtual_text = false,
+	virtual_text = {
+		spacing = 4,
+		prefix = "·",
+	},
 })
 
 --plugins
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
 	vim.fn.system({
 		"git",
 		"clone",

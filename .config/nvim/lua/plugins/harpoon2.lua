@@ -26,9 +26,16 @@ return {
 				:find()
 		end
 
-		-- Export for use in keymaps
-		_G.harpoon_toggle_telescope = function()
-			toggle_telescope(harpoon:list())
-		end
+		local map = vim.keymap.set
+
+		map("n", "<leader>fh", function() toggle_telescope(harpoon:list()) end, { desc = "Open harpoon window" })
+		map("n", "<leader>au", function() harpoon:list():replace_at(1) end)
+		map("n", "<leader>ai", function() harpoon:list():replace_at(2) end)
+		map("n", "<leader>u",  function() harpoon:list():select(1) end)
+		map("n", "<leader>i",  function() harpoon:list():select(2) end)
+		map("n", "<leader>o",  function() harpoon:list():select(3) end)
+		map("n", "<leader>p",  function() harpoon:list():select(4) end)
+		map("n", "<C-S-P>",    function() harpoon:list():prev() end)
+		map("n", "<C-S-N>",    function() harpoon:list():next() end)
 	end,
 }

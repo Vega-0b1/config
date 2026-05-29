@@ -13,37 +13,6 @@ map({ "n", "v" }, "P", '"+P', opts)
 map("n", "<leader>ff", "<cmd>Telescope find_files<CR>", { desc = "Find Files" })
 map("n", "<leader>fg", "<cmd>Telescope live_grep<CR>", { desc = "Live Grep" })
 
--- Harpoon
-local harpoon = require("harpoon")
-
-map("n", "<leader>fh", _G.harpoon_toggle_telescope, { desc = "Open harpoon window" })
-map("n", "<leader>au", function()
-	harpoon:list():replace_at(1)
-end)
-map("n", "<leader>ai", function()
-	harpoon:list():replace_at(2)
-end)
-
-map("n", "<leader>u", function()
-	harpoon:list():select(1)
-end)
-map("n", "<leader>i", function()
-	harpoon:list():select(2)
-end)
-map("n", "<leader>o", function()
-	harpoon:list():select(3)
-end)
-map("n", "<leader>p", function()
-	harpoon:list():select(4)
-end)
-
-map("n", "<C-S-P>", function()
-	harpoon:list():prev()
-end)
-map("n", "<C-S-N>", function()
-	harpoon:list():next()
-end)
-
 -- LSP keymaps
 map("n", "gd", vim.lsp.buf.definition, {})
 map("n", "gr", vim.lsp.buf.references, {})
@@ -68,11 +37,6 @@ map("n", "*", "*zzzv", opts)
 map("n", "#", "#zzzv", opts)
 map("n", "g*", "g*zzzv", opts)
 map("n", "g#", "g#zzzv", opts)
-
-map("n", "<C-d>", "<C-d>", opts)
-map("n", "<C-u>", "<C-u>", opts)
-map("n", "<C-f>", "<C-f>", opts)
-map("n", "<C-b>", "<C-b>", opts)
 
 -- Terminal
 local terminal = require("terminal")

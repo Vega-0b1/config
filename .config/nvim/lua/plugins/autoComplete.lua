@@ -4,7 +4,12 @@ return {
 	opts = {
 		keymap = { preset = "super-tab" },
 		sources = {
-			min_keyword_length = 5,
+			providers = {
+				lsp      = { min_keyword_length = 5 },
+				buffer   = { min_keyword_length = 5 },
+				snippets = { min_keyword_length = 5 },
+				path     = { min_keyword_length = 5 },
+			},
 		},
 		completion = {
 			menu = { auto_show = false },
