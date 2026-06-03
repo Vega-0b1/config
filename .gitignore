@@ -13,7 +13,6 @@
 .config/scripts/notifications/hypr-osd/target/
 !.config/zsh/
 !.config/bash/
-!.config/nvim/
 !.config/ghostty/
 !.config/mako/
 !.config/tmux.conf
@@ -23,7 +22,7 @@
 !.config/mpv/
 !.config/gtk-3.0/
 !.config/gtk-4.0/
-!.bashrc
+!shelf/
 !CLAUDE.md
 !.claude/
 .claude/*
