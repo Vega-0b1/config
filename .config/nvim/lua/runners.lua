@@ -1,1 +1,0 @@
-/nix/store/zyhjmr8n9z64gs81b2fs9fyq6ahp0s40-home-manager-files/.config/nvim/lua/runners.lua
