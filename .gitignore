@@ -3,22 +3,13 @@
 !.config/
 .config/*
 
-!.config/wezterm/
-!.config/waybar/
-!.config/hypr/
-!.config/kanata/
 !.config/wofi/
-!.config/closet/
 !.config/scripts/
+.config/scripts/target/
 .config/scripts/notifications/hypr-osd/target/
-!.config/zsh/
-!.config/bash/
-!.config/ghostty/
+.config/scripts/notifications/hypr-osd/src/target/
 !.config/mako/
-!.config/tmux.conf
-!.config/cosmic/
 !.config/wallpaper/
-!.config/alacritty/
 !.config/mpv/
 !.config/gtk-3.0/
 !.config/gtk-4.0/
