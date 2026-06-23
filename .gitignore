@@ -3,15 +3,11 @@
 !.config/
 .config/*
 
-!.config/wofi/
 !.config/scripts/
 .config/scripts/target/
 .config/scripts/notifications/hypr-osd/target/
 .config/scripts/notifications/hypr-osd/src/target/
 !.config/wallpaper/
-!.config/mpv/
-!.config/gtk-3.0/
-!.config/gtk-4.0/
 !shelf/
 !CLAUDE.md
 !.claude/
