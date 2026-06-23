@@ -8,7 +8,6 @@
 .config/scripts/target/
 .config/scripts/notifications/hypr-osd/target/
 .config/scripts/notifications/hypr-osd/src/target/
-!.config/mako/
 !.config/wallpaper/
 !.config/mpv/
 !.config/gtk-3.0/
