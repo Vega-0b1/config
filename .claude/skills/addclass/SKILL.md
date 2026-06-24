@@ -24,7 +24,7 @@ code/        — code written during the course.
 
 ### 2. Infer course metadata from existing files
 
-Do not ask the user anything. Scan the target root for clues:
+Do not ask the user anything — scanning filenames gives enough context, and asking creates unnecessary friction for a simple scaffolding task. Scan the target root for clues:
 
 - **Textbook:** Read filenames of any EPUBs/PDFs — the filename usually contains the title, author, and edition.
 - **Course number & name:** Infer from the folder name and any filenames that include a course code. If nothing is findable, use the folder name as the course name.
@@ -41,11 +41,11 @@ Do not ask the user anything. Scan the target root for clues:
 
 Scan the target root for any files and directories. Use judgment to place each:
 
-- **`source/`** — anything raw: textbooks (EPUB/PDF), lecture slides, weekly folders (`wk1/`, `wk2/`), exam PDFs, lab PDFs, handouts. Default for anything ambiguous.
+- **`source/`** — anything raw: textbooks (EPUB/PDF), lecture slides, weekly folders (`wk1/`, `wk2/`), exam PDFs, lab PDFs, handouts. Default for anything ambiguous — source/ is the safe bucket for unknowns since it's the "raw files" home and nothing gets lost there.
 - **`code/`** — source code files or directories containing code.
 - **`extracted/`** — only if already a pre-processed markdown notes file.
 
-If something genuinely fits nowhere, leave it and note it in the summary.
+If something genuinely fits nowhere, leave it in place and note it in the summary — do not force a wrong placement.
 
 ### 5. Write README.md
 

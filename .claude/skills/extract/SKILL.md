@@ -19,12 +19,14 @@ Scan files and extract all content into a single markdown file saved to `extract
 
 - Run from the class root (e.g. `~/edu/cybersecurity/`). If cwd looks like `source/` or a subfolder, warn the user.
 - Create `extracted/` if it doesn't exist.
-- If the output file already exists, stop and warn the user before overwriting.
+- If the output file already exists, stop and warn the user before overwriting — a previous extraction may have been intentional, and silently overwriting it could destroy notes the user added manually.
 - If no extractable content files are found, stop and tell the user.
 
 ### 2. Read all files in parallel
 
 Supported formats: PDF, DOCX, PPTX, EPUB. Skip unrelated files (`.gitignore`, lock files, code files, existing markdown in `extracted/`).
+
+Reading in parallel is faster and matters especially for large courses with many weekly slide decks.
 
 - **PDF:** read directly with the Read tool.
 - **DOCX:** extract with Python's `zipfile` + `xml.etree.ElementTree` — unzip, parse `word/document.xml`, collect all `<w:t>` text nodes per paragraph.
@@ -33,11 +35,11 @@ Supported formats: PDF, DOCX, PPTX, EPUB. Skip unrelated files (`.gitignore`, lo
 
 ### 3. Write the output file
 
-Write to `extracted/<name>_notes.md` with all text verbatim. Preserve structure (headings, lists, tables, code blocks) where possible. Do not summarize, filter, or omit anything.
+Write to `extracted/<name>_notes.md` with all text verbatim. Preserve structure (headings, lists, tables, code blocks) where possible. **Do not summarize, filter, or omit anything** — these notes are used as a reference when studying and answering exam questions; any omission creates gaps that the user won't know exist until they need the missing content.
 
 ### 4. Move source files into source/
 
-After a successful write:
+After a successful write — do not move files if the write failed, since that would leave the source inaccessible:
 - Create `source/` if it doesn't exist.
 - Subfolder arg → move the whole subfolder: `source/wk9/`
 - Single file or loose files → move each file individually into `source/`
