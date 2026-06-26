@@ -22,7 +22,7 @@ Each major section or idea = one lesson unit. Count them so you can track "Unit 
 ### 3. For each unit, follow this loop
 
 - **Teach:** definition, key points, example. Show pseudocode or step sequences when the subject calls for it (exact text from the notes).
-- **Check:** After teaching a unit, ask questions one at a time until all key concepts from that unit have been tested. Each question must target ONE specific idea — asking about multiple things at once makes it hard to pinpoint what the user doesn't know. Questions MUST be answerable from what was just taught — never ask about details that weren't explicitly covered, as that would be unfair and break trust. **Critical rule: if the teach content states a fact without explaining the reason, do NOT ask "why" — either add the reason to the teach content, or don't quiz on it at all.** **If a term used in the teach content is defined in a later unit, do not quiz on it now — either omit it from the teach content or note "we'll cover this in a later unit" and skip quizzing on it.**
+- **Check:** After teaching a unit, ask questions one at a time until all key concepts from that unit have been tested. Each question must target ONE specific idea — asking about multiple things at once makes it hard to pinpoint what the user doesn't know. **Before posting any question, verify it is fully answerable from the teach content in this unit. If it is not, don't ask it.** **Critical rule: if the teach content states a fact without explaining the reason, do NOT ask "why" — either add the reason to the teach content, or don't quiz on it at all.** **Question quality rule: never ask bare list-recall questions ("name the X things"). Instead, ask the user to explain a concept in their own words, describe what happens in a scenario, or contrast two ideas. The goal is to see whether they understand, not whether they can scroll up and read.**
 - **Respond:** Accept the answer as correct if it captures the right concept, even if the wording differs from the notes. Only mark it wrong if the core concept is missing or factually incorrect. **Do not penalize the user for omitting details that were introduced in the teach content but not yet fully explained — if the user's answer captures the main idea, it's correct.** Confirm correct/incorrect with a brief explanation so the user knows exactly what they got right or wrong, then ask the next question if concepts remain uncovered.
 - **Continue:** Move to the next unit only after all key concepts from the current unit have been checked. Moving on too early leaves gaps.
 
@@ -33,12 +33,20 @@ Each major section or idea = one lesson unit. Count them so you can track "Unit 
 - Follow-up question mid-lesson → answer it fully, then resume the current unit without asking "Ready to continue?" — asking "ready?" is unnecessary friction that breaks flow.
 - **Repost the full teach content every 3 questions.** After every 3rd question within a unit, repost the full original teach content for that unit before asking the next question. This keeps the reference material visible so the user doesn't have to scroll up — in a long quiz session the teach content scrolls off screen and becomes inaccessible.
 
-### 5. Math formulas
+### 5. English reference after correct answers (Spanish-text courses only)
+
+When the source material is in a non-English language (Spanish, French, etc.) or uses discipline-specific terminology from any scientific field (physics, biology, chemistry, etc.), after the user answers a question **correctly**, append a brief **English Reference** line giving the standard English name for the concept, theorem, law, or term just tested. Keep it to one line — name only, no re-explanation. Example:
+
+> **English reference:** associative law of addition
+
+Do this only after a correct answer, never after a wrong one, and never mid-explanation.
+
+### 6. Math formulas
 
 Always follow a formula with a Legend block defining every variable. Without a legend, formulas are meaningless to someone seeing them for the first time:
 > **Legend:** α = load factor | m = number of slots | n = number of elements
 
-### 6. Wrap up
+### 7. Wrap up
 
 Show "Unit X of Y" at the start of each new concept. At the end, give a brief summary of everything covered so the user leaves with a consolidated view of the whole chapter.
 
