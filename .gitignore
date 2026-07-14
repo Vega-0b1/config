@@ -2,6 +2,7 @@
 !.gitignore
 !.bashrc
 !.gitconfig
+!arch-setup.sh
 !.config/
 .config/*
 
