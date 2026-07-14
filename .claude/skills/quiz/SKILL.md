@@ -3,40 +3,52 @@ name: quiz
 description: Quiz the user on course material using extracted notes from the extracted/ directory in the current working directory.
 ---
 
-Quiz the user on the specified week or topic using extracted notes.
+Quiz the user on the specified week or topic.
 
-## Instructions
+## Rules
 
-### 1. Load the notes
+// Mode selection
+R1.  IF `extracted/questions_<arg>.md` exists THEN use Mode A (R5–R14).
+R2.  IF `extracted/questions_<arg>.md` does not exist AND a raw notes file for the argument exists THEN use Mode B (R15–R24).
+     Notify the user: "No pre-audited questions found. Falling back to on-the-fly generation. Run /generate_questions <arg> for better results."
+R3.  IF neither file exists THEN stop and tell the user. Do not generate questions.
+R4.  R1 overrides R2: IF both files exist THEN always use Mode A.
 
-Map the argument to a file: `wk8` → `extracted/wk8_notes.md`, `midterm1` → `extracted/midterm1_notes.md`, etc.
+// Mode A — Pre-generated questions
+R5.  IF about to display a question (Mode A) THEN first display that question's `Teach:` field verbatim, framed by a Unicode line before and after:
+     ────────────────────────────────────────────────────────────────
+     <Teach field content>
+     ────────────────────────────────────────────────────────────────
+R6.  Do NOT display `Tests` or `Audit` fields.
+R7.  Ask each question one at a time, in the order they appear in the file.
+R8.  Display only the `Question` field.
+R9.  IF the user's answer contains the key idea(s) from the `Answer key` THEN mark correct.
+R10. IF the user's answer is missing the key idea(s) OR contains a factually incorrect claim THEN mark wrong.
+R11. R10 overrides R9: IF the answer contains the key idea AND a factually incorrect claim THEN mark wrong.
+R12. IF the answer is marked wrong THEN re-display the relevant teach content and explain it more concretely, then ask the same question again.
+R13. Track score as (correct / total questions asked). Display final score summary after the last question.
+R14. Do not ask "Ready to continue?" — proceed immediately.
 
-If no argument is given, list the files available in `extracted/` and ask the user which to quiz on.
+// Mode B — On-the-fly generation
+R15. Before generating a question, verify that every concept required to answer it is explicitly stated in the notes. IF any concept is absent THEN drop the question.
+R16. Each question MUST require the user to explain a mechanism, describe a scenario, or contrast two ideas.
+     A question answerable by pattern-matching a single phrase is prohibited.
+R17. IF the notes state a fact without explaining the reason AND the candidate question asks "why" about that fact AND adding the reason as context before the question would make it answerable THEN include the reason as question context.
+R18. IF the notes state a fact without explaining the reason AND the candidate question asks "why" about that fact AND the reason cannot be derived from the notes THEN drop the question.
+     // R17 fires first; R18 fires only if R17 is not possible.
+R19. IF a question involves an algorithm, protocol, or multi-step process THEN display the relevant steps before asking.
+R20. IF a question involves a math formula THEN display the formula with a Legend block before asking.
+R21. Ask one question at a time. Wait for the user's answer before proceeding.
+R22. IF the user sends a clarifying question THEN answer it fully, then re-display the current unanswered question at the bottom.
+R23. IF the user's answer is marked wrong THEN re-explain the concept more concretely, then ask the same question again before moving on.
+R24. Cover at least one question per `##` section heading in the notes. Do not stop before all sections are covered.
 
-If the file doesn't exist, stop and tell the user — do not hallucinate questions from memory.
-
-### 2. Quiz rules
-
-- Ask **one question at a time** — wait for the answer before proceeding. Multiple questions at once make it hard to give focused answers and make it impossible to pinpoint exactly what the user knows vs. doesn't know.
-- Clarifying question mid-quiz → answer it fully, then re-display the current question at the bottom so the user doesn't have to scroll up to remember what they were answering.
-- After each answer: confirm correct/incorrect with a brief explanation so the user knows exactly what they got right or wrong. Accept an answer as correct if it captures the right concept, even if the wording differs from the notes — only mark it wrong if the core idea is missing or factually incorrect.
-- **Wrong answer → re-explain the concept more simply, then ask the same question again before moving on.** The user hasn't learned it until they can answer correctly.
-- Do not ask "Ready to continue?" or similar — just proceed to the next question.
-- Track score (correct/total). Display summary at the end.
-
-### 3. Question guidelines
-
-- Ask as many questions as needed to cover the full breadth of the material, then show the summary. Don't cut off early — stopping short gives the user false confidence about material that wasn't covered. Don't pad with repetition either.
-- Vary question types — don't repeat exact values from the notes. Rephrase to test understanding, not memorization. **Never ask bare list-recall questions ("name the X things", "list the Y steps"). Instead, ask the user to explain a concept in their own words, describe what happens in a scenario, contrast two ideas, or apply a concept to an example. The goal is to see whether they understand, not whether they can scroll up and read.**
-- **Before posting any question, verify every concept required to answer it appears in the loaded notes.** If the answer requires knowledge not in the notes, don't ask it.
-- If an answer captures the main idea, mark it correct even if peripheral details are missing.
-- When a question involves an algorithm, protocol, or process: show the relevant pseudocode or steps before asking — algorithm questions without that context are unfair since the user is being tested on behavior, not on memorizing code.
-- **"Why" rule: if the notes state a fact without explaining the reason behind it, do not ask "why" — either include the reason in a brief context before the question, or skip that angle entirely.**
-- When showing math: follow with a Legend block defining each symbol — a formula without a legend is meaningless to someone seeing it for the first time.
+// Catch-all
+R25. IF any condition not covered by R1–R24 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Usage
 
 ```
+/quiz chapter2
 /quiz wk8
-/quiz midterm1
 ```

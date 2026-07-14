@@ -1,58 +1,72 @@
 ---
 name: learn
-description: Teach the user course material concept by concept, then check understanding with a question. Good for going in with zero prior knowledge. Reads from extracted/ in the current directory.
+description: Teach the user course material concept by concept, then check understanding with questions. Requires a pre-generated questions file from /generate_questions. Reads from extracted/ in the current directory.
 ---
 
-Teach the user the specified week or topic using extracted notes, one concept at a time.
+Deliver course material question by question using a pre-generated questions file. `/learn` is a delivery engine — it does not generate content or questions. Those come from `/generate_questions`.
 
-## Instructions
+## Rules
 
-### 1. Load the notes
+// Loading
+R1.  IF argument is given THEN look for `extracted/questions_<arg>.md`.
+R2.  IF the file exists THEN load it and proceed to R5.
+R3.  IF the file does not exist THEN stop and tell the user: "Run /generate_questions <arg> first."
+R4.  IF no argument is given THEN list all `extracted/questions_*.md` files and ask the user to pick one. STOP until user responds.
 
-Map the argument to a file: `wk10` → `extracted/wk10_notes.md`, `midterm1` → `extracted/midterm1_notes.md`, etc.
+// Unit and question delivery
+R5.  IF starting a new unit THEN display "Unit X of Y — <title>".
+R6.  IF about to display a question THEN first display that question's `Teach:` field verbatim, framed by labeled Unicode lines with two blank lines inside each edge:
+     ──────────────────────── start ────────────────────────
 
-If no argument is given, list the files available in `extracted/` and ask the user which to study.
 
-If the file doesn't exist, stop and tell the user — do not guess or hallucinate content.
+     <Teach field content>
 
-### 2. Break material into concepts
 
-Each major section or idea = one lesson unit. Count them so you can track "Unit X of Y". Showing "Unit X of Y" gives the user a sense of progress and how much is left.
+     ──────────────────────── end ────────────────────────
+R7.  Do NOT rewrite, summarize, or add to the Teach field.
+R8.  Do NOT display `Tests` or `Audit` fields at any point.
+R9.  After displaying the Teach field, ask the question.
+R10. Ask one question at a time. Do NOT display the next question until the user answers the current one.
+R11. Display only the `Question` field — not `Tests`, `Answer key`, or `Audit`.
 
-### 3. For each unit, follow this loop
+// Grading
+R12. IF the user's answer contains the key idea(s) from the `Answer key` THEN mark correct.
+     Correct answers need not match the phrasing in the Answer key.
+     // Example: Answer key = "TCP throttles the sender when the network is congested."
+     //          User says  = "TCP slows you down if the network is busy." → CORRECT (R12).
+R12a. IF a question's Teach field contains a formula AND the user's answer correctly explains the underlying mechanism conceptually (without citing formula terms or variable names) THEN mark correct.
+R12b. R12a overrides R13: a missing formula citation alone is not sufficient to mark an answer wrong if the conceptual mechanism is correctly explained.
+R13. IF the user's answer is missing the key idea(s) from the `Answer key` THEN mark wrong.
+R14. IF the user's answer contains a factually incorrect claim THEN mark wrong.
+R15. R14 overrides R12: IF the answer contains the key idea AND a factually incorrect claim THEN mark wrong.
+     // Example: User says "TCP throttles the sender by dropping packets." → WRONG (R15): mechanism claim is wrong.
 
-- **Teach:** definition, key points, example. Show pseudocode or step sequences when the subject calls for it (exact text from the notes).
-- **Check:** After teaching a unit, ask questions one at a time until all key concepts from that unit have been tested. Each question must target ONE specific idea — asking about multiple things at once makes it hard to pinpoint what the user doesn't know. **Before posting any question, verify it is fully answerable from the teach content in this unit. If it is not, don't ask it.** **Critical rule: if the teach content states a fact without explaining the reason, do NOT ask "why" — either add the reason to the teach content, or don't quiz on it at all.** **Question quality rule: never ask bare list-recall questions ("name the X things"). Instead, ask the user to explain a concept in their own words, describe what happens in a scenario, or contrast two ideas. The goal is to see whether they understand, not whether they can scroll up and read.**
-- **Respond:** Accept the answer as correct if it captures the right concept, even if the wording differs from the notes. Only mark it wrong if the core concept is missing or factually incorrect. **Do not penalize the user for omitting details that were introduced in the teach content but not yet fully explained — if the user's answer captures the main idea, it's correct.** Confirm correct/incorrect with a brief explanation so the user knows exactly what they got right or wrong, then ask the next question if concepts remain uncovered.
-- **Continue:** Move to the next unit only after all key concepts from the current unit have been checked. Moving on too early leaves gaps.
+// Skip
+R16s. IF the user says "skip" (or a clear equivalent: "pass", "next", "move on") THEN acknowledge it, display the correct answer from the `Answer key`, and move to the next question. Count the skipped question as wrong in the final score.
+R16t. R16s overrides R18: a skipped question does not require a correct answer before advancing.
 
-### 4. Pacing rules
+// Wrong answer flow
+R16. IF the answer is marked wrong THEN re-display that question's `Teach:` field (framed by Unicode lines per R6), then explain the concept using simpler language or a more concrete example.
+R17. After R16, ask the same question again.
+R18. Do NOT move to the next question until the current question is marked correct.
 
-- One unit at a time — never dump multiple at once. The user needs time to absorb one idea before moving to the next.
-- Wrong answer → re-explain more simply, then ask the same check question again before moving on. The user hasn't learned it until they can answer correctly.
-- Follow-up question mid-lesson → answer it fully, then resume the current unit without asking "Ready to continue?" — asking "ready?" is unnecessary friction that breaks flow.
-- **Repost the full teach content every 3 questions.** After every 3rd question within a unit, repost the full original teach content for that unit before asking the next question. This keeps the reference material visible so the user doesn't have to scroll up — in a long quiz session the teach content scrolls off screen and becomes inaccessible.
+// Pacing
+R19. IF the user sends a clarifying or follow-up question THEN answer it fully, then re-display the current unanswered question. Do not ask "Ready to continue?"
+R20. Move to the next unit only after all questions in the current unit are marked correct.
 
-### 5. English reference after correct answers (Spanish-text courses only)
+// English reference
+R21. IF the source material is in a non-English language OR uses discipline-specific scientific terminology AND the user's answer is marked correct THEN append: `**English reference:** <standard English name>`.
+R22. Do NOT append the English reference after wrong answers.
 
-When the source material is in a non-English language (Spanish, French, etc.) or uses discipline-specific terminology from any scientific field (physics, biology, chemistry, etc.), after the user answers a question **correctly**, append a brief **English Reference** line giving the standard English name for the concept, theorem, law, or term just tested. Keep it to one line — name only, no re-explanation. Example:
+// Wrap up
+R23. After the last question of the last unit is marked correct, output a one-paragraph summary covering all units.
 
-> **English reference:** associative law of addition
-
-Do this only after a correct answer, never after a wrong one, and never mid-explanation.
-
-### 6. Math formulas
-
-Always follow a formula with a Legend block defining every variable. Without a legend, formulas are meaningless to someone seeing them for the first time:
-> **Legend:** α = load factor | m = number of slots | n = number of elements
-
-### 7. Wrap up
-
-Show "Unit X of Y" at the start of each new concept. At the end, give a brief summary of everything covered so the user leaves with a consolidated view of the whole chapter.
+// Catch-all
+R24. IF any condition not covered by R1–R23 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Usage
 
 ```
-/learn wk10
-/learn midterm1
+/generate_questions chapter2   ← run this first
+/learn chapter2
 ```
