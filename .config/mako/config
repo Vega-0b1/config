@@ -1,0 +1,31 @@
+background-color=#1b1b1bdd
+text-color=#c0c0c0
+border-color=#92cf9c
+border-size=2
+border-radius=12
+padding=12
+margin=10
+width=300
+font=FiraCode Nerd Font 11
+default-timeout=3000
+progress-color=over #ffffff0f
+
+[app-name=volume]
+border-color=#5edb8c
+default-timeout=1200
+
+[app-name=brightness]
+border-color=#5edb8c
+default-timeout=1200
+
+[app-name=bluetooth]
+border-color=#5edb8c
+default-timeout=3000
+
+[app-name=workspace]
+border-color=#5edb8c
+default-timeout=2000
+
+[urgency=critical]
+border-color=#fda1a0
+default-timeout=0

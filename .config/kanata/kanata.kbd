@@ -1,0 +1,31 @@
+(defcfg
+  process-unmapped-keys yes
+)
+
+(defsrc
+  caps
+  spc
+  tab
+  k j h l
+  rctrl
+)
+
+(defalias
+  esc_ctrl    (tap-hold 0 175 esc lctrl)
+  space_super (tap-hold 0 175 spc lmet)
+  tab_arrows  (tap-hold 0 175 tab (layer-while-held arrows))
+)
+
+(deflayer base
+  @esc_ctrl
+  @space_super
+  @tab_arrows
+  k j h l
+  spc
+)
+
+(deflayer arrows
+  _ _ _
+  up down left right
+  _
+)

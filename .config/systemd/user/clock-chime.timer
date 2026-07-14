@@ -1,0 +1,9 @@
+[Unit]
+Description=15-minute clock chime
+
+[Timer]
+OnCalendar=*:0/15
+Persistent=true
+
+[Install]
+WantedBy=timers.target

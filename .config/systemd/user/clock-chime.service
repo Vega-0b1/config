@@ -1,0 +1,6 @@
+[Unit]
+Description=Clock chime notification
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'notify-send -t 8000 "$(date +'"'"'%I:%M %p'"'"')" "$(date +'"'"'%A, %B %-d'"'"')"'
