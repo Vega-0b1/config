@@ -12,7 +12,7 @@ case "$1" in
         # Restore workspace after unlocking
         if [[ -f "$WORKSPACE_FILE" ]]; then
             workspace=$(cat "$WORKSPACE_FILE")
-            hyprctl dispatch workspace "$workspace"
+            hyprctl dispatch "hl.dsp.focus({ workspace = $workspace })"
             rm "$WORKSPACE_FILE"
         fi
         ;;

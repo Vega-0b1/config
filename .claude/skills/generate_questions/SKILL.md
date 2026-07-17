@@ -1,6 +1,6 @@
 ---
 name: generate_questions
-description: Pre-generate and audit quiz questions from extracted notes for a chapter or topic. Saves questions alongside teaching content to extracted/questions_<arg>.md for use by /learn and /quiz.
+description: Pre-generate and audit quiz questions from extracted notes for a chapter or topic. Saves questions alongside teaching content to extracted/questions_<arg>.md for use by /learn.
 ---
 
 Pre-generate audited questions for the specified chapter or topic and save them to `extracted/`.
@@ -9,11 +9,13 @@ Pre-generate audited questions for the specified chapter or topic and save them 
 
 // File loading
 R1.  IF argument is given AND a file named `extracted/<arg>.md` exists THEN use that file as the notes source.
-R2.  IF argument is given AND no file named `extracted/<arg>.md` exists THEN search all `.md` files in `extracted/` for a `##` heading matching the argument (case-insensitive).
+R2.  IF argument is given AND no file named `extracted/<arg>.md` exists THEN search all `.md` files in `extracted/` — excluding `questions_*.md` files — for a `##` heading containing the argument as a case-insensitive substring.
+     // Commentary: questions_*.md files are this skill's own output; matching their `## Unit N of M` headings would generate questions from questions.
 R3.  IF R2 finds a heading match THEN use the content under that heading as the notes source.
 R4.  IF R1 fails AND R2–R3 fail THEN list all `.md` files in `extracted/` and ask the user which to use. STOP until user responds.
 R5.  IF `extracted/questions_<arg>.md` already exists THEN ask "Overwrite?" STOP until user responds.
 R6.  IF user answers no to R5 THEN stop execution.
+R6a. IF user answers yes to R5 THEN proceed to R7.
 
 // Unit segmentation
 R7.  Count all `##` level headings in the notes source. This count is N.
@@ -44,7 +46,7 @@ R11f. IF the Teach field contrasts two or more named concepts THEN introduce eac
      // **Go-Back-N:** receiver discards out-of-order packets; sender retransmits the lost packet plus all subsequent ones.
      // **Selective Repeat:** receiver buffers out-of-order packets; only the missing packet is retransmitted.
 R11g. IF a Teach field covers two or more clearly distinct sub-concepts THEN separate them with a blank line. Do NOT run distinct concepts together in one paragraph.
-R11h. Each sentence in a Teach field MUST express one idea only. Max ~20 words per sentence. Do NOT chain multiple concepts with "and," commas, or semicolons into a single sentence.
+R11h. Each sentence in a Teach field MUST express one idea only. Max 25 words per sentence. Do NOT chain multiple concepts with "and," commas, or semicolons into a single sentence.
 R11i. Bold each key term the first time it appears in a Teach field.
 R11j. No single list in a Teach field should exceed 7 items. IF a natural grouping exceeds 7 THEN split into labeled sub-groups with a bold label for each.
 
@@ -57,6 +59,8 @@ R12b. R12 overrides R12a: IF omitting the prior context would make the Teach fie
 R13. Generate between 2 and 5 candidate questions per unit.
 R13a. Order questions within each unit from most foundational concept to most complex, so later questions may safely rely on earlier ones having been seen.
 R14. Each question MUST target exactly ONE concept from this unit's notes.
+R14a. R15 overrides R14 for contrast questions: a question contrasting two concepts counts as targeting the one contrast, provided both concepts appear in this unit's notes.
+     // Commentary: contrasting two ideas forces deeper processing than recalling one — contrast questions serve retention and must not be blocked by R14.
 R15. Each question MUST require the user to explain a mechanism, describe a scenario, or contrast two ideas.
      A question is prohibited if it can be answered by pattern-matching a single definition phrase.
      // Mental test: "Does answering this correctly prove the user understands how it works — not just that they remember its name?"
@@ -67,6 +71,8 @@ R15a. Each `Question:` field MUST contain exactly one question — one interroga
      // PASSES: Two separate entries — Q1 asks the first; Q2 asks the implication.
 R15b. IF a concept produces two natural sub-questions (e.g., "what is X" and "what does X imply for Y") THEN generate them as two separate entries in the same unit, each with its own Teach, Question, Answer key, and Audit.
 R15c. R15a overrides R15: IF satisfying R15 would require two interrogatives in one entry THEN split into two entries per R15b.
+R15d. IF a unit yields 3 or more PASS questions THEN the unit MUST include at least two different R15 question types (mechanism, scenario, contrast).
+     // Commentary: varied retrieval aids retention — five mechanism questions in a row is monotone drilling.
 R16. Each question MUST be fully answerable using only this question's Teach field, given that prior questions' Teach fields within the same unit have been shown in order.
 
 // Audit (per candidate question)
@@ -77,11 +83,18 @@ R19. IF this question's Teach field states a fact without an explanation AND the
 R20. IF an acronym or term appears in the question AND it is not defined in this question's Teach field AND it was not defined in a prior question's Teach field within the same unit THEN mark FAIL.
 R21. IF a candidate question is not marked FAIL by R17–R20 THEN mark PASS.
 R22. Drop all FAIL questions. Only PASS questions go into the output file.
-R23. R23 overrides R13: IF initial candidates for a unit all fail audit THEN generate additional candidates targeting different concepts, contrasts, or scenarios within the unit's notes and re-audit each. Keep generating until candidates pass. Declaring a unit unquestionable is not permitted.
+R23. R23 overrides R13: IF all candidates for a unit fail audit THEN generate a new round of candidates targeting different concepts, contrasts, or scenarios within the unit's notes and re-audit each.
+R23a. IF 3 rounds of candidates for a unit have all failed audit THEN stop, show the user the failed candidates with their fail reasons and the unit's notes, and ask whether to (a) keep generating or (b) skip the unit. STOP until user responds.
+     // Commentary: no near-miss option — a question not fully answerable from its Teach field produces frustration, not retention.
+R23b. Do NOT declare a unit unquestionable without completing R23a.
 
 // Output
 R24. Save to `extracted/questions_<arg>.md` using the exact structure in the Output Format block below.
-R25. After saving, report: (1) units processed, (2) questions saved, (3) candidates dropped and their fail reasons, (4) output file path.
+R24a. IF the questions file is saved AND the class root contains a `CLAUDE.md` with a `## Contents` section THEN add a one-line entry for `questions_<arg>.md` under its `**extracted/**` group. IF the section has no `**extracted/**` group THEN create the group header first. IF an entry for the file already exists THEN replace that line instead of duplicating.
+R24b. IF the questions file is saved AND the class root contains a `CLAUDE.md` without a `## Contents` section THEN append a `## Contents` section (format: `**<dir>/**` bold group headers, one `- file — description` line per entry) and add the entry per R24a.
+R24c. IF the class root contains no `CLAUDE.md` THEN skip R24a–R24b.
+R24d. IF updating the Contents section THEN do not modify any other part of `CLAUDE.md`.
+R25. After saving, report: (1) units processed, (2) questions saved, (3) candidates dropped and their fail reasons, (4) output file path, (5) whether `CLAUDE.md` Contents was updated.
 
 // Catch-all
 R26. IF any condition not covered by R1–R25 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
@@ -120,7 +133,7 @@ Teach:
 ...
 ```
 
-// Note: Tests and Audit are internal metadata. /learn and /quiz display only the Teach field and Question, and use Answer key for grading.
+// Note: Tests and Audit are internal metadata. /learn displays only the Teach field (teach mode) and Question, and uses Answer key for grading.
 
 ## Usage
 

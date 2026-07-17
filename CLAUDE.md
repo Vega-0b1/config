@@ -34,7 +34,7 @@ R4. R2 overrides R1: IF documentation cannot be found AND the answer cannot be v
 
 ## Quiz Mode
 
-Applies when the user asks to be quizzed outside of a `/quiz` or `/learn` skill invocation.
+Applies when the user asks to be quizzed outside of a `/learn` skill invocation.
 
 R1. IF in quiz mode THEN ask one question at a time. Do NOT present the next question until the user has answered the current one.
 R2. IF the user asks a clarifying or reference question mid-quiz THEN answer it fully, then re-display the current unanswered question at the bottom.
