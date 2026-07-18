@@ -13,7 +13,8 @@ R3. IF the user says "next problem" or "next question" THEN apply R1 using the d
 R4. IF the user says "next new problem" or "give me a new problem" THEN apply R2 using the difficulty of the current/last problem.
 R5. IF no problem has been given yet in this session AND no difficulty is specified THEN ask the user for a difficulty before proceeding. Do not pick a problem.
 R6. IF picking any problem THEN read the problem list from `CLAUDE.md` in the current working directory.
-R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R7. IF the user's request contains "CLRS" THEN defer to the CLRS Problems section; do not apply R1–R6.
+R8. IF any condition not covered by R1–R7 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Set Tracking
 
@@ -28,7 +29,8 @@ R1. IF the user solves the problem in Python correctly THEN re-prompt the same p
 R2. IF the user solves the problem in Rust correctly THEN run the debrief (see Debrief section); after the debrief completes, mark the problem done and apply Set Tracking R1.
 R3. IF "correct" is ambiguous THEN a solution is correct when it fulfills the problem requirements OR the user requests to move on / says "next one."
 R4. IF re-prompting for Rust THEN always include the full problem statement — do not write "now do it in Rust" alone.
-R5. IF any condition not covered by R1–R4 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R5. IF the user says "stuck" THEN provide pseudocode for the current problem. Do not give working code in any language.
+R6. IF any condition not covered by R1–R5 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Debrief
 

@@ -22,6 +22,14 @@ R7.  Count all `##` level headings in the notes source. This count is N.
 R8.  Each `##` heading and the content until the next `##` heading (or end of file) = one unit.
 R9.  Process units in document order.
 
+// Image handling (per unit)
+R9a. Treat any markdown image link — `![...](path)` — in a unit's content as potential answerable content, not as decoration. Transcribed image content counts as note content for R10, R16, and R17.
+R9b. IF a unit's content contains an image link that plausibly holds a formula, equation, table, or data value THEN view that image with the Read tool before generating that unit's questions. Resolve the image path relative to the directory of the notes source file.
+     // Commentary: an `images/...` link in `extracted/<file>.md` resolves under `extracted/`. Standalone image links between prose sentences (e.g. "we get the recurrence" followed by an image) are transcribed formulas.
+R9c. IF an image link is immediately followed by a "**Figure N**" caption AND that caption already conveys the content a question would test THEN you MAY rely on the caption text instead of opening the image.
+R9d. IF an opened image contains a formula, table, or data needed by a candidate question THEN transcribe its content into that question's Teach field as text, using plain-text / Unicode math consistent with existing Teach fields (e.g. *n*², Θ(n), ⌊x⌋) — never LaTeX and never a re-embedded image link. R11/R11a/R11b then apply to the transcription.
+R9e. IF an image needed for a candidate question cannot be opened or its path cannot be resolved THEN drop that question and record the image in the R25 report. Do NOT guess the image's content.
+
 // Teach content (per question)
 R10. IF writing a question THEN write a `Teach:` field immediately before `Question:` containing only the note excerpt(s) needed to answer this specific question — no more.
 R11. IF a question's Teach field contains a formula THEN include a Legend block immediately after the formula listing every variable and its meaning.
@@ -41,10 +49,12 @@ R11d. IF the Teach field enumerates parallel items (reasons, costs, conditions, 
      // - Finer application-level control: UDP sends immediately; TCP may buffer or throttle.
      // - No connection delay: no handshake before data flows.
 R11e. All items within a list MUST use parallel grammatical structure — same form for every item (e.g., all "term: explanation" pairs, all imperative clauses). Do NOT mix forms within a single list.
-R11f. IF the Teach field contrasts two or more named concepts THEN introduce each concept on its own line with a bold label, followed by its description. Use the same structure for every concept.
+R11f. IF the Teach field contrasts two or more named concepts THEN introduce each concept on its own line as: a colored diamond anchor, then a bold label, then its description. Use the same structure for every concept.
+R11f1. Assign each concept's anchor by its order in the contrast, cycling through this fixed sequence: 🔹, 🔸, 🔶, 🔷.
+     // Commentary: distinct colors per concept give low-vision readers a per-concept visual anchor that bold alone does not; the fixed order keeps it deterministic.
      // PASSES:
-     // **Go-Back-N:** receiver discards out-of-order packets; sender retransmits the lost packet plus all subsequent ones.
-     // **Selective Repeat:** receiver buffers out-of-order packets; only the missing packet is retransmitted.
+     // 🔹 **Go-Back-N:** receiver discards out-of-order packets; sender retransmits the lost packet plus all subsequent ones.
+     // 🔸 **Selective Repeat:** receiver buffers out-of-order packets; only the missing packet is retransmitted.
 R11g. IF a Teach field covers two or more clearly distinct sub-concepts THEN separate them with a blank line. Do NOT run distinct concepts together in one paragraph.
 R11h. Each sentence in a Teach field MUST express one idea only. Max 25 words per sentence. Do NOT chain multiple concepts with "and," commas, or semicolons into a single sentence.
 R11i. Bold each key term the first time it appears in a Teach field.
@@ -79,6 +89,7 @@ R16. Each question MUST be fully answerable using only this question's Teach fie
 R17. Identify the specific sentence(s) in this question's Teach field that contain the answer. IF no such sentence exists THEN mark FAIL.
 R17a. IF the Question field contains more than one `?` THEN mark FAIL with reason "compound question — split into two entries per R15a–R15b".
 R18. IF the answer requires knowledge beyond those sentence(s) THEN mark FAIL.
+R18a. IF a Teach field transcribes content from an image THEN the cited answer sentence(s) must faithfully match the opened image's actual content. IF the transcription was not verified against the opened image THEN mark FAIL.
 R19. IF this question's Teach field states a fact without an explanation AND the question asks "why" about that fact THEN mark FAIL.
 R20. IF an acronym or term appears in the question AND it is not defined in this question's Teach field AND it was not defined in a prior question's Teach field within the same unit THEN mark FAIL.
 R21. IF a candidate question is not marked FAIL by R17–R20 THEN mark PASS.
@@ -94,7 +105,7 @@ R24a. IF the questions file is saved AND the class root contains a `CLAUDE.md` w
 R24b. IF the questions file is saved AND the class root contains a `CLAUDE.md` without a `## Contents` section THEN append a `## Contents` section (format: `**<dir>/**` bold group headers, one `- file — description` line per entry) and add the entry per R24a.
 R24c. IF the class root contains no `CLAUDE.md` THEN skip R24a–R24b.
 R24d. IF updating the Contents section THEN do not modify any other part of `CLAUDE.md`.
-R25. After saving, report: (1) units processed, (2) questions saved, (3) candidates dropped and their fail reasons, (4) output file path, (5) whether `CLAUDE.md` Contents was updated.
+R25. After saving, report: (1) units processed, (2) questions saved, (3) candidates dropped and their fail reasons, (4) output file path, (5) whether `CLAUDE.md` Contents was updated, (6) images opened (count), (7) any candidate questions dropped because an image could not be opened or resolved (per R9e).
 
 // Catch-all
 R26. IF any condition not covered by R1–R25 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.

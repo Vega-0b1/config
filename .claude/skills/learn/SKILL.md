@@ -20,20 +20,17 @@ R5.  IF the file does not exist THEN stop and tell the user: "Run /generate_ques
 R6.  IF no <arg> is given THEN list all `extracted/questions_*.md` files and ask the user to pick one. STOP until user responds.
 
 // Unit and question delivery
-R7.  IF starting a new unit THEN display "Unit X of Y — <title>".
-R8.  IF mode = teach AND about to display a question THEN first display that question's `Teach:` field verbatim, framed by labeled Unicode lines with two blank lines inside each edge:
-     ──────────────────────── start ────────────────────────
-
-
-     <Teach field content>
-
-
-     ──────────────────────── end ────────────────────────
+R7.  IF starting a new unit THEN display "Unit X of Y — <title>" as a level-2 markdown heading: `## Unit X of Y — <title>`.
+R8.  IF mode = teach AND about to display a question THEN first display that question's `Teach:` field verbatim as a markdown blockquote — prefix every line of the Teach content, including blank lines between sub-concepts, with `> `.
+     // Commentary: the blockquote renders as a distinct callout in the desktop app; the `> ` on blank lines keeps a multi-paragraph Teach field inside one quote block.
+R8a. The `> ` blockquote prefix in R8 is display framing, not content. R10 does not prohibit it.
+R8b. IF mode = teach THEN after the Teach blockquote and before the Question, output a blank line, a `---` horizontal rule, and a blank line.
+     // Commentary: the blank lines keep `---` from being parsed as a setext underline of the blockquote; the rule chunks "reference" from "what to answer".
 R9.  IF mode = review THEN do NOT display Teach fields at any point.
      // Commentary: review mode is retrieval practice — showing the material before the question makes it an open-book test of text on screen.
 R10. Do NOT rewrite, summarize, or add to the Teach field.
 R11. Do NOT display `Tests` or `Audit` fields at any point.
-R12. Ask one question at a time. Display only the `Question` field. Do NOT display the next question until the user answers the current one.
+R12. Ask one question at a time. Display only the `Question` field, rendered as a level-3 markdown heading with a `❓` anchor: `### ❓ <question text>`. Do NOT display the next question until the user answers the current one.
 
 // Grading (both modes)
 R13. IF the user's answer contains the key idea(s) from the `Answer key` THEN mark correct.
@@ -47,12 +44,17 @@ R15. IF the user's answer contains a factually incorrect claim THEN mark wrong.
 R16. R15 overrides R13: IF the answer contains the key idea AND a factually incorrect claim THEN mark wrong.
      // Example: User says "TCP throttles the sender by dropping packets." → WRONG (R16): mechanism claim is wrong.
 
+// Result display (both modes)
+R16a. IF marking an answer correct THEN begin the result with `✅ **Correct**`.
+R16b. IF marking an answer wrong — including a skip under R17 — THEN begin the result with `❌ **Wrong**`.
+R16c. R16a–R16b set the result prefix only. They do not change what R13–R18 require the result to contain.
+
 // Skip (both modes)
-R17. IF the user's message declines to answer rather than attempts an answer (e.g. "skip", "pass", "next", "move on", "I don't know") THEN acknowledge it, display the correct answer from the `Answer key`, mark the question wrong as skipped, and move to the next question.
+R17. IF the user's message declines to answer rather than attempts an answer (e.g. "skip", "pass", "next", "move on", "I don't know") THEN acknowledge it, display the correct answer from the `Answer key`, mark the question wrong as skipped, and move to the next question. In teach mode, display the Teach field before the Question field of the next question.
 
 // Wrong answer flow (both modes)
-R18. IF the answer is marked wrong THEN state wrong, display the correct answer from the `Answer key`, give a one-sentence explanation of the key idea missed, and move to the next question immediately. Do NOT re-teach, do NOT re-ask.
-R19. Advance to the next question after every graded answer regardless of correctness.
+R18. IF the answer is marked wrong THEN state wrong, display the correct answer from the `Answer key`, give a one-sentence explanation of the key idea missed, and move to the next question immediately. Do NOT re-teach, do NOT re-ask. In teach mode, display the Teach field before the Question field of the next question.
+R19. Advance to the next question after every graded answer regardless of correctness. In teach mode, display the Teach field before the Question field of the next question.
 
 // Pacing
 R20. IF the user sends a clarifying or follow-up question THEN answer it fully, then re-display the current unanswered question. Do not ask "Ready to continue?"
@@ -62,7 +64,7 @@ R21. Move through units in order. There is no correctness gate on advancing to t
 R22. IF the user's message on a pending question is "flag" (or otherwise clearly requests flagging the question) THEN ask "Why are you flagging this question?" STOP until user responds.
 R23. IF the user gives the flag reason THEN append an entry to `extracted/flagged_questions_<arg>.md` containing: unit number and title, question number, the full question entry (Teach, Question, Answer key), the user's reason verbatim, and today's date.
 R23a. IF `extracted/flagged_questions_<arg>.md` does not exist THEN create it first with frontmatter: `name: flagged_questions_<arg>`, `source: questions_<arg>.md`.
-R24. IF the flag entry is saved THEN confirm in one line, mark the question flagged — not graded, excluded from both the correct count and the total — and move to the next question.
+R24. IF the flag entry is saved THEN confirm in one line, mark the question flagged — not graded, excluded from both the correct count and the total — and move to the next question. In teach mode, display the Teach field before the Question field of the next question.
 R25. R22–R24 override R13–R18: "flag" is neither an answer nor a skip. Do not grade it, do not mark it wrong, do not display the Answer key in the session.
 
 // English reference
