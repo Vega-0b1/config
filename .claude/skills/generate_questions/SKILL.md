@@ -43,6 +43,8 @@ R11c. IF the Teach field contains sequential steps THEN format them as a numbere
      // 1. Client sends SYN (SYN=1, seq=client_isn).
      // 2. Server sends SYNACK (SYN=1, seq=server_isn, ack=client_isn+1).
      // 3. Client sends ACK (SYN=0, ack=server_isn+1).
+R11c1. R11c applies only when each step is an action (a verb phrase describing something done). IF the ordered items are named concepts (nouns naming a phase, component, or mechanism) THEN R11f applies instead of R11c.
+     // Example: SYN → SYNACK → ACK are actions → numbered list (R11c). Divide / Conquer / Combine are named phases → diamond anchors (R11f).
 R11d. IF the Teach field enumerates parallel items (reasons, costs, conditions, features) with no strict order THEN format them as a bulleted list — one item per line. Do NOT write them inline as numbered prose.
      // FAILS: "Applications choose UDP for: (1) finer control (2) no delay (3) no state (4) small header."
      // PASSES:
@@ -55,6 +57,9 @@ R11f1. Assign each concept's anchor by its order in the contrast, cycling throug
      // PASSES:
      // 🔹 **Go-Back-N:** receiver discards out-of-order packets; sender retransmits the lost packet plus all subsequent ones.
      // 🔸 **Selective Repeat:** receiver buffers out-of-order packets; only the missing packet is retransmitted.
+R11f2. R11f overrides R11d: IF each item names a distinct concept, mechanism, protocol, or component (a noun naming a thing) THEN use diamond anchors (R11f), even if the items could also be read as parallel items. R11d bullets apply only when the items are NOT named concepts (reasons, costs, conditions, features, effects).
+     // PASSES R11f2 (diamonds): Daemon vs Set-UID; UDP vs TCP; Static linking vs Dynamic linking.
+     // PASSES R11d (bullets): the reasons an application chooses UDP; the costs of static linking.
 R11g. IF a Teach field covers two or more clearly distinct sub-concepts THEN separate them with a blank line. Do NOT run distinct concepts together in one paragraph.
 R11h. Each sentence in a Teach field MUST express one idea only. Max 25 words per sentence. Do NOT chain multiple concepts with "and," commas, or semicolons into a single sentence.
 R11i. Bold each key term the first time it appears in a Teach field.
