@@ -1,9 +1,9 @@
 ---
 name: coding_interview
-description: Practice essential CS problems in Python then Rust, with set-based review selection and a post-completion debrief on data structures, algorithms, and complexity.
+description: Practice essential CS problems in Python, with set-based review selection and a post-completion debrief on data structures, algorithms, and complexity.
 ---
 
-Run coding interview practice. Problems are stored in `CLAUDE.md` in the current working directory. The user solves each problem in Python, then Rust. After Rust is complete, a four-question debrief runs.
+Run coding interview practice. Problems are stored in `CLAUDE.md` in the current working directory. The user solves each problem in Python. After Python is complete, a four-question debrief runs.
 
 ## Problem Selection
 
@@ -18,25 +18,23 @@ R8. IF any condition not covered by R1–R7 arises THEN stop, describe the situa
 
 ## Set Tracking
 
-R1. IF a problem is completed (Python → Rust → debrief done) THEN immediately increment its `(sets: N)` count in CLAUDE.md — do not defer to the next problem request.
+R1. IF a problem is completed (Python → debrief done) THEN immediately increment its `(sets: N)` count in CLAUDE.md — do not defer to the next problem request.
 R2. IF picking a completed problem for review THEN select the problem(s) with the lowest set count. IF tied THEN pick randomly.
 R3. IF a problem's set count is 2 or more below the median set count of all completed problems at that difficulty THEN mark it `[growing]`. Growing problems get 2× weight in selection.
 R4. IF a growing problem's set count gap closes to 1 or less from the median THEN remove the `[growing]` tag.
 
 ## Workflow
 
-R1. IF the user solves the problem in Python correctly THEN re-prompt the same problem in full and ask for Rust.
-R2. IF the user solves the problem in Rust correctly THEN run the debrief (see Debrief section); after the debrief completes, mark the problem done and apply Set Tracking R1.
-R3. IF "correct" is ambiguous THEN a solution is correct when it fulfills the problem requirements OR the user requests to move on / says "next one."
-R4. IF re-prompting for Rust THEN always include the full problem statement — do not write "now do it in Rust" alone.
-R5. IF the user says "stuck" THEN provide pseudocode for the current problem. Do not give working code in any language.
-R6. IF any condition not covered by R1–R5 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R1. IF the user solves the problem in Python correctly THEN run the debrief (see Debrief section); after the debrief completes, mark the problem done and apply Set Tracking R1.
+R2. IF "correct" is ambiguous THEN a solution is correct when it fulfills the problem requirements OR the user requests to move on / says "next one."
+R3. IF the user says "stuck" THEN provide pseudocode for the current problem. Do not give working code in any language.
+R4. IF any condition not covered by R1–R3 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Debrief
 
-Fires after both Python and Rust are complete. Questions are about the Python solution. One question at a time.
+Fires after the Python solution is correct. One question at a time.
 
-R1. IF the Rust solution is graded correct THEN start the debrief immediately before marking the problem done.
+R1. IF the Python solution is graded correct THEN start the debrief immediately before marking the problem done.
 R2. IF starting the debrief THEN ask only the first question: "Looking at your Python solution — what data structure(s) did you use, and why?"
 R3. IF the user answers a debrief question THEN grade it (correct or incorrect, plus a one-sentence explanation), then ask the next question.
 R4. The four debrief questions, asked in order:
