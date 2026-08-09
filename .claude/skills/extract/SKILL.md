@@ -11,7 +11,9 @@ Scan files and extract all content into a single markdown file saved to `extract
 R1.  IF the argument names a subfolder (e.g. `wk9`) THEN target = all files inside that subfolder; output = `extracted/<subfolder>_notes.md`.
 R2.  IF the argument names a single file (e.g. `textbook.epub`) THEN target = that file; output = `extracted/<sanitized>_notes.md`, sanitized per the Sanitization block below.
 R3.  IF no argument is given THEN target = all loose files in the current directory; output = `extracted/<current-folder-name>_notes.md`.
-R4.  IF cwd looks like `source/` or a subfolder rather than a class root THEN warn the user before proceeding.
+R4.  IF cwd's basename is `source`, `extracted`, `code`, or `images` THEN warn the user that cwd is not a class root and ask whether to proceed. STOP until user responds.
+R4a. IF cwd contains no `CLAUDE.md` AND no `extracted/` directory THEN apply R4's warning as well.
+     // Commentary: R4 and R4a are the two decidable tests for "not a class root". A class root either has been scaffolded by /addclass (CLAUDE.md) or has been extracted into before (extracted/).
 R5.  IF `extracted/` does not exist THEN create it.
 R6.  IF the output file already exists THEN stop and warn the user before overwriting. STOP until user responds.
      // Commentary: a previous extraction may have been intentional; the user may have added manual notes to it.
@@ -23,8 +25,8 @@ R9.  IF a file is unrelated (`.gitignore`, lock files, code files, existing mark
 R10. IF multiple files are targeted THEN read them in parallel.
      // Commentary: matters especially for large courses with many weekly slide decks.
 R11. IF the file is a PDF THEN read it directly with the Read tool.
-R11a. IF the file is a PDF THEN do NOT extract its embedded images; note in the R25 report that PDF figures were not extracted.
-     // Commentary: PDF image streams carry no markup tying a figure to its surrounding section, so position-accurate inline linking is not reliable. Image extraction is EPUB-only (R13a–R13e).
+R11a. IF the file is a PDF, DOCX, or PPTX THEN do NOT extract its embedded images; note in the R25 report which of those formats were processed and that their figures were not extracted.
+     // Commentary: only the EPUB path (R13a–R13e) resolves an image to its position in the reading flow. PDF image streams carry no markup tying a figure to its section; DOCX and PPTX store images as relationship IDs this skill does not resolve. Naming all three keeps a figure-bearing slide deck from silently losing its figures with no report line.
 R12. IF the file is a DOCX THEN extract with Python `zipfile` + `xml.etree.ElementTree`: unzip, parse `word/document.xml`, collect all `<w:t>` text nodes per paragraph.
 R13. IF the file is an EPUB THEN extract with Python `zipfile` + `xml.etree.ElementTree`: unzip, find `.xhtml`/`.html` files in spine order (via `META-INF/container.xml` → `content.opf`), strip tags (except `<img>`, per R13c), concatenate. Skip nav/TOC files.
 
@@ -69,7 +71,7 @@ R23. IF the class root contains no `CLAUDE.md` THEN skip R21–R22.
 R24. IF updating the Contents section THEN do not modify any other part of `CLAUDE.md`.
 
 // Confirm
-R25. Print what was written to `extracted/`, how many images were copied to `extracted/images/` (per R13a) or that PDF figures were not extracted (per R11a), how many chapter/section headings were reconstructed when R13g applied, what was moved to `source/`, and whether `CLAUDE.md` Contents was updated.
+R25. Print what was written to `extracted/`, how many images were copied to `extracted/images/` (per R13a), which non-EPUB formats had their figures skipped (per R11a), how many chapter/section headings were reconstructed when R13g applied, what was moved to `source/`, and whether `CLAUDE.md` Contents was updated.
 
 // Catch-all
 R26. IF any condition not covered by R1–R25 (including lettered sub-rules) arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.

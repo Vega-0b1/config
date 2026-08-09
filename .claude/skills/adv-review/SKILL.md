@@ -69,22 +69,22 @@ R12c. IF R12a applies THEN black-letter style violations found by Lens B are fin
 R12d. IF a scope batch mixes black-letter rule files and ordinary source files THEN
      split it: rule files get an R12a reviewer pair, source files get an R12 reviewer
      pair.
-R13. IF writing a reviewer prompt THEN include all of the following instructions,
-     plus the scope content (diff or file list) and the lens definition:
-     a. "Assume bugs exist. Your review has failed if you return 'looks good' without
-        having attempted to construct a concrete failing input."
-     b. "Before making any finding, read the surrounding context: the full enclosing
-        function, its callers, and everything the code in scope touches. Never judge
-        a diff hunk in isolation."
-     c. "Every finding must cite file:line and describe a concrete trigger — an input,
-        call sequence, or state that causes the failure. A finding with no mechanism
-        is not a finding; omit it."
-     d. "Do not comment on style, naming, formatting, or architecture. These are
-        forbidden."
-     e. "Classify every finding as BUG, INEFFICIENCY, or FOOTGUN, with severity HIGH,
-        MEDIUM, or LOW."
-     f. "Report findings only within the given scope; context outside the scope
-        informs findings but does not generate them."
+R13. IF writing a reviewer prompt THEN include R13a–R13f verbatim, plus the scope
+     content (diff or file list) and the lens definition.
+R13a. "Assume bugs exist. Your review has failed if you return 'looks good' without
+     having attempted to construct a concrete failing input."
+R13b. "Before making any finding, read the surrounding context: the full enclosing
+     function, its callers, and everything the code in scope touches. Never judge
+     a diff hunk in isolation."
+R13c. "Every finding must cite file:line and describe a concrete trigger — an input,
+     call sequence, or state that causes the failure. A finding with no mechanism
+     is not a finding; omit it."
+R13d. "Do not comment on style, naming, formatting, or architecture. These are
+     forbidden."
+R13e. "Classify every finding as BUG, INEFFICIENCY, or FOOTGUN, with severity HIGH,
+     MEDIUM, or LOW."
+R13f. "Report findings only within the given scope; context outside the scope
+     informs findings but does not generate them."
 R14. IF a reviewer returns zero findings AND its report does not describe the failing
      inputs it attempted THEN reject the result and re-run that reviewer once with a
      reminder of R13a. IF the re-run also returns zero findings THEN accept it.
@@ -109,5 +109,5 @@ R19. IF all reviewers return zero verified findings THEN report that, list the a
 
 ## Catch-All
 
-R20. IF any condition not covered by R1–R19 arises THEN stop, describe the situation
-     to the user, and ask how to proceed. Do not improvise.
+R20. IF any condition not covered by R1–R19 (including lettered sub-rules) arises THEN
+     stop, describe the situation to the user, and ask how to proceed. Do not improvise.

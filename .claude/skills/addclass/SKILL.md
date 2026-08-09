@@ -23,8 +23,9 @@ R2.  IF no argument is given AND cwd's parent is `~/edu` or `~/edu/zOld` THEN ta
 R3.  IF no argument is given AND cwd's parent is NOT `~/edu` or `~/edu/zOld` THEN stop and tell the user to provide a name or navigate to a class directory.
 
 // Metadata inference
-R4.  IF inferring course metadata THEN scan filenames in the target root. Do NOT ask the user questions.
+R4.  IF inferring course metadata THEN scan filenames in the target root. Do NOT ask the user questions about metadata.
      // Commentary: filenames give enough context; asking creates friction for a simple scaffolding task.
+R4a. R4 is scoped to metadata inference only. R3, R15, and R20 override R4 — they require asking or reporting, and are not blocked by it.
 R5.  IF an EPUB/PDF filename contains a title, author, or edition THEN use it as the textbook.
 R6.  IF the folder name or any filename contains a course code THEN use it as the course number.
 R7.  IF no course name is findable THEN use the folder name as the course name.
@@ -40,7 +41,8 @@ R12. IF a file or directory contains code THEN move it to `code/` (created per R
 R13. IF a file is already a pre-processed markdown notes file THEN move it to `extracted/`.
 R14. IF a file is ambiguous but plausibly raw material THEN move it to `source/`.
      // Commentary: source/ is the safe bucket for unknowns — nothing gets lost there.
-R15. IF a file genuinely fits nowhere THEN leave it in place and note it in the summary.
+R15. IF a file is a dotfile, a lock file, an archive of unknown contents, or a media file with no course context in its name THEN leave it in place and list it in the R19 summary as unsorted.
+     // Commentary: R14 already routes anything plausibly raw to source/. R15 names the specific residue that is left over — without the list, "fits nowhere" was undecidable and the rule could never fire.
 R16. Do NOT move `extracted/`, `source/`, `code/`, or `CLAUDE.md`.
 
 // CLAUDE.md
@@ -52,10 +54,13 @@ R18c. IF no files were sorted at all THEN keep the `## Contents` section with th
      // Commentary: the section must exist so those skills grow it instead of skipping it.
 
 // Confirm
-R19. Print: full path created, files moved and where they landed, anything left in place.
+R19. IF the scaffold is complete THEN print: full path created, files moved and where they landed, anything left in place per R15.
+
+// Template writing
+R19a. IF writing the CLAUDE.md Template THEN emit the code fences as three literal backticks. The `\`\`\`` sequences in the template block below are escapes for nesting the template inside this file — strip the backslashes on write.
 
 // Catch-all
-R20. IF any condition not covered by R1–R19 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R20. IF any condition not covered by R1–R19 (including lettered sub-rules) arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## CLAUDE.md Template
 
