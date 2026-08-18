@@ -72,7 +72,8 @@ R24. IF a dump is added or retired THEN update the file table in `~/edu/scrapes/
      // Commentary: `~/CLAUDE.md` R1 routes lookups by filename. A stale entry sends the next session to a file that does not exist.
 R25. IF deleting any dump THEN first verify what is uniquely in it, and report that before deleting.
      // Commentary: a redundancy call in this directory was wrong once. Title overlap is not content overlap.
-R26. IF `sources.toml` or a script changes THEN they are tracked in git — stage the change; do not commit unless asked.
+R26. IF `sources.toml` or a script changes THEN do NOT stage or commit it. Nothing under `~/edu` is tracked by the home repo.
+     // Commentary: the Nextcloud client syncs ~/edu, so this directory is backed up but not versioned. These files were tracked for one day (2026-08-17 to 2026-08-18) and untracked deliberately. Editing them is still correct; reaching for git afterwards is not.
 
 // Catch-all
 R27. IF any condition not covered by R1–R26 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.

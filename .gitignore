@@ -6,13 +6,9 @@
 !.claude/skills/
 !.claude/skills/**
 
-# The scrapes tooling: generators and manifest are tracked, the dumps they
-# produce are not. Every .txt in there regenerates from sources.toml.
-# Each directory level has to be un-ignored explicitly because of the /* above.
-!edu/
-edu/*
-!edu/scrapes/
-edu/scrapes/*
-!edu/scrapes/*.py
-!edu/scrapes/sources.toml
-!edu/scrapes/README.md
+# edu/ is deliberately NOT tracked here. The Nextcloud client syncs it
+# (localPath=/home/jcvega/edu/ -> targetPath=/edu), so it is backed up there
+# rather than versioned here. The scrapes tooling under edu/scrapes was tracked
+# briefly on 2026-08-17 and untracked on 2026-08-18; do not re-add it without
+# also fixing R26 in .claude/skills/scrapes/SKILL.md, which describes how those
+# files are stored.

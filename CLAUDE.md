@@ -50,6 +50,9 @@ R11. IF any condition not covered by R1–R10 arises THEN stop, describe the sit
 - `hypr_waybar_docs.txt` — Hyprland wiki + Waybar docs. Re-scraped 2026-08-14 from the wiki's latest-git branch; stack runs 0.56.1
 - `nixos_options.txt` — 24,558 NixOS options, **generated from the pinned flake** (grep this for option lookups)
 - `home_manager_options.txt` — 5,406 home-manager options, generated the same way
+- `plasma_manager_options.txt` — 669 `programs.plasma.*` options, generated the same way. **Stops at `panels.*.widgets`**; per-widget options are in the next file
+- `plasma_manager_widgets.txt` — the 17 plasma-manager widget modules, read from the pinned source. The only place per-widget options live (e.g. `iconTasks`' `onlyMinimized`)
+- `kde_config_keys.txt` — 47 KDE `.kcfg` schemas: the underlying KDE key, group, type and default, for `configFile` writes. **Read the coverage rule in the scrapes README before concluding a key does not exist** — absence only means something if the group is declared, and grepping the package instead gives false positives
 - `nvim_plugins_docs.txt` — Neovim plugin docs (matches the configured plugin set)
 - `cortex_debug_docs.txt` — cortex-debug launch.json attribute schema (embedded/STM32 debugging)
 - `stm32f4_hal.txt` — 2,468 HAL functions with `@param` valid-value lists, from the on-disk F4 firmware
