@@ -22,6 +22,8 @@ R0e1. An apparatus section is `enumerated` IF its content is a bulleted or numbe
 R0f. Generation mode = `tiered` IF anchor source is not `none`; ELSE `capped`.
 R0g. The user may correct a Source Profile by hand. R0a makes the correction permanent.
      // Commentary: detection is a heuristic and will sometimes be wrong. Persisting the result means a wrong guess is corrected once rather than re-made every run.
+R0h. Detect the language of the notes content. Record `language: <code>` (e.g. `es`, `en`) in the Source Profile.
+R0i. IF language = `en` THEN skip R16f–R16g. No `Teach_EN` or `Question_EN` fields are generated.
 
 // File loading
 R1.  IF argument is given AND a file named `extracted/<arg>.md` exists THEN use that file as the notes source.
@@ -57,7 +59,9 @@ R9e. IF an image needed for a candidate question cannot be opened or its path ca
 // Teach content (per question)
 R10. IF writing a question THEN write a `Teach:` field immediately before `Question:` containing only the note excerpt(s) needed to answer this specific question — no more.
 R11. IF a question's Teach field contains a formula THEN include a Legend block immediately after the formula listing every variable and its meaning.
-R11a. IF a question's Teach field contains a formula THEN the Answer key MUST include both (a) a formula-path answer (citing specific terms) and (b) a conceptual-path answer (explaining the mechanism without formula notation). Either path alone is sufficient for a correct grade.
+R11a. IF a question's Teach field contains a formula THEN write the conceptual-path answer (the mechanism, without formula notation) in `Answer key`, and the formula-path answer (citing specific terms) in `Elaboration`. Either path alone is sufficient for a correct grade.
+R11a1. R16a overrides R11a: the `Answer key` field carries the conceptual path ONLY. Do NOT pack both paths into it.
+     // Commentary: before R16a this rule required both paths in one field, which is exactly the over-specification R16a exists to stop. The two paths are still both recorded — they now live in two fields.
 R11b. IF a question's Teach field contains a formula THEN do NOT write the question in a way that mandates formula citation (e.g., do not say "using the formula, show that…"). The question must be answerable via conceptual explanation alone.
 
 // Teach field formatting
@@ -158,7 +162,10 @@ R15. Each question MUST require the user to explain a mechanism, describe a scen
      // PASSES R15: "Describe why non-persistent HTTP is expensive in terms of delay."
      // FAILS R15: "What does HTTP stand for?"
 R15a. Each `Question:` field MUST contain exactly one question — one interrogative, one `?`. Compound questions are prohibited.
-     // FAILS R15a: "What distinguishes the network layer from the transport layer? Explain what this means for an application sending data."
+R15a1. R15a states two independent conditions. The `?` count is enforced by R17a; the single-interrogative condition is enforced by R20b. A question may satisfy one and still fail R15a on the other.
+     // Commentary: until R20b existed, only the `?` count was audited, so a question carrying one `?` and two interrogative pronouns passed. That is how "¿qué ocurre con la oposición /y/ ~ /ll/ y cuál de los dos fonemas sobrevive?" reached a saved questions file — the rule prohibited it, but nothing checked for it.
+     // FAILS the one-interrogative condition — one `?`, two required facts, caught by R20b: "What distinguishes the network layer from the transport layer? Explain what this means for an application sending data."
+     // FAILS the one-`?` condition — caught by R17a: "What is a dígrafo? Why is ch no longer part of the abecedario?"
      // PASSES: Two separate entries — Q1 asks the first; Q2 asks the implication.
 R15b. IF a concept produces two natural sub-questions (e.g., "what is X" and "what does X imply for Y") THEN generate them as two separate entries in the same unit, each with its own Teach, Question, Answer key, and Audit.
 R15c. R15a overrides R15: IF satisfying R15 would require two interrogatives in one entry THEN split into two entries per R15b.
@@ -170,14 +177,46 @@ R15f. R13 and R14a override R15d–R15e: IF the unit's inventory contains no two
      // Commentary: R13 derives questions from the inventory, one per concept. A type quota that the material cannot supply would force inventing a contrast the notes never draw — which fails audit under R17 anyway. The quota is a diversity target, not a licence to fabricate.
 R16. Each question MUST be fully answerable using only this question's Teach field, given that prior questions' Teach fields within the same unit have been shown in order.
 
+// Answer key (per question)
+R16a. The `Answer key` field MUST state the minimum sufficient answer: the single idea whose absence makes an answer wrong. One sentence, max 25 words.
+     // Commentary: the field is a grading threshold, not a model answer. The 25-word cap is the same one R11h sets for Teach sentences, reused rather than reinvented.
+     // FAILS R16a: "A computational problem specifies the desired input/output relationship. An algorithm is a concrete, finite sequence of steps that produces that output. The problem defines the goal; the algorithm attains it." — three claims, 40 words.
+     // PASSES R16a: "The problem states what result is required; the algorithm is the sequence of steps that produces it."
+R16b. IF a correct answer has supporting mechanism, example, or consequence beyond the minimal idea THEN write that material in an `Elaboration:` field placed immediately after `Answer key`. Do NOT write it into `Answer key`.
+R16c. An answer that carries the `Answer key` idea is correct regardless of phrasing, length, or whether it reaches any part of the `Elaboration`.
+     // Commentary: this is R11a's "either path alone is sufficient" clause generalized out of the formula-only case it was trapped in.
+R16d. IF the minimal idea cannot be stated in one sentence because the `Question` field demands two distinct facts THEN split the entry into two entries per R15b.
+     // Commentary: R15a's one-`?` test is syntactic and lets "¿qué ocurre con X y cuál sobrevive?" through — one question mark, two required answers. R16d is the semantic test.
+R16e. IF a question has no material beyond the minimal idea THEN omit the `Elaboration` field entirely. Do NOT pad it.
+
+// Translation (per question — non-English sources only)
+R16f. IF language ≠ `en` THEN for each question entry, write a `Teach_EN:` field containing an accurate English translation of the `Teach:` content. Preserve structure (numbered lists, bulleted lists, bold terms, diamond anchors, legends).
+R16g. IF language ≠ `en` THEN for each question entry, write a `Question_EN:` field containing an accurate English translation of the `Question:` field.
+R16h. Translations are reference aids, not study material. Translate for clarity, not style. Preserve technical terms that have no standard English equivalent.
+R16i. IF language = `en` THEN do NOT write `Teach_EN` or `Question_EN` fields. R16i overrides R16f–R16g.
+
 // Audit (per candidate question)
 R17. Identify the specific sentence(s) in this question's Teach field that contain the answer. IF no such sentence exists THEN mark FAIL.
 R17a. IF the Question field contains more than one `?` THEN mark FAIL with reason "compound question — split into two entries per R15a–R15b".
+     // Commentary: R17a is the syntactic fast path and covers ONLY the `?` count. A compound question carrying a single `?` is out of its scope — R20b catches that one. Do not read a PASS here as evidence the question is not compound.
+     // FAILS R17a (two `?`): "What is a dígrafo? Why is ch no longer part of the abecedario?"
 R18. IF the answer requires knowledge beyond those sentence(s) THEN mark FAIL.
 R18a. IF a Teach field transcribes content from an image THEN the cited answer sentence(s) must faithfully match the opened image's actual content. IF the transcription was not verified against the opened image THEN mark FAIL.
 R19. IF this question's Teach field states a fact without an explanation AND the question asks "why" about that fact THEN mark FAIL.
 R20. IF an acronym or term appears in the question AND it is not defined in this question's Teach field AND it was not defined in a prior question's Teach field within the same unit THEN mark FAIL.
-R21. IF a candidate question is not marked FAIL by R17–R20 THEN mark PASS.
+R20a. IF the `Answer key` field contains more than one independently droppable claim THEN mark FAIL with reason "over-specified answer key — move the surplus to Elaboration per R16b".
+     // Test: delete a clause. IF the remaining text still fully answers the Question as asked THEN that clause was droppable and belongs in Elaboration.
+R20b. IF the `Question` field demands two distinct facts — even when it contains a single `?` — THEN mark FAIL with reason "compound requirement — split per R15b/R16d".
+     // Commentary: R17a is the syntactic check (count the question marks); R20b is the semantic one. A question joined by "and" or "y" passes R17a and fails here. R20b is what gives R15a's single-interrogative condition an enforcement mechanism.
+     // Test: count the facts the Answer key must carry to satisfy the question as asked. IF that count exceeds one, the question is compound regardless of its punctuation.
+     // FAILS R20b (one `?`, two required facts): "En el habla yeísta, ¿qué ocurre con la oposición /y/ ~ /ll/ y cuál de los dos fonemas es el que sobrevive?" — demands both what happens AND which survives.
+     // PASSES R20b: "En el habla yeísta, ¿cuál de los dos fonemas sobrevive?" — one required fact.
+R20b1. A conjunction in the Question is NOT itself evidence of a compound requirement. Apply the interdependence test: IF either half, answered alone, would fully satisfy the question THEN it is compound and R20b fires. IF neither half alone satisfies it THEN the two halves state ONE relation and R20b does NOT fire.
+     // Commentary: R15/R14a/R15d–R15e all push toward contrast questions, and a contrast question necessarily names two values. Firing R20b on that would split questions the ruleset elsewhere requires. The test is interdependence, not the presence of "y" or "and".
+     // DOES NOT fire (one relation, halves interdependent): "¿En qué se diferencian el seseo y el ceceo?" — naming only the seseo half answers nothing.
+     // FIRES (two independent facts): "¿qué ocurre con la oposición /y/ ~ /ll/ y cuál de los dos fonemas sobrevive?" — "la oposición se neutraliza" is a complete answer on its own, and so is "/y/".
+     // DOES NOT fire (conjunction joins coordinated examples, not questions): "¿Por qué la elección entre *b* y *v* no puede resolverse escuchando la palabra?"
+R21. IF a candidate question is not marked FAIL by R17–R20 — including all lettered sub-rules — THEN mark PASS.
 R22. Drop all FAIL questions. Only PASS questions go into the output file.
 R23. R23 overrides R13: IF all candidates for a unit fail audit THEN generate a new round of candidates targeting inventory concepts not yet used, and re-audit each. IF every inventory concept has already been used THEN re-run R12c–R12g over the unit's notes to find concepts the first inventory missed.
 R23a. IF 3 rounds of candidates for a unit have all failed audit THEN stop, show the user the failed candidates with their fail reasons and the unit's notes, and ask whether to (a) keep generating or (b) skip the unit. STOP until user responds.
@@ -194,7 +233,7 @@ R24e. IF the chapter contains `constructive` exercises THEN write them to `extra
 R24f. Each `practice_<arg>.md` entry records the exercise number and its text verbatim. Do NOT paraphrase and do NOT attempt an answer.
      // Commentary: these are hand-worked tasks — diagrams, specifications, designs. /learn cannot grade them. The file exists so they are not lost.
 R24g. IF the chapter contains no constructive exercises THEN do NOT create `practice_<arg>.md`.
-R25. After saving, report: (1) units processed, (2) questions saved, (3) candidates dropped and their fail reasons, (4) output file path, (5) whether `CLAUDE.md` Contents was updated, (6) images opened (count), (7) any candidate questions dropped because an image could not be opened or resolved (per R9e), (8) the concept inventory size per unit, (9) concepts excluded under R12e–R12f with the reason for each, (10) the core/supporting split per unit, (11) the analytical/constructive exercise split, (12) concepts promoted to `core` by an exercise, (13) inventory gaps found under R12r and whether each was fixable, (14) the Source Profile used and whether it was read from `CLAUDE.md` or newly detected, (15) any unit where an R15d–R15e question-type quota was waived under R15f, and which type the material could not supply.
+R25. After saving, report: (1) units processed, (2) questions saved, (3) candidates dropped and their fail reasons, (4) output file path, (5) whether `CLAUDE.md` Contents was updated, (6) images opened (count), (7) any candidate questions dropped because an image could not be opened or resolved (per R9e), (8) the concept inventory size per unit, (9) concepts excluded under R12e–R12f with the reason for each, (10) the core/supporting split per unit, (11) the analytical/constructive exercise split, (12) concepts promoted to `core` by an exercise, (13) inventory gaps found under R12r and whether each was fixable, (14) the Source Profile used and whether it was read from `CLAUDE.md` or newly detected, (15) any unit where an R15d–R15e question-type quota was waived under R15f, and which type the material could not supply, (16) language detected and whether `Teach_EN`/`Question_EN` translations were generated.
      // Commentary: (14) matters because a wrong profile silently changes segmentation and generation mode. Naming it in the report is how a bad detection gets caught on the first run rather than the tenth.
      // Commentary: (8) and (9) make the question count auditable — the user can see whether a chapter got N questions because it holds N concepts or because the generator padded. (10) makes the study budget visible: only the core count has to fit the available time. (12) and (13) show what the exercise anchor earned its place doing.
 
@@ -216,18 +255,26 @@ generated: <today's date>
 Priority: core — <the Objective or Key Point statement this serves, per R12l>
 Teach:
 <only the note excerpt(s) needed to answer Q1 — no more>
+Teach_EN:                ← omit when language = en (R16i)
+<English translation of the Teach field — preserves structure>
 Question: <question text>
+Question_EN: <English translation of the Question field>   ← omit when language = en
 Tests: <one-line description of the concept being tested>
-Answer key: <the key idea(s) a correct answer must include — be specific>
+Answer key: <the single minimal idea whose absence makes an answer wrong — one sentence, max 25 words>
+Elaboration: <mechanism, example, or consequence completing the answer — NOT required for a correct grade; omit the field entirely if there is none>
 Audit: PASS — <cite the exact phrase in the Teach field that contains the answer>
 
 #### Q2
 Priority: supporting
 Teach:
 <excerpt for Q2 — may omit concepts already covered in Q1's Teach per R12a>
+Teach_EN:                ← omit when language = en
+...
 Question: <question text>
+Question_EN: ...         ← omit when language = en
 Tests: ...
 Answer key: ...
+Elaboration: ...        ← omit this line when the minimal idea is the whole answer (R16e)
 Audit: PASS — ...
 
 ## Unit 2 of N — <Unit Title>
@@ -237,7 +284,7 @@ Teach:
 ...
 ```
 
-// Note: Priority, Tests and Audit are internal metadata. /learn displays only the Teach field (teach mode) and Question, and uses Answer key for grading. /learn reads Priority to filter (core-only mode) but never displays it.
+// Note: Priority, Tests and Audit are internal metadata. /learn displays only the Teach field (teach mode) and Question, and grades on Answer key alone. /learn reads Priority to filter (core-only mode) but never displays it. Elaboration is never shown before the user answers — /learn displays it only alongside Answer key after a wrong answer or a skip. Teach_EN and Question_EN are never displayed by /learn when it delivers a question — it prints them only when the user types `en` on that question.
 
 ## Usage
 

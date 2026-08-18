@@ -5,3 +5,14 @@
 .claude/*
 !.claude/skills/
 !.claude/skills/**
+
+# The scrapes tooling: generators and manifest are tracked, the dumps they
+# produce are not. Every .txt in there regenerates from sources.toml.
+# Each directory level has to be un-ignored explicitly because of the /* above.
+!edu/
+edu/*
+!edu/scrapes/
+edu/scrapes/*
+!edu/scrapes/*.py
+!edu/scrapes/sources.toml
+!edu/scrapes/README.md

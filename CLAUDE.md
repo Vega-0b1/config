@@ -26,11 +26,38 @@ R8. IF any condition not covered by R1–R7 arises THEN stop, describe the situa
 
 ## Uncertainty & Verification
 
-R1. IF uncertain about a fact THEN look it up in official documentation before answering.
-R2. IF the answer cannot be verified from documentation or a reliable source THEN say so explicitly. Do not state it as fact.
-R3. IF an answer is based on incomplete information or inference THEN disclose a rough confidence level inline (e.g., "~60% confident").
-     // Example: "I'm not sure about this, ~60% confident — verify against the NixOS manual."
-R4. R2 overrides R1: IF documentation cannot be found AND the answer cannot be verified THEN say so, even if a plausible answer exists.
+Source precedence: scraped dumps → official documentation → model knowledge.
+
+R1. IF answering a factual question about a tool, OS, language, or library THEN check `~/edu/scrapes/` for a dump covering that topic before consulting any other source.
+R2. IF a relevant dump exists THEN grep it and answer from it, citing file and line.
+     // Example: `grep -n "hl.dsp" ~/edu/scrapes/hypr_waybar_docs.txt`
+R3. IF no relevant dump exists THEN consult official documentation before answering.
+R4. IF a dump was consulted AND does not contain the answer THEN consult official documentation before answering.
+R5. IF a dump documents an older version than the one installed THEN treat the dump as stale and verify against official documentation.
+R6. IF neither a dump nor official documentation yields the answer THEN say so explicitly. Do not state a model-knowledge answer as fact.
+R7. IF answering from model knowledge THEN label it inline as unverified model knowledge AND state a rough confidence level.
+     // Commentary: The dumps are static, local, and greppable. Model recall is a probability distribution over text that may never have existed. Prefer the file on disk.
+R8. IF an answer rests on inference or incomplete information THEN disclose a rough confidence level inline (e.g., "~60% confident").
+     // Example: "~60% confident — verify against the NixOS manual."
+R9. R6 overrides R7: IF no source can be found THEN say so rather than answering from model knowledge and labeling it.
+R10. R5 overrides R2: IF a dump is stale on the point in question THEN the official documentation answer wins over the dump's.
+R11. IF any condition not covered by R1–R10 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+
+### Available dumps (`~/edu/scrapes/`)
+
+- `arch_wiki.txt` — Arch Wiki (for the `~/dotfiles` Arch mirror)
+- `nixos_wiki.txt` — NixOS wiki, re-scraped 2026-08-14. **Code blocks intact and fenced — grep this for config snippets**
+- `hypr_waybar_docs.txt` — Hyprland wiki + Waybar docs. Re-scraped 2026-08-14 from the wiki's latest-git branch; stack runs 0.56.1
+- `nixos_options.txt` — 24,558 NixOS options, **generated from the pinned flake** (grep this for option lookups)
+- `home_manager_options.txt` — 5,406 home-manager options, generated the same way
+- `nvim_plugins_docs.txt` — Neovim plugin docs (matches the configured plugin set)
+- `cortex_debug_docs.txt` — cortex-debug launch.json attribute schema (embedded/STM32 debugging)
+- `stm32f4_hal.txt` — 2,468 HAL functions with `@param` valid-value lists, from the on-disk F4 firmware
+- `openocd_manual.txt` — OpenOCD User's Guide, generated from the installed 0.12.0
+- `stm32cube_getting_started.txt` — UM1730, extracted from the local PDF; one dump page per PDF page
+
+Not mirrored here: the `configuration.nix(5)` man page — run `man configuration.nix`, it is on the system.
+Regenerate any dump with `python3 ~/edu/scrapes/scrapes.py scrape <name>`; see that directory's README for extraction artifacts.
 
 ## Quiz Mode
 

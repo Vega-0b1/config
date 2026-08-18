@@ -1,0 +1,151 @@
+# Source manifest for ~/edu/scrapes. Read by scrapes.py.
+#
+# Each table is one dump file (<name>.txt). Fields:
+#
+#   kind        "nix-options" | "markdown" | "mediawiki" | "texinfo" | "doxygen" | "pdf"
+#   urls/files  pdf kind takes remote URLs, local paths, or both
+#   min_pages   promotion blocks below this (guards against truncated scrapes)
+#   sentinels   strings that MUST survive; missing one blocks promotion
+#
+# Plugin repos were resolved from nixpkgs (pkgs.vimPlugins.<attr>.src) rather than
+# guessed. Note three are not on GitHub -- nvim-dap and nvim-lint live on codeberg,
+# rainbow-delimiters on gitlab -- which is why "markdown" takes full raw URLs
+# instead of owner/repo shorthand.
+
+
+# ---------------------------------------------------------------- generated ---
+# Built from the pinned flake, not fetched. Matches the version actually
+# installed, unlike a web scrape of whatever the site shows today.
+
+[nixos_options]
+kind        = "nix-options"
+attr        = "/etc/nixos#nixosConfigurations.vega.config.system.build.manual.optionsJSON"
+json_path   = "share/doc/nixos/options.json"
+min_options = 20000
+sentinels   = ["services.tailscale.enable", "boot.loader.systemd-boot.enable"]
+
+[home_manager_options]
+kind        = "nix-options"
+# Built through /etc/nixos/flake.lock, NOT as a bare
+# 'github:nix-community/home-manager/release-26.05' ref -- that resolves to the
+# branch HEAD, which drifts ahead of the locked rev and would document a version
+# this system does not have.
+expr        = "let f = builtins.getFlake \"/etc/nixos\"; in f.inputs.home-manager.packages.x86_64-linux.docs-json"
+json_path   = "share/doc/home-manager/options.json"
+min_options = 4500
+# programs.bash.profileExtra starts the whole session (see /etc/nixos/CLAUDE.md)
+# and had 0 hits across every dump before this file existed.
+sentinels   = ["programs.bash.profileExtra", "wayland.windowManager.hyprland"]
+
+
+# ------------------------------------------------------------------ scraped ---
+
+[nvim_plugins_docs]
+kind      = "markdown"
+min_pages = 18
+# tokyonight is the colorscheme in use; the dap stack backs embedded debugging.
+# Both were missing from the 2026-06-05 scrape.
+sentinels = ["tokyonight", "nvim-dap", "blink"]
+urls = [
+  "https://raw.githubusercontent.com/Saghen/blink.cmp/main/README.md",
+  "https://raw.githubusercontent.com/stevearc/conform.nvim/master/README.md",
+  "https://raw.githubusercontent.com/ThePrimeagen/harpoon/harpoon2/README.md",
+  "https://raw.githubusercontent.com/lukas-reineke/indent-blankline.nvim/master/README.md",
+  "https://raw.githubusercontent.com/folke/noice.nvim/main/README.md",
+  "https://raw.githubusercontent.com/MunifTanjim/nui.nvim/main/README.md",
+  "https://raw.githubusercontent.com/windwp/nvim-autopairs/master/README.md",
+  "https://codeberg.org/mfussenegger/nvim-dap/raw/branch/master/README.md",
+  "https://raw.githubusercontent.com/jedrzejboczar/nvim-dap-cortex-debug/master/README.md",
+  "https://raw.githubusercontent.com/rcarriga/nvim-dap-ui/master/README.md",
+  "https://raw.githubusercontent.com/theHamsta/nvim-dap-virtual-text/master/README.md",
+  "https://codeberg.org/mfussenegger/nvim-lint/raw/branch/master/README.md",
+  "https://raw.githubusercontent.com/neovim/nvim-lspconfig/master/README.md",
+  "https://raw.githubusercontent.com/nvim-neotest/nvim-nio/master/README.md",
+  "https://raw.githubusercontent.com/rcarriga/nvim-notify/master/README.md",
+  "https://raw.githubusercontent.com/nvim-treesitter/nvim-treesitter/main/README.md",
+  "https://raw.githubusercontent.com/windwp/nvim-ts-autotag/main/README.md",
+  "https://raw.githubusercontent.com/nvim-lua/plenary.nvim/master/README.md",
+  # No README in this repo; it ships vim help files, which document it better.
+  "https://gitlab.com/HiPhish/rainbow-delimiters.nvim/-/raw/master/doc/rainbow-delimiters.txt",
+  "https://raw.githubusercontent.com/Aasim-A/scrollEOF.nvim/master/README.md",
+  "https://raw.githubusercontent.com/nvim-telescope/telescope.nvim/master/README.md",
+  "https://raw.githubusercontent.com/folke/tokyonight.nvim/main/README.md",
+]
+
+[cortex_debug_docs]
+kind      = "markdown"
+min_pages = 2
+# The VS Code debug adapter that nvim-dap-cortex-debug drives. debug_attributes.md
+# is the launch.json schema -- svdFile and runToEntryPoint are both referenced in
+# /etc/nixos/CLAUDE.md and had 0 hits across every dump before this entry.
+# CHANGELOG.md (861 lines) is deliberately excluded: release noise, not reference.
+sentinels = ["svdFile", "runToEntryPoint", "openocd"]
+urls = [
+  "https://raw.githubusercontent.com/Marus/cortex-debug/master/debug_attributes.md",
+  "https://raw.githubusercontent.com/Marus/cortex-debug/master/README.md",
+]
+
+[hypr_waybar_docs]
+kind      = "markdown"
+min_pages = 90
+sentinels = ["dispatch", "windowrule", "waybar"]
+# The 2026-06-08 scrape took the whole repo, wasting pages on README.md and
+# .github/pull_request_template.md. Restricted to content/ here.
+tree = [
+  { host = "github", repo = "hyprwm/hyprland-wiki", branch = "main", prefix = "content/", ext = ".md" },
+]
+urls = [
+  "https://raw.githubusercontent.com/Alexays/Waybar/master/README.md",
+  "https://raw.githubusercontent.com/wiki/Alexays/Waybar/Home.md",
+  "https://raw.githubusercontent.com/wiki/Alexays/Waybar/Writing-Modules.md",
+]
+
+[nixos_wiki]
+kind        = "mediawiki"
+api         = "https://wiki.nixos.org/w/api.php"
+namespace   = 0
+min_pages   = 1200
+# useGrimAdapter sits inside a {{File}} code template; if the template parser
+# regresses, it is the first thing to disappear.
+sentinels   = ["useGrimAdapter", "services.flameshot", "1Password"]
+
+[stm32f4_hal]
+kind      = "doxygen"
+# SCOPED TO THE DRIVER DIRECTORY ON PURPOSE. The firmware package around it is
+# 2.7 GB (Middlewares/TouchGFX, STemWin, Projects, CMSIS); including any of that
+# would produce a dump larger than arch_wiki.txt. F4 matches the target board,
+# embedded/BlackPill -> board = blackpill_f411ce.
+root      = "~/STM32Cube/Repository/STM32Cube_FW_F4_V1.28.3/Drivers/STM32F4xx_HAL_Driver/Src"
+glob      = "*.c"
+title     = "STM32F4 HAL API Reference"
+min_pages = 50
+sentinels = ["HAL_GPIO_WritePin", "GPIO_PIN_RESET", "HAL_StatusTypeDef"]
+
+[openocd_manual]
+kind        = "texinfo"
+# From the openocd this system runs, not the project website: the .info files
+# ship inside the derivation, so the manual always matches the installed binary.
+expr        = "let f = builtins.getFlake \"/etc/nixos\"; in f.inputs.nixpkgs.legacyPackages.x86_64-linux.openocd"
+info_glob   = "share/info/openocd.info*"
+title       = "OpenOCD User's Guide"
+min_pages   = 20
+sentinels   = ["flash bank", "STM32", "swd"]
+
+[arch_wiki]
+kind        = "mediawiki"
+api         = "https://wiki.archlinux.org/api.php"
+namespace   = 0
+user_agent  = "arch-wiki-scraper/1.0 (nixos-config)"
+min_pages   = 4000
+sentinels   = ["Pacman", "Systemd"]
+
+# Local PDF, already on disk with the F4 firmware -- no download involved.
+# Also the worked example of the `pdf` kind: one dump page per PDF page, so an
+# index entry reads "... — page 12" and a citation resolves directly.
+[stm32cube_getting_started]
+kind      = "pdf"
+files     = ["~/STM32Cube/Repository/STM32Cube_FW_F4_V1.28.3/Documentation/STM32CubeF4GettingStarted.pdf"]
+doc_title = "UM1730 STM32CubeF4 Getting Started"
+title     = "STM32CubeF4 Getting Started (UM1730)"
+min_pages = 20
+sentinels = ["STM32Cube", "HAL"]
