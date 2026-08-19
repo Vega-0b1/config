@@ -49,6 +49,12 @@ R16. Do NOT move `extracted/`, `source/`, `code/`, or `CLAUDE.md`.
 R17. Write `{target}/CLAUDE.md` using the template below.
 R18. IF `code/` was not created (R10) THEN omit the `code/` line from the directories block in CLAUDE.md.
 R18a. IF writing the `## Contents` section THEN add a one-line entry (`- file — description`) for every file sorted in R11–R15, grouped under a `**<dir>/**` bold header per directory.
+R18a1. Every Contents entry MUST begin with the file's literal name in backticks, then ` — `, then the description. Do NOT name a file in prose only.
+     // Commentary: /updateclass R5 reads this section by basename to decide what is new. An entry written as "Kurose & Ross textbook EPUB" is invisible to that match, so the file resurfaces as new on every run and risks being re-extracted.
+     // FAILS R18a1:  - Kurose & Ross textbook EPUB (full book — already extracted)
+     // PASSES R18a1: - `kurose_networking_7e.epub` — Kurose & Ross textbook, full book, already extracted to `networking_notes.md`
+R18a2. IF one entry covers several files THEN name each of them in backticks on that line.
+     // PASSES R18a2: - `udp_client.py`, `udp_server.py` — UDP socket programming exercises
 R18b. IF a directory received no files THEN omit its group header from the Contents section.
 R18c. IF no files were sorted at all THEN keep the `## Contents` section with the single line: `Nothing here yet — /extract and /generate_questions add entries as they create files.`
      // Commentary: the section must exist so those skills grow it instead of skipping it.

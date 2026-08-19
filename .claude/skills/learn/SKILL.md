@@ -1,33 +1,43 @@
 ---
 name: learn
-description: Teach the user course material concept by concept, then check understanding with questions. Pass no_context for a blind review mode that hides the teaching content and just scores answers. Pass core to deliver only the questions tagged core, skipping supporting material. Say "flag" on a question to log it with a reason for later processing. Say "en" on a question to see its English translation when the material is not in English. Requires a pre-generated questions file from /generate_questions. Reads from extracted/ in the current directory.
+description: Teach the user course material concept by concept, then check understanding with questions. Delivers the core questions by default — what the professor actually taught. Append + to the topic (chapter1+) for full textbook coverage including material the course skipped. Pass no_context for a blind review mode that hides the teaching content and just scores answers. Say "flag" on a question to log it with a reason for later processing. Say "en" on a question to see its English translation when the material is not in English. Requires a pre-generated questions file from /generate_questions. Reads from extracted/ in the current directory.
 ---
 
 Deliver course material question by question using a pre-generated questions file. `/learn` is a delivery engine — it does not generate content or questions. Those come from `/generate_questions`.
 
 Two modes: **teach** (default) shows each question's Teach field before asking — first contact with material. **review** (`no_context` flag) hides all Teach fields and asks blind — retrieval practice for material already learned. The modes differ only in Teach field visibility: in both, a graded answer (right or wrong) shows the answer and moves on. Say "flag" on any question to log it with a reason to a flagged-questions file for later processing. Say "en" on any question to see its English translation, when the questions file carries one.
 
-One filter, independent of the mode: **`core`** delivers only the questions tagged `Priority: core` — the concepts that serve the chapter's own stated Objectives and Key Points — and skips the supporting material. Use it when time is short; use the unfiltered run for full coverage. The two flags compose in either order.
+One filter, independent of the mode, and it is **on by default**. A bare `/learn chapter1` delivers only the questions tagged `Priority: core` — the concepts the professor's own material covers, or failing that the ones serving the chapter's stated Objectives and Key Points. Append `+` to the topic (`/learn chapter1+`) to get everything, including the textbook material the course skipped.
+
+The default is the common case: you are studying for a class you are currently taking. The `+` run is the deliberate one — a chapter the professor passed over, or the whole book after the semester ends. Nothing is ever deleted by the filter; `+` always reaches it.
+
+IF a file has no core tier — because the class has no anchor to rank against — then a bare run delivers everything and says so. It never refuses.
 
 ## Rules
 
 // Mode selection & loading
 R1.  IF the arguments contain `no_context` or `--no_context` THEN mode = review; remove that token from the arguments.
-R1a. IF more than one argument remains after removing the mode flag (R1) and the filter flag (R1b) THEN stop and ask the user which one is the topic. STOP until user responds.
-R1b. IF the arguments contain `core` or `--core` THEN filter = core-only; remove that token from the arguments.
-R1c. IF filter = core-only THEN deliver only entries whose `Priority` field begins with `core`. Skip all other entries without displaying them and without counting them in the total.
-R1d. IF no core flag is given THEN filter = all; deliver every entry regardless of its `Priority` field.
-R1e. IF filter = core-only AND the loaded file contains zero entries whose `Priority` field begins with `core` THEN stop and tell the user: "No core questions in this file — run without the core flag, or re-run /generate_questions <arg>."
-R1f. IF filter = core-only AND the loaded file's entries have no `Priority` field at all THEN consult the class's `## Source Profile` in `CLAUDE.md`. IF its generation mode is `capped` THEN stop and tell the user: "<class> is untiered by design — its textbook has no objectives or key points to rank against. Run without the core flag." ELSE stop and tell the user: "This questions file predates priority tagging — re-run /generate_questions <arg>, or run without the core flag."
-R1g. IF filter = core-only AND every entry reads `Priority: untiered` THEN stop and give the same untiered-by-design message as R1f.
-     // Commentary: two different causes need two different messages. Telling someone to regenerate a file that has no anchor to tier against sends them to do work that cannot succeed.
-R1h. `untiered` is not `supporting`. An `untiered` file is delivered in full by an unfiltered run exactly as a tiered file is.
-     // Commentary: silently delivering everything when the user asked for core-only would misrepresent the session length they signed up for. Refusing with the right reason is the point of R1f–R1g.
-R1i. R1f and R1g override R1e. IF the file has no `Priority` field at all THEN R1f is the message. IF every entry reads `Priority: untiered` THEN R1g is the message. R1e fires only on a tiered file whose entries are all `supporting`.
-     // Commentary: R1f's and R1g's conditions are both subsets of R1e's — a file with no Priority field also has zero core entries. Without this rule the generic "re-run /generate_questions" message wins by position, which is the exact wrong advice R1f exists to avoid.
+R1a. IF more than one argument remains after removing the mode flag (R1) and the deprecated core token (R1b) THEN stop and ask the user which one is the topic. STOP until user responds.
+R1b. IF the arguments contain `core` or `--core` THEN remove that token and print one line: "`core` is the default now — delivering core questions. Use `<topic>+` for everything." Do NOT treat it as a filter and do NOT stop.
+     // Commentary: the token named an opt-in that is now the default, so it is redundant rather than wrong. Erroring on muscle memory would punish the user for a change they did not make; ignoring it silently would leave them believing a flag is doing work.
+
+// Filter resolution — R1c–R1d run on the arguments; R1e resolves against the loaded file
+R1c. IF the topic argument ends in `+` THEN requested filter = all. Strip the `+` before the R3 file lookup.
+     // Example: `/learn chapter1+` loads `extracted/questions_chapter1.md` and delivers every entry.
+R1d. IF the topic argument does not end in `+` THEN requested filter = core-only.
+     // Commentary: the common case is studying for the class you are currently in, and that is the case that should need no flag. Full textbook coverage is the deliberate act — after the course ends, or for a chapter the professor skipped — so it is what carries the marker.
+R1e. After loading the file per R3–R4: IF requested filter = core-only AND the file contains zero entries whose `Priority` field begins with `core` THEN set filter = all and print one line naming the cause per R1e1–R1e3. Do NOT stop.
+     // Commentary: this replaces three refusal rules that were correct when `core` was an explicit opt-in — the user had asked for something the file could not give. As a default it must never refuse, or every untiered class on the system becomes unrunnable without a flag the user has no reason to know about.
+R1e1. IF every entry reads `Priority: untiered` THEN the line is: "<class> has no anchor to tier against — delivering all N questions."
+R1e2. IF the entries carry no `Priority` field at all THEN the line is: "This questions file predates priority tagging — delivering all N. Re-run /generate_questions <arg> to tier it."
+R1e3. IF the entries are tiered but none is `core` THEN the line is: "No core questions in this file — delivering all N."
+R1e4. R1e1 and R1e2 override R1e3. A file with no `Priority` field also has zero `core` entries, so all three conditions can hold at once; the most specific cause is the one to name.
+R1f. IF filter = core-only THEN deliver only entries whose `Priority` field begins with `core`. Skip all other entries without displaying them and without counting them in the total.
+R1g. IF filter = all THEN deliver every entry regardless of its `Priority` field.
+R1h. `untiered` is not `supporting`. An `untiered` file is delivered in full, exactly as a tiered file is under `+`.
 R2.  IF the arguments do not contain a no_context flag THEN mode = teach.
-R2a. R1 and R1b are independent. Both flags may be given together in either order.
-     // Example: `/learn chapter1 core no_context` = review mode, core questions only.
+R2a. The mode flag (R1) and the `+` suffix (R1c) are independent. Both may be given, in either order.
+     // Example: `/learn chapter1+ no_context` = review mode, every question.
 R3.  IF <arg> is given THEN look for `extracted/questions_<arg>.md`.
 R4.  IF the file exists THEN load it and proceed to R7.
 R4a. IF the loaded file contains zero units or zero questions THEN stop and tell the user: "Questions file is empty — re-run /generate_questions <arg>."
@@ -35,6 +45,13 @@ R5.  IF the file does not exist THEN stop and tell the user: "Run /generate_ques
 R6.  IF no <arg> is given THEN list all `extracted/questions_*.md` files and ask the user to pick one. STOP until user responds.
 
 // Unit and question delivery
+// Course scope notice
+R6a. After loading the file per R3–R4 and before the first question: IF the class `CLAUDE.md` holds a `### Course Scope` entry listing the loaded chapter as not covered THEN print one line saying the course does not cover it. Then proceed normally.
+     // Example: `Note: CS4470 does not cover chapter 7 — this is textbook material beyond the course.`
+R6b. R6a is a notice, not a gate. Do NOT refuse, do NOT ask for confirmation, and do NOT change the filter.
+     // Commentary: studying a chapter the course skipped is a deliberate act — after the final, or out of interest. The notice sets the expectation that none of it will be on the exam; blocking it would remove the reason the questions were generated at all.
+R6c. IF the loaded chapter is in scope, or the class has no `### Course Scope` entry, THEN print no notice.
+
 R7.  IF starting a new unit THEN display "Unit X of Y — <title>" as a level-2 markdown heading: `## Unit X of Y — <title>`.
 R8.  IF mode = teach AND about to display a question THEN first display that question's `Teach:` field verbatim as a markdown blockquote — prefix every line of the Teach content, including blank lines between sub-concepts, with `> `.
      // Commentary: the blockquote renders as a distinct callout in the desktop app; the `> ` on blank lines keeps a multi-paragraph Teach field inside one quote block.
@@ -47,7 +64,7 @@ R9.  IF mode = review THEN do NOT display Teach fields at any point.
      // Commentary: review mode is retrieval practice — showing the material before the question makes it an open-book test of text on screen.
 R10. Do NOT rewrite, summarize, or add to the Teach field.
 R11. Do NOT display `Priority`, `Tests`, or `Audit` fields at any point.
-     // Commentary: Priority is read by R1c to filter and is never shown. Displaying it mid-session invites treating `supporting` questions as skippable.
+     // Commentary: Priority is read by R1f to filter and is never shown. Displaying it mid-session invites treating `supporting` questions as skippable.
 R11a. Do NOT display the `Elaboration` field before the user answers, in either mode. It is post-grade material, released only under R17 and R18.
 R12. Ask one question at a time. Display only the `Question` field, rendered as a level-3 markdown heading with a `❓` anchor: `### ❓ <question text>`. Do NOT display the next question until the user answers the current one.
 
@@ -117,8 +134,18 @@ R27. Do NOT append the English reference after wrong answers, skips, or flags.
 // Wrap up (both modes)
 R28. IF the last delivered question of the last unit has been graded, skipped, or flagged THEN display the final score as (correct / total) — skips count as wrong; flagged questions are excluded from the total — list the questions marked wrong or skipped with their unit titles, list any flagged questions, and output a one-paragraph summary of the weak areas.
 R28a. IF filter = core-only THEN the R28 score line MUST name the filter and the file's full size.
-     // Example: `**Final score: 12 / 16** (core only — 16 of 33 questions in this file)`
+     // Example: `**Final score: 12 / 16** (core only — 16 of 33 questions in this file. Run `/learn chapter2+` for all 33.)`
      // Commentary: without this the user cannot tell a 16-question core pass from a 16-question file.
+R28a1. IF filter was set to all by R1e THEN the R28 score line MUST say the file had no core tier, naming the R1e1–R1e3 cause.
+     // Example: `**Final score: 24 / 33** (all 33 — this file is untiered, so there was no core subset to deliver.)`
+     // Commentary: R1e prints its line before the session starts, an hour of questions earlier. Without the reminder at the score, a full run reads as though core-only silently delivered everything.
+R28a2. IF filter = all because the topic ended in `+` THEN the R28 score line MUST say the run was the full file.
+     // Example: `**Final score: 24 / 33** (all 33 questions — full coverage.)`
+R28c. IF `extracted/gaps_<arg>.md` exists THEN, after the R28 score, print one line naming how many topics it lists and pointing at the file.
+     // Example: `⚠ 3 topics were taught but are not in the textbook — see extracted/gaps_chapter1.md. No questions exist for them.`
+     // Commentary: these are topics the professor covered that the notes cannot answer, so no question in this session tested them and a good score says nothing about them. Surfacing the count at the score is the only moment the user is thinking about their coverage.
+R28d. Do NOT list the gap topics individually and do NOT attempt to teach them. Name the count and the file.
+     // Commentary: /generate_questions R24m deliberately records no answers for these — everything known about them is that they were taught and are absent. Improvising an explanation here would invent exactly the unaudited content that rule exists to prevent.
 R28b. IF every delivered question was flagged THEN display no score. Say instead: "All N questions were flagged — no score. Flagged questions are in `extracted/flagged_questions_<arg>.md`." R28b overrides R28.
      // Commentary: R24 excludes flagged questions from the total, so an all-flagged run makes the R28 score line read "0 / 0".
 
@@ -129,10 +156,10 @@ R29. IF any condition not covered by R1–R28 (including all lettered sub-rules)
 
 ```
 /generate_questions chapter2      ← run this first
-/learn chapter2                   ← first pass: teach then ask, everything
-/learn chapter2 core              ← first pass, core concepts only
-/learn chapter2 no_context        ← review pass: blind questions, score at the end
-/learn chapter2 core no_context   ← review pass, core concepts only
+/learn chapter2                   ← first pass: teach then ask, core only (the default)
+/learn chapter2+                  ← first pass, everything the textbook covers
+/learn chapter2 no_context        ← review pass: blind questions, core only
+/learn chapter2+ no_context       ← review pass, everything
 ```
 
 In-session keywords, typed in reply to a pending question:

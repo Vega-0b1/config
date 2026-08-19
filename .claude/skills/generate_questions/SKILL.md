@@ -1,6 +1,6 @@
 ---
 name: generate_questions
-description: Pre-generate and audit quiz questions from extracted notes for a chapter or topic. Saves questions alongside teaching content to extracted/questions_<arg>.md for use by /learn.
+description: Pre-generate and audit quiz questions from extracted notes for a chapter or topic. Saves questions alongside teaching content to extracted/questions_<arg>.md for use by /learn. Re-running on an existing file MERGES by default rather than starting over — it recomputes priority against any new instructor material and adds questions for concepts not yet covered, leaving already-audited entries and their numbering untouched. Also writes extracted/gaps_<arg>.md naming topics the professor taught that the textbook cannot answer.
 ---
 
 Pre-generate audited questions for the specified chapter or topic and save them to `extracted/`.
@@ -13,13 +13,32 @@ R0a. IF a Source Profile exists THEN use it. Do NOT re-detect.
 R0b. IF no Source Profile exists THEN detect the source's shape per R0c–R0f, write it to `CLAUDE.md` as a `## Source Profile` section, and report that it was created.
 R0c. Chapter heading = the shallowest heading level whose text matches a chapter form (`# Chapter N`, `## N`, `# N`). A heading-like line is NOT a heading if it is a code comment — judge by whether it sits among code lines rather than prose.
      // Commentary: a PDF extraction can turn `# !/usr/bin/python3` into what looks like a top-level heading. Counting those destroys the chapter map.
+R0c1. A heading whose entire trimmed text matches `Page <N>` or `Slide <N>` — with or without a trailing `— <title>` — is a LOCATOR, not a heading. Exclude locators when determining the chapter level under R0c, the unit level under R0d, and the unit count under R7.
+     // Commentary: /extract R11b and R14b emit these so a dump can be cited and grepped by position. Counting them as structure turns a 400-page PDF into 400 one-page units and a 42-slide deck into 42 units, and every one of those units would then demand its own questions.
+R0c2. IF a file's only headings are locators THEN it has no chapter heading and no unit heading. Record `Unit heading: none` and let R8a treat the whole file as one unit.
+R0c3. Locators remain valid citation targets. R0c1 removes them from segmentation only — R12o cites them by name.
 R0d. Unit heading = the heading level one deeper than the chapter level. IF only one heading level exists THEN unit = chapter.
-R0e. Anchor source = `apparatus` IF an alias from R12i0 appears in at least 80% of chapters AND that section is enumerated per R0e1; ELSE `instructor` IF the class root holds a syllabus, exam, or slide deck; ELSE `none`.
+R0e. Anchor source = `instructor` IF `CLAUDE.md` holds an `## Instructor Material` section with at least one entry under `### Teaching`; ELSE `apparatus` IF an alias from R12i0 appears in at least 80% of chapters AND that section is enumerated per R0e1; ELSE `none`.
+R0e3. `### Course Scope` entries do NOT satisfy R0e and never contribute to the anchor. They are read only by R0j–R0j2.
+     // Commentary: a syllabus names a whole week's topic — "Week 6: Transport layer". Every concept in that chapter answers to it, so it ranks nothing, which is the same defect R0e1 rejects narrative summaries for. A class holding only a syllabus has no anchor and stays `capped`.
+R0e0. R0e's `instructor` test reads the registry and nothing else. Do NOT infer instructor provenance from a file sitting in `source/`, from a filename, or from an extension.
+     // Commentary: the registry records a y/n answer the user gave in /updateclass, which is the only place that fact exists. A deck in source/ that the user said was NOT instructor-provided must not promote anything — inferring from location would silently overrule them.
 R0e1. An apparatus section is `enumerated` IF its content is a bulleted or numbered list of discrete claims. A running-prose recap is NOT enumerated, even when titled "Summary".
      // Commentary: presence of the heading is not enough. The anchor has to be a set of separable statements that concepts can be ranked against one at a time.
      // PASSES R0e1: Sommerville Key Points — "■ Software engineering is an engineering discipline that is concerned with all aspects of software production." Discrete and rankable.
      // FAILS R0e1:  Kurose chapter Summary — "In this chapter we've covered a tremendous amount of material! We've looked at the various pieces of hardware and software that make up the Internet..." It renarrates the whole chapter, so every concept matches it and it ranks nothing.
+R0e2. R0e's order is deliberate: instructor material outranks textbook apparatus. IF a chapter has both THEN the apparatus stops promoting concepts for that chapter entirely.
+     // Commentary: what the professor put in front of the class is what is testable. Taking the union instead would let a broad Key Point promote most of a chapter, and the core tier would stop discriminating — which is the whole reason to have a tier.
 R0f. Generation mode = `tiered` IF anchor source is not `none`; ELSE `capped`.
+R0f1. R0e and R0f record the CLASS-level default. The anchor that governs a given run is the EFFECTIVE anchor, resolved per chapter under R0f2.
+R0f2. Effective anchor = `instructor` IF the registry maps at least one `### Teaching` entry to the chapter being generated; ELSE the class-level anchor from R0e, with its R0f mode.
+R0f3. Effective generation mode = `tiered` IF the effective anchor is not `none`; ELSE `capped`. Every rule below that tests generation mode tests the EFFECTIVE mode.
+     // Commentary: a professor covers chapters 1–5 and skips 6–9. Chapter 1 tiers against its slides; chapter 8 falls back to capped/untiered — same class, same skill, no user intervention and no wrong answer in either direction. A single class-level mode could only be right for one of them.
+// Course scope
+R0j. IF `CLAUDE.md` holds a `### Course Scope` entry THEN read its `covers` and `not covered` chapter lists.
+R0j1. A `### Course Scope` entry NEVER promotes a concept to `core` and never participates in R12n–R12q1.
+R0j2. IF the chapter being generated is listed as not covered THEN generate its questions normally and say in the R25 report that the course does not cover this chapter.
+     // Commentary: out of scope is not out of bounds. The material is still in the book and still worth studying after the course ends — /learn reaches it with `+`. Refusing to generate would delete the option; reporting it sets the expectation.
 R0g. The user may correct a Source Profile by hand. R0a makes the correction permanent.
      // Commentary: detection is a heuristic and will sometimes be wrong. Persisting the result means a wrong guess is corrected once rather than re-made every run.
 R0h. Detect the language of the notes content. Record `language: <code>` (e.g. `es`, `en`) in the Source Profile.
@@ -27,20 +46,50 @@ R0i. IF language = `en` THEN skip R16f–R16g. No `Teach_EN` or `Question_EN` fi
 
 // File loading
 R1.  IF argument is given AND a file named `extracted/<arg>.md` exists THEN use that file as the notes source.
-R2.  IF argument is given AND no file named `extracted/<arg>.md` exists THEN normalize the argument and search all `.md` files in `extracted/` — excluding `questions_*.md` and `practice_*.md` files — for a chapter heading matching it under the Source Profile's chapter heading pattern.
+R2.  IF argument is given AND no file named `extracted/<arg>.md` exists THEN normalize the argument and search all `.md` files in `extracted/` — excluding `questions_*.md`, `practice_*.md`, and `gaps_*.md` files — for a chapter heading matching it under the Source Profile's chapter heading pattern.
 R2a. Normalization: `chapter<N>`, `ch<N>`, and `<N>` all match the chapter whose number is `<N>`. Matching is on the chapter NUMBER, not on the argument as a literal substring.
      // Commentary: `chapter5` is not a substring of `## 5`. Before R2a this failed on every chapter and had to be bridged by hand.
 R2b. IF the argument does not normalize to a chapter number THEN fall back to matching it as a case-insensitive substring of a heading.
      // Commentary: keeps non-chapter arguments such as `wk10` working.
-     // Commentary: questions_*.md and practice_*.md are this skill's own output; matching their headings would generate questions from questions.
+     // Commentary: questions_*.md, practice_*.md, and gaps_*.md are this skill's own output; matching their headings would generate questions from questions.
+R2c. Exclude from the R2 search, and from the candidate lists R4 and R4a show the user, every file listed in `## Instructor Material`.
+     // Commentary: instructor extractions live in `extracted/` alongside the textbook notes, so R2 would happily select a slide deck as the notes source. R9i bars that material from supplying Teach content; without R2c the file-selection step routes around R9i before it ever runs, and the result is a chapter of questions whose answers are three-word bullets.
 R3.  IF R2 finds a heading match THEN use the content under that heading as the notes source.
-R4.  IF an argument is given AND neither R1 nor R2–R3 locates a source THEN list all `.md` files in `extracted/` — excluding `questions_*.md` and `practice_*.md` — and ask the user which to use. STOP until user responds.
+R4.  IF an argument is given AND neither R1 nor R2–R3 locates a source THEN list all `.md` files in `extracted/` — excluding `questions_*.md`, `practice_*.md`, and `gaps_*.md` — and ask the user which to use. STOP until user responds.
 R4a. IF no argument is given THEN list those same files, ask the user which to use, and STOP until user responds. Do not proceed on an empty argument.
 R4b. IF the source was chosen under R4 or R4a AND no argument was given THEN ask the user for the `<arg>` to name the output file, and STOP until user responds. Do not derive it.
      // Commentary: R24, R24a, and R24e all build filenames from `<arg>`. Picking a source without an `<arg>` leaves the output path undefined, and a guessed name is what /learn will fail to find later.
-R5.  IF `extracted/questions_<arg>.md` already exists THEN ask "Overwrite?" STOP until user responds.
-R6.  IF user answers no to R5 THEN stop execution.
-R6a. IF user answers yes to R5 THEN proceed to R7.
+// Existing-file handling
+R5.  IF `extracted/questions_<arg>.md` already exists THEN read its frontmatter, state the recommended operation per R5a, and ask the user to choose `merge`, `regenerate`, or `cancel`. STOP until user responds.
+R5a. The recommended operation is `merge` unless the notes source has been re-extracted since the file's `generated:` date, in which case it is `regenerate`.
+     // Commentary: merge is right whenever the textbook is unchanged, which is every week that only new instructor material arrived. Recommending it — rather than defaulting to the destructive path as the old "Overwrite?" prompt did — is what keeps a weekly registry update from rewriting 32 audited questions.
+R5b. IF the user chooses `merge` THEN proceed under R5f–R5m. IF `regenerate` THEN discard the existing file and proceed to R7 as a first generation. IF `cancel` THEN stop execution.
+R5c. IF `extracted/questions_<arg>.md` does not exist THEN proceed to R7 as a first generation. Do NOT prompt.
+
+// Recorded state
+R5d. Read `mode:` and `anchor:` from the existing file's frontmatter. These record how it was generated.
+R5e. IF the frontmatter carries no `mode:` or no `anchor:` THEN treat the file as `mode: capped`, `anchor: none`.
+     // Commentary: correct for every file generated before this field existed — those runs had no anchor to rank against, which is exactly what capped/none records.
+
+// Merge operation selection
+R5f. Under a merge, compare the file's recorded state (R5d–R5e) against the EFFECTIVE state for this run (R0f2–R0f3), and compare the current concept inventory against the concepts the file already questions.
+R5g. IF the effective mode equals the recorded mode AND the inventory yields no concept the file lacks THEN the operation is RE-TIER. Apply R5h only.
+R5h. RE-TIER: recompute the `Priority:` field of every existing entry against the current registry, per R12h–R12q1. Leave every other field of every entry byte-identical — Teach, Teach_EN, Question, Question_EN, Tests, Concept, Answer key, Elaboration, and Audit.
+R5h1. A re-tier MUST NOT re-run the audit (R17–R23b), MUST NOT rewrite question text, and MUST NOT touch `extracted/flagged_questions_<arg>.md`.
+     // Commentary: R9i makes this safe rather than merely convenient. Questions derive only from the notes source; instructor material only assigns priority. New slides therefore cannot change which questions exist, only which are core — so re-auditing could not discover anything, and rewriting would churn text the user has already studied.
+R5i. IF the effective mode differs from the recorded mode, OR the inventory yields at least one concept the file lacks, THEN the operation is EXTEND. Apply R5j–R5m, then R5h.
+R5j. EXTEND: build the unit's concept inventory per R12c–R12g, then subtract the concepts the file already questions. Generate candidates for the remainder only, and audit those candidates per R17–R23b.
+R5k. Match an existing entry to a concept by its `Concept:` field. IF an entry has no `Concept:` field THEN match on its `Tests:` field instead.
+     // Commentary: R13e already guarantees one question maps to exactly one inventory concept, but no field recorded which until now. `Tests:` is a one-line description of the concept under test, which is close enough to carry the four legacy files through their first merge; every entry written after this rule carries `Concept:` and matches exactly.
+R5k1. IF R5k's field match does not connect a candidate concept to an existing entry THEN test that concept against every existing entry's `Answer key` using R12g's same-idea test. IF an existing Answer key already carries the idea THEN treat the concept as covered and generate nothing for it.
+     // Commentary: questions files get hand-edited. `~/edu/network` chapter 1 Unit 1 Q3 was replaced by hand with a socket-interface question, and its `Tests:` prose resembles no phrasing this skill would generate — so a field match alone misses it and extend appends a second question on the same concept. R12g already defines "same idea" for comparing two inventory concepts; R5k1 applies that same test across the merge boundary.
+R5k2. R5k1 governs whether a concept is COVERED, not whether an existing entry is correct. Do NOT rewrite or replace an entry that R5k1 matched.
+     // Commentary: a hand-edited question is the user's deliberate correction of something this skill produced. Treating a match as license to regenerate it would undo that edit silently — which is exactly the failure R5h exists to prevent.
+R5l. Append new entries at the END of their unit. Existing entry numbers MUST NOT change.
+R5l1. R5l overrides R13b for extended entries: the foundational-to-complex ordering applies within a generation, not across a merge.
+     // Commentary: /learn R23 writes question numbers into `flagged_questions_<arg>.md`. Renumbering to restore R13b's ordering would invalidate every reference in that file, which is a worse outcome than a late entry that happens to be foundational.
+R5m. IF an existing entry maps to no concept in the current inventory THEN keep it, and report it under R25. Do NOT delete it.
+     // Commentary: an audited question that survived R17–R21 is not garbage merely because a rebuilt inventory phrased its concept differently. Deleting on an inventory mismatch would silently shrink a file the user has been studying.
 
 // Unit segmentation
 R7.  Count the headings matching the Source Profile's unit heading pattern inside the selected chapter. This count is N.
@@ -55,6 +104,15 @@ R9b. IF a unit's content contains an image link that plausibly holds a formula, 
 R9c. IF an image link is immediately followed by a "**Figure N**" caption AND that caption already conveys the content a question would test THEN you MAY rely on the caption text instead of opening the image.
 R9d. IF an opened image contains a formula, table, or data needed by a candidate question THEN transcribe its content into that question's Teach field as text, using plain-text / Unicode math consistent with existing Teach fields (e.g. *n*², Θ(n), ⌊x⌋) — never LaTeX and never a re-embedded image link. R11/R11a/R11b then apply to the transcription.
 R9e. IF an image needed for a candidate question cannot be opened or its path cannot be resolved THEN drop that question and record the image in the R25 report. Do NOT guess the image's content.
+
+// Instructor material (per chapter) — read before the inventory; R12n reads its output
+R9f. IF the effective anchor is `instructor` THEN read every `### Teaching` file the registry maps to the chapter being generated, before building any unit's concept inventory. Resolve each path relative to the class root. Do NOT read `### Course Scope` files here.
+R9g. IF a registered path is a code file or an image THEN open it with the Read tool. Its content counts as instructor coverage under R12n exactly as an extracted markdown file does.
+     // Commentary: /updateclass R21 registers code and images by path rather than extracting them, because converting a diagram or a socket demo to markdown only loses fidelity. Reading them here is what makes that decision work.
+R9h. IF a registered file cannot be opened or its path cannot be resolved THEN do NOT treat its absence as evidence that a concept is uncovered. Assign priority from the registered files that did open, and report the unreadable file under R25.
+     // Commentary: a stale path would otherwise demote a chapter's entire core tier to supporting, producing a short and confidently wrong study list with no signal that anything went missing.
+R9i. Instructor material is read to ASSIGN PRIORITY. It is not a source of questions and not a source of Teach content.
+     // Commentary: questions come from the notes source selected under R1–R4; R17 audits every answer against a Teach field drawn from it. A slide's three-word bullet cannot support a question that survives that audit, and treating it as note content would produce exactly the unanswerable questions R23a exists to catch.
 
 // Teach content (per question)
 R10. IF writing a question THEN write a `Teach:` field immediately before `Question:` containing only the note excerpt(s) needed to answer this specific question — no more.
@@ -119,10 +177,13 @@ R12h0c. IF an exercise contains both an analytical and a constructive clause THE
 
 // Priority assignment (per inventory concept)
 R12h. IF a concept is admitted to the inventory THEN assign it a priority of `core` or `supporting`.
-R12h1. R12h1 overrides R12h: IF generation mode = `capped` THEN skip R12h–R12m and R12r–R12s entirely and emit `Priority: untiered` on every entry.
+R12h1. R12h1 overrides R12h: IF the effective generation mode = `capped` THEN skip R12h–R12q1 and R12r–R12s entirely and emit `Priority: untiered` on every entry.
 R12h2. R12h1 does NOT skip R12h0–R12h0c. Exercise classification runs in every generation mode.
      // Commentary: R24e writes constructive exercises to practice_<arg>.md regardless of mode. Folding classification into the skipped range would silently drop that file for every capped class.
      // Commentary: `untiered` is not `supporting`. It records that this class's textbook offers no anchor to rank against, so /learn can say so precisely instead of advising a regeneration that would not help.
+R12h3. IF the effective anchor is `instructor` THEN assign priority under R12n–R12q1. R12i0–R12l do NOT apply, including R12i2's per-statement cap.
+     // Commentary: R12i ranks concepts against the author's own statements; R12n ranks them against the professor's teaching. Running both would produce the union R0e2 rejects. R12i2's cap in particular has no denominator here — a slide is a locator, not a claim that nine concepts can be over-matched against.
+R12h4. IF the effective anchor is `apparatus` THEN assign priority under R12i0–R12l. R12n–R12q1 do NOT apply.
 R12i0. Apparatus sections are recognized case-insensitively by any of these headings: Objectives, Learning Objectives, Chapter Objectives, Key Points, Summary, Chapter Summary, Key Terms, Exercises, Problems, Homework Problems, Review Questions, Discussion Questions.
      // Commentary: different publishers name the same apparatus differently. The Source Profile records which aliases a given book actually uses.
 R12i. A concept is `core` IF AND ONLY IF it is required to answer at least one statement in an apparatus section of the kind named by the Source Profile — for example an `Objectives` list, a `Key Points` list, or an `analytical` exercise.
@@ -134,10 +195,20 @@ R12j. R12i counts an Objective only when that Objective is phrased with a master
      // Commentary: "have been introduced to" states familiarity, not mastery.
      // PASSES R12j (core): "understand the fundamental system modeling perspectives of context, interaction, structure, and behavior" — mastery verb.
      // FAILS R12j (supporting): "have been introduced to four systems, of different types, which are used as examples throughout the book" — familiarity verb.
-R12k. IF a concept is not `core` under R12i–R12j THEN it is `supporting`.
+R12k. IF the effective anchor is `apparatus` AND a concept is not `core` under R12i–R12j THEN it is `supporting`.
 R12l. IF assigning `core` THEN record alongside the concept the Objective or Key Point statement it serves.
      // Commentary: R12i is a lookup against the author's own statements, not a judgment about importance. Naming the statement is what makes the assignment checkable after the fact.
-R12m. The concept inventory is internal metadata. Do NOT write it to the output file. The priority assigned under R12h–R12l and the statement recorded under R12l ARE written to the output file, in the `Priority:` field defined in the Output Format block.
+
+// Priority assignment — instructor anchor (per inventory concept)
+R12n. IF the effective anchor is `instructor` THEN a concept is `core` IF AND ONLY IF a `### Teaching` file registered for this chapter presents it.
+R12o. IF assigning `core` under R12n THEN record alongside the concept the exact locator that presents it — the `## Slide <N>` heading, the `## Page <N>` heading, or the code file and line. IF no locator can be cited THEN the concept is `supporting`.
+     // Commentary: the same quotable-evidence discipline R12e imposes on inventory admission. Naming the slide is what makes the tier checkable after the fact rather than a judgment about importance, and it is what R25 (18) reports.
+R12p. Depth of treatment is not the test under R12n. Presence is. A concept the instructor material states in three words is `core` even when the textbook spends three pages on it.
+     // Commentary: a slide reading only "Nagle's algorithm" still means the professor put it in front of the class. Requiring the slide to match the textbook's depth would make the anchor unreachable for exactly the terse decks it is meant to read.
+R12q. IF the registry maps more than one file to this chapter THEN a concept presented by ANY of them is `core`.
+R12q1. IF the effective anchor is `instructor` AND a concept is not `core` under R12n–R12q THEN it is `supporting`.
+
+R12m. The concept inventory is internal metadata. Do NOT write it to the output file. The priority assigned under R12h–R12q1 and the statement or locator recorded under R12l or R12o ARE written to the output file, in the `Priority:` field defined in the Output Format block.
 
 // Inventory gap check (per unit)
 R12r. IF an `analytical` exercise asks about a topic that no inventory concept covers THEN record it as an inventory gap.
@@ -151,6 +222,8 @@ R13a. IF generation mode = `capped` THEN generate between 2 and 5 candidate ques
 R13b. Order questions within each unit from most foundational concept to most complex, so later questions may safely rely on earlier ones having been seen.
 R13c. R15b overrides R13: IF one inventory concept produces two natural sub-questions THEN that concept yields two entries.
 R13d. IF a unit's concept inventory is empty THEN stop, show the user the unit's notes, and ask how to proceed. Do not improvise.
+R13f. Record each question's inventory concept in its `Concept:` field. This is the merge key R5k reads.
+     // Commentary: R13e has always required the one-question-one-concept mapping; nothing wrote it down, so a later run had to re-derive it from prose. Recording it makes a merge exact instead of approximate.
 R13e. Before saving, check each candidate question against the inventory. IF a question does not map to exactly one inventory concept THEN drop it.
      // Commentary: R13e is the anti-padding guard — it catches questions invented to fill space rather than derived from the material.
 R14. Each question MUST target exactly ONE concept from this unit's notes.
@@ -225,15 +298,30 @@ R23b. Do NOT declare a unit unquestionable without completing R23a.
 
 // Output
 R24. Save to `extracted/questions_<arg>.md` using the exact structure in the Output Format block below.
+R24h. IF saving THEN write this run's effective mode (R0f3) and effective anchor (R0f2) into the frontmatter `mode:` and `anchor:` fields.
+     // Commentary: R5d reads these to choose between re-tier and extend. A file that does not record them forces R5e's capped/none assumption, and the merge cannot tell a deliberate capped run from a legacy one.
+R24i. IF saving an entry THEN write its `Concept:` field per R13f.
 R24a. IF the questions file is saved AND the class root contains a `CLAUDE.md` with a `## Contents` section THEN add a one-line entry for `questions_<arg>.md` under its `**extracted/**` group. IF the section has no `**extracted/**` group THEN create the group header first. IF an entry for the file already exists THEN replace that line instead of duplicating.
 R24b. IF the questions file is saved AND the class root contains a `CLAUDE.md` without a `## Contents` section THEN append a `## Contents` section (format: `**<dir>/**` bold group headers, one `- file — description` line per entry) and add the entry per R24a.
 R24c. IF the class root contains no `CLAUDE.md` THEN skip R24a–R24b.
 R24d. IF updating the Contents section THEN do not modify any other part of `CLAUDE.md`.
+// Coverage gaps — instructor topics the notes cannot answer
+R24j. IF the effective anchor is `instructor` THEN, for every concept a `### Teaching` file presents, check whether any sentence in the notes source explains it per R12d.
+R24k. IF no such sentence exists THEN record the concept as a COVERAGE GAP. Do NOT admit it to the inventory and do NOT generate a question for it.
+     // Commentary: R9i bars instructor material from supplying Teach content, so a question for such a concept has no answer sentence to cite and R17 would fail it. The gap is real information, not an error — it means this topic needs a source the class does not have.
+R24l. IF at least one coverage gap was recorded THEN write `extracted/gaps_<arg>.md` with frontmatter `name: gaps_<arg>`, `source: <notes filename>`, `generated: <today's date>`.
+R24m. Each gap entry records the concept, the locator that taught it (`## Slide <N>` / `## Page <N>` / code file and line, per R12o), and the Teaching file it came from. Do NOT attempt an answer and do NOT paraphrase the textbook at it.
+     // Commentary: writing a plausible-sounding answer from model knowledge is the one thing that would make this file dangerous — it would read exactly like the audited material next to it while resting on nothing. The file's job is to name what is missing.
+R24n. IF no coverage gaps were recorded THEN do NOT create `gaps_<arg>.md`.
+R24o. A merge rewrites `gaps_<arg>.md` in full from the current Teaching files. R5h1's byte-identical guarantee covers `questions_<arg>.md` only.
+     // Commentary: gaps are derived entirely from material that just changed, so a stale gap entry would name a topic a newly-added deck has since covered.
 R24e. IF the chapter contains `constructive` exercises THEN write them to `extracted/practice_<arg>.md` with frontmatter `name: practice_<arg>`, `source: <notes filename>`, `generated: <today's date>`.
 R24f. Each `practice_<arg>.md` entry records the exercise number and its text verbatim. Do NOT paraphrase and do NOT attempt an answer.
      // Commentary: these are hand-worked tasks — diagrams, specifications, designs. /learn cannot grade them. The file exists so they are not lost.
 R24g. IF the chapter contains no constructive exercises THEN do NOT create `practice_<arg>.md`.
-R25. After saving, report: (1) units processed, (2) questions saved, (3) candidates dropped and their fail reasons, (4) output file path, (5) whether `CLAUDE.md` Contents was updated, (6) images opened (count), (7) any candidate questions dropped because an image could not be opened or resolved (per R9e), (8) the concept inventory size per unit, (9) concepts excluded under R12e–R12f with the reason for each, (10) the core/supporting split per unit, (11) the analytical/constructive exercise split, (12) concepts promoted to `core` by an exercise, (13) inventory gaps found under R12r and whether each was fixable, (14) the Source Profile used and whether it was read from `CLAUDE.md` or newly detected, (15) any unit where an R15d–R15e question-type quota was waived under R15f, and which type the material could not supply, (16) language detected and whether `Teach_EN`/`Question_EN` translations were generated.
+R25. After saving, report: (1) units processed, (2) questions saved, (3) candidates dropped and their fail reasons, (4) output file path, (5) whether `CLAUDE.md` Contents was updated, (6) images opened (count), (7) any candidate questions dropped because an image could not be opened or resolved (per R9e), (8) the concept inventory size per unit, (9) concepts excluded under R12e–R12f with the reason for each, (10) the core/supporting split per unit, (11) the analytical/constructive exercise split, (12) concepts promoted to `core` by an exercise, (13) inventory gaps found under R12r and whether each was fixable, (14) the Source Profile used and whether it was read from `CLAUDE.md` or newly detected, (15) any unit where an R15d–R15e question-type quota was waived under R15f, and which type the material could not supply, (16) language detected and whether `Teach_EN`/`Question_EN` translations were generated, (17) the EFFECTIVE anchor and generation mode for this chapter, and whether it came from the registry or from the class-level default, (18) every instructor file consulted, with the locator count each contributed to `core` assignments, (19) any registered instructor file that could not be opened (per R9h), (20) IF the effective anchor is `instructor` AND the class-level anchor is `apparatus` THEN say so explicitly and name what the apparatus would have promoted but did not, (21) the operation chosen under R5g/R5i — first generation, re-tier, extend, or regenerate — and what selected it, (22) on a re-tier, how many `Priority` fields changed and in which direction, (23) on an extend, how many entries were added per unit and how many existing entries were left untouched, (24) any existing entry kept under R5m because it matched no current inventory concept, (25) coverage gaps written to `gaps_<arg>.md` (per R24l), naming each concept and its locator.
+     // Commentary: (22) and (23) are the numbers that make a merge auditable. "Re-tiered, 7 questions moved supporting→core, 0 rewritten" is checkable; "done" is not, and a merge that silently rewrote everything would look identical to one that did not.
+     // Commentary: (17) and (20) are how a per-chapter anchor split stays visible. A class where chapters 1–5 tier against slides and 6–9 fall back to untiered is correct behavior, but silently correct behavior looks identical to a bug — the report is what distinguishes them.
      // Commentary: (14) matters because a wrong profile silently changes segmentation and generation mode. Naming it in the report is how a bad detection gets caught on the first run rather than the tenth.
      // Commentary: (8) and (9) make the question count auditable — the user can see whether a chapter got N questions because it holds N concepts or because the generator padded. (10) makes the study budget visible: only the core count has to fit the available time. (12) and (13) show what the exercise anchor earned its place doing.
 
@@ -247,12 +335,15 @@ R26. IF any condition not covered by R0–R25 (including lettered sub-rules) ari
 name: questions_<arg>
 source: <notes filename>
 generated: <today's date>
+mode: tiered | capped          ← the EFFECTIVE mode this run used (R0f3)
+anchor: instructor | apparatus | none   ← the EFFECTIVE anchor this run used (R0f2)
 ---
 
 ## Unit 1 of N — <Unit Title>
 
 #### Q1
-Priority: core — <the Objective or Key Point statement this serves, per R12l>
+Concept: <the inventory concept this question tests — the merge key, per R5k>
+Priority: core — <under the apparatus anchor, the Objective or Key Point statement this serves (R12l); under the instructor anchor, the locator that presents it (R12o), e.g. `lec1_intro_computer_networks_notes.md ## Slide 14 — Internet structure: network of networks`>
 Teach:
 <only the note excerpt(s) needed to answer Q1 — no more>
 Teach_EN:                ← omit when language = en (R16i)
@@ -265,6 +356,7 @@ Elaboration: <mechanism, example, or consequence completing the answer — NOT r
 Audit: PASS — <cite the exact phrase in the Teach field that contains the answer>
 
 #### Q2
+Concept: <this question's inventory concept>
 Priority: supporting
 Teach:
 <excerpt for Q2 — may omit concepts already covered in Q1's Teach per R12a>
@@ -284,7 +376,7 @@ Teach:
 ...
 ```
 
-// Note: Priority, Tests and Audit are internal metadata. /learn displays only the Teach field (teach mode) and Question, and grades on Answer key alone. /learn reads Priority to filter (core-only mode) but never displays it. Elaboration is never shown before the user answers — /learn displays it only alongside Answer key after a wrong answer or a skip. Teach_EN and Question_EN are never displayed by /learn when it delivers a question — it prints them only when the user types `en` on that question.
+// Note: Concept, Priority, Tests and Audit are internal metadata. /learn displays only the Teach field (teach mode) and Question, and grades on Answer key alone. /learn reads Priority to filter (core-only mode) but never displays it. Concept exists solely as the merge key R5k matches on. Elaboration is never shown before the user answers — /learn displays it only alongside Answer key after a wrong answer or a skip. Teach_EN and Question_EN are never displayed by /learn when it delivers a question — it prints them only when the user types `en` on that question.
 
 ## Usage
 
