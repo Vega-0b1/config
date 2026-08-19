@@ -22,8 +22,8 @@ R4.  Enumerate candidate files: every loose file and directory in the class root
 R5.  A candidate is NEW IF its basename does not appear in the `## Contents` section of `CLAUDE.md`.
      // Commentary: `/addclass` R18a, `/extract` R21, and `/generate_questions` R24a all maintain Contents as a living inventory. Reusing it as the seen-set means this skill needs no state file of its own and stays correct even when files were added by those skills rather than by hand.
 R6.  IF `## Contents` reads `Nothing here yet` (the `/addclass` R18c placeholder) THEN treat the inventory as empty and every candidate as NEW.
-R7.  Exclude from candidates: `CLAUDE.md`, `README.md`, dotfiles, lock files, the `extracted/images/` directory, and the skill chain's own output — `questions_*.md`, `practice_*.md`, and `flagged_questions_*.md`.
-     // Commentary: those three are written by /generate_questions R24/R24e and /learn R23a, and /learn's flagged-questions file is never added to Contents by its author. Without this exclusion the first /updateclass run in any class that has used /learn asks "instructor-provided?" about the chain's own artifacts.
+R7.  Exclude from candidates: `CLAUDE.md`, `README.md`, dotfiles, lock files, the `extracted/images/` directory, and the skill chain's own output — `questions_*.md`, `practice_*.md`, `gaps_*.md`, and `flagged_questions_*.md`.
+     // Commentary: those four are written by /generate_questions R24/R24e/R24l and /learn R23a. Without this exclusion the first /updateclass run in any class that has used the chain asks "instructor-provided?" about the chain's own artifacts. `gaps_*.md` was the live hole: /generate_questions R24a wrote a Contents entry for `questions_<arg>.md` alone, so a gaps file had nothing to make it match under R5 and read as NEW on every run.
 R8.  IF no candidate is NEW THEN report that the class is already up to date and stop. Do not prompt.
 R9.  Treat a NEW directory (e.g. `wk4/`) as one candidate, not as one candidate per file inside it.
      // Commentary: weekly folders are a single act of course delivery. Prompting per file inside one would ask the same question a dozen times.
@@ -35,20 +35,29 @@ R9b. Before prompting, check each NEW document candidate's format. Note on its R
 // Classification prompt
 R10. IF exactly one candidate is NEW THEN print its name and ask: `instructor-provided? (y/n/s/c)`. STOP until the user responds.
 R11. IF more than one candidate is NEW THEN print the full numbered list once for context, then ask about the FIRST candidate alone. STOP until the user responds.
-R11b. Ask about exactly one candidate per turn, in list order. Do NOT present the next candidate until the current one has been answered.
-     // Commentary: batching the whole list into one space-separated reply looks efficient and is not. It forces the user to hold every filename in their head at once, and a miscounted reply invalidates the entire batch under R12 rather than one item.
-R11c. IF a candidate has been answered THEN ask about the next one immediately. Do NOT ask whether to continue.
 R11a. Print the legend with every prompt:
      `y = teaching material from the professor (slides, handout, lab)`
      `c = course scope (syllabus, schedule) — defines what the course covers`
      `n = not from the professor`
      `s = already processed, just inventory it`
+R11b. Ask about exactly one candidate per turn, in list order. Do NOT present the next candidate until the current one has been answered.
+     // Commentary: batching the whole list into one space-separated reply looks efficient and is not. It forces the user to hold every filename in their head at once, and a miscounted reply invalidates the entire batch under R12 rather than one item.
+R11c. IF a candidate has been answered THEN ask about the next one immediately. Do NOT ask whether to continue.
 R12. Accept a single `y`, `n`, `s`, or `c` case-insensitively, and nothing else. IF the reply is any other token THEN re-ask about the same candidate. STOP until the user responds. Do NOT guess.
 R13. `y` = teaching material. `c` = course scope. `n` = not instructor-provided. `s` = already processed by an earlier run or by hand.
-R13b. `y` and `c` are different kinds of instructor material and are NOT interchangeable. A `y` candidate says what is worth knowing; a `c` candidate says which chapters are on the menu.
-     // Commentary: a syllabus names the topic of an entire week — "Week 6: Transport layer". Every concept in that chapter matches it, so treating it as teaching material would promote a whole chapter to `core` and the tier would stop meaning anything. This is the same failure /generate_questions R0e1 rejects narrative chapter summaries for.
 R13a. IF the answer is `s` THEN skip R15–R29 for that candidate. Apply R30 and R30a only, so the file gains a Contents entry naming it literally.
      // Commentary: R5 matches Contents by basename, but /addclass R18a lets an entry be written as prose — `~/edu/network` inventories its textbook as "Kurose & Ross textbook EPUB", which no basename match can find. Without `s`, that EPUB reads as NEW on every run and R17 re-extracts a 349-image book into a duplicate notes file. One `s` writes the literal filename into Contents and the candidate never resurfaces.
+R13b. `y` and `c` are different kinds of instructor material and are NOT interchangeable. A `y` candidate says what is worth knowing; a `c` candidate says which chapters are on the menu.
+     // Commentary: a syllabus names the topic of an entire week — "Week 6: Transport layer". Every concept in that chapter matches it, so treating it as teaching material would promote a whole chapter to `core` and the tier would stop meaning anything. This is the same failure /generate_questions R0e1 rejects narrative chapter summaries for.
+// Week prompt — asked per `y` candidate, immediately after its classification
+R13c. IF a candidate was answered `y` THEN ask which week of the course it is from, before moving to the next candidate. STOP until the user responds.
+R13c1. Accept a positive integer, or `n` meaning the week does not matter. IF the reply is anything else THEN re-ask the same candidate. Do NOT guess.
+R13c2. The week prompt carries no hint. Ask it plainly: `Which week is this from? — number, or n`.
+     // Commentary: this rule previously offered to show the weeks a syllabus maps to the candidate's chapter. That chapter is not known yet — R13c fires inside the classification block, and chapter mapping is R22–R26, which runs after every candidate has been classified. R13c5 forbids the only other route to it. The hint could never be produced legally, and the weeks→chapters table it would have read is not part of the `### Course Scope` line format either.
+R13c3. IF the answer is `n` THEN write no `week:` value for that entry. An absent week is not an error and never blocks anything downstream.
+R13c4. Do NOT ask the week for candidates answered `n`, `s`, or `c`. A syllabus does not belong to a week — it defines them.
+R13c5. Do NOT infer the week from a filename, a lecture number, or a file's mtime. R13c1's answer is the only source.
+     // Commentary: lecture numbering and week numbering diverge as soon as a class meets more than once a week, which is the common case — CS4470 meets Monday and Wednesday, so `lec2` is still week 1 and every later filename drifts further. mtime records when the file was downloaded, not when it was taught. A wrong week silently mis-scopes exam preparation, which is the same class of failure R24's chapter confirmation exists to prevent.
 R14. Do NOT infer instructor provenance from a filename, extension, or location. R13's answer is the only source.
      // Commentary: a PDF the user downloaded and a PDF the professor handed out are byte-identical in every respect this skill can observe. Guessing here mistags a whole chapter's core tier, and the user would not find out until the quiz.
 R14a. Do NOT infer `s` either. A candidate is already-processed only when the user says so.
@@ -88,6 +97,7 @@ R26e. Do NOT derive scope from a `y` candidate, and do NOT derive per-chapter pr
 // Registry write
 R27. IF at least one candidate was answered `y` or `c` THEN write its confirmed mapping to the `## Instructor Material` section of `CLAUDE.md`, in the format given below. IF the section does not exist THEN create it immediately after `## Contents`, or at end of file when there is no Contents section.
 R27a. Write `y` entries under a `### Teaching` subheading and `c` entries under a `### Course Scope` subheading. Create whichever subheading is missing.
+R27b. IF a week was given under R13c THEN record it on the entry as `week <N>`. IF the answer was `n` THEN omit the field entirely.
      // Commentary: /generate_questions R12n reads only `### Teaching` when it assigns `core`. The split is what keeps a syllabus from promoting an entire chapter.
 R28. IF an entry for the same path already exists THEN replace that line. Do NOT duplicate it.
 R29. Do NOT write a registry entry for a candidate answered `n`.
@@ -114,7 +124,7 @@ R34. IF `CLAUDE.md` has no `## Source Profile` THEN skip R33. Do NOT create one.
      // Commentary: profile detection belongs to `/generate_questions` R0b, which writes the whole profile from the notes' actual shape. A partial profile written here would satisfy its R0a and suppress the real detection.
 
 // Confirm
-R35. Report: candidates found and which were NEW, the y/n/s/c answer per candidate, every candidate skipped under R13a, any legacy file converted by `/extract` R8a, what was extracted and to where, what was sorted and to where, the confirmed chapter mapping per `### Teaching` entry, the confirmed in-scope and out-of-scope chapter sets per `### Course Scope` entry, any `/extract` stop from R20, any Contents entry repaired under R30a, any questions file marked STALE under R32a, whether `## Instructor Material` and `## Contents` were updated, whether the Source Profile was touched under R33, and anything left in place under R16.
+R35. Report: candidates found and which were NEW, the y/n/s/c answer per candidate, the week recorded per `y` candidate or that it was declined, every candidate skipped under R13a, any legacy file converted by `/extract` R8a, what was extracted and to where, what was sorted and to where, the confirmed chapter mapping per `### Teaching` entry, the confirmed in-scope and out-of-scope chapter sets per `### Course Scope` entry, any `/extract` stop from R20, any Contents entry repaired under R30a, any questions file marked STALE under R32a, whether `## Instructor Material` and `## Contents` were updated, whether the Source Profile was touched under R33, and anything left in place under R16.
 R35a. IF a `### Course Scope` entry was written THEN name the out-of-scope chapters explicitly in the report.
      // Commentary: "your course skips chapters 7 and 9" is the single most useful thing this skill can tell someone, and it is the answer to what to do with the rest of the book once the semester ends.
 
@@ -128,9 +138,9 @@ R36. IF any condition not covered by R1–R35 (including lettered sub-rules) ari
 
 ### Teaching
 
-- `extracted/ch1_slides_notes.md` — chapter 1 — pptx, 42 slides
-- `extracted/lab2_notes.md` — chapter 3 — pdf, 8 pages
-- `code/udp_demo.py` — chapter 2 — code, read directly
+- `extracted/ch1_slides_notes.md` — chapter 1 — week 1 — pptx, 42 slides
+- `extracted/lab2_notes.md` — chapter 3 — week 6 — pdf, 8 pages
+- `code/udp_demo.py` — chapter 2 — week 4 — code, read directly
 - `extracted/images/topology_handout.png` — chapter 1 — image, read directly
 
 ### Course Scope
@@ -138,7 +148,7 @@ R36. IF any condition not covered by R1–R35 (including lettered sub-rules) ari
 - `extracted/syllabus_notes.md` — covers 1, 2, 3, 4, 5, 6, 8 — not covered: 7, 9 — pdf, 5 pages
 ```
 
-**Teaching** lines are: backtick-quoted path relative to the class root, an em dash, the confirmed mapping from R26, an em dash, and the source kind with its extent (slide count, page count, or `read directly` for unextracted code and images).
+**Teaching** lines are: backtick-quoted path relative to the class root, an em dash, the confirmed mapping from R26, an em dash, `week <N>` from R13c when one was given, an em dash, and the source kind with its extent (slide count, page count, or `read directly` for unextracted code and images). The last example above shows an entry whose week was answered `n` — the field is simply absent.
 
 **Course Scope** lines replace the single mapping with two chapter sets from R26c: `covers <list>` then `not covered: <list>`. These entries never promote a concept to `core`.
 

@@ -51,6 +51,8 @@ R6a. After loading the file per R3–R4 and before the first question: IF the cl
 R6b. R6a is a notice, not a gate. Do NOT refuse, do NOT ask for confirmation, and do NOT change the filter.
      // Commentary: studying a chapter the course skipped is a deliberate act — after the final, or out of interest. The notice sets the expectation that none of it will be on the exam; blocking it would remove the reason the questions were generated at all.
 R6c. IF the loaded chapter is in scope, or the class has no `### Course Scope` entry, THEN print no notice.
+R6d. IF a `### Course Scope` entry exists but carries no derivable chapter list — its `covers` field reads `NOT DETERMINED`, is empty, or names no chapter — THEN treat the class as having no scope entry and print no notice. Do NOT stop under R29.
+     // Commentary: mirrors /generate_questions R0j3. /updateclass R26d writes such an entry when a syllabus defers its schedule elsewhere. The chapter is then neither in scope nor out of it, which matched no branch of R6a–R6c and sent a plain `/learn chapter3` to the catch-all.
 
 R7.  IF starting a new unit THEN display "Unit X of Y — <title>" as a level-2 markdown heading: `## Unit X of Y — <title>`.
 R8.  IF mode = teach AND about to display a question THEN first display that question's `Teach:` field verbatim as a markdown blockquote — prefix every line of the Teach content, including blank lines between sub-concepts, with `> `.
@@ -63,8 +65,8 @@ R8c. R8b overrides the global CLAUDE.md response-style ban on `---` horizontal r
 R9.  IF mode = review THEN do NOT display Teach fields at any point.
      // Commentary: review mode is retrieval practice — showing the material before the question makes it an open-book test of text on screen.
 R10. Do NOT rewrite, summarize, or add to the Teach field.
-R11. Do NOT display `Priority`, `Tests`, or `Audit` fields at any point.
-     // Commentary: Priority is read by R1f to filter and is never shown. Displaying it mid-session invites treating `supporting` questions as skippable.
+R11. Do NOT display `Concept`, `Priority`, `Tests`, or `Audit` fields at any point.
+     // Commentary: Priority is read by R1f to filter and is never shown. Displaying it mid-session invites treating `supporting` questions as skippable. `Concept` is the merge key /generate_questions R13f writes; it names the answer, so showing it before the user answers gives the question away.
 R11a. Do NOT display the `Elaboration` field before the user answers, in either mode. It is post-grade material, released only under R17 and R18.
 R12. Ask one question at a time. Display only the `Question` field, rendered as a level-3 markdown heading with a `❓` anchor: `### ❓ <question text>`. Do NOT display the next question until the user answers the current one.
 
@@ -121,8 +123,13 @@ R21. Move through units in order. There is no correctness gate on advancing to t
 
 // Flagging (both modes)
 R22. IF the user's message on a pending question is "flag" (or otherwise clearly requests flagging the question) THEN ask "Why are you flagging this question?" STOP until user responds.
-R23. IF the user gives the flag reason THEN append an entry to `extracted/flagged_questions_<arg>.md` containing: unit number and title, question number, the full question entry (Teach, Question, Answer key, Elaboration), the user's reason verbatim, and today's date.
+R23. IF the user gives the flag reason THEN append an entry to `extracted/flagged_questions_<arg>.md` containing: unit number and title, question number, the full question entry (Teach, Question, Answer key, Elaboration), the user's reason verbatim, today's date, and a `**Status:**` field per R23b.
 R23a. IF `extracted/flagged_questions_<arg>.md` does not exist THEN create it first with frontmatter: `name: flagged_questions_<arg>`, `source: questions_<arg>.md`.
+R23b. The `**Status:**` field of a newly written flag is `OPEN`. Do NOT write any other value at flag time, and do NOT judge the flag's merit.
+     // Commentary: /generate_questions R5k3 reads this field to tell a question the user deliberately removed from one that is merely flagged. Without it every flag this skill writes is invisible to that rule, and a merge re-adds the rejected question. The value is `OPEN` because at flag time nothing has been decided — the user has said only that something is wrong with the question.
+R23c. Label the question number field `**Question no.:**` and the question text field `**Question:**`. Do NOT use `**Question:**` for both.
+     // Commentary: `~/edu/network/extracted/flagged_questions_chapter1.md` carries two `**Question:**` lines in one entry, which makes the entry unparseable by field name.
+R23d. Do NOT rewrite the `**Status:**` field of an existing entry. Resolving a flag is a deliberate act taken outside a `/learn` session.
 R24. IF the flag entry is saved THEN confirm in one line, mark the question flagged — not graded, excluded from both the correct count and the total — and advance per R19.
 R25. R22–R24 override R13–R18: "flag" is neither an answer nor a skip. Do not grade it, do not mark it wrong, do not display the Answer key or Elaboration in the session.
 
@@ -141,13 +148,13 @@ R28a1. IF filter was set to all by R1e THEN the R28 score line MUST say the file
      // Commentary: R1e prints its line before the session starts, an hour of questions earlier. Without the reminder at the score, a full run reads as though core-only silently delivered everything.
 R28a2. IF filter = all because the topic ended in `+` THEN the R28 score line MUST say the run was the full file.
      // Example: `**Final score: 24 / 33** (all 33 questions — full coverage.)`
+R28b. IF every delivered question was flagged THEN display no score. Say instead: "All N questions were flagged — no score. Flagged questions are in `extracted/flagged_questions_<arg>.md`." R28b overrides R28.
+     // Commentary: R24 excludes flagged questions from the total, so an all-flagged run makes the R28 score line read "0 / 0".
 R28c. IF `extracted/gaps_<arg>.md` exists THEN, after the R28 score, print one line naming how many topics it lists and pointing at the file.
      // Example: `⚠ 3 topics were taught but are not in the textbook — see extracted/gaps_chapter1.md. No questions exist for them.`
      // Commentary: these are topics the professor covered that the notes cannot answer, so no question in this session tested them and a good score says nothing about them. Surfacing the count at the score is the only moment the user is thinking about their coverage.
 R28d. Do NOT list the gap topics individually and do NOT attempt to teach them. Name the count and the file.
      // Commentary: /generate_questions R24m deliberately records no answers for these — everything known about them is that they were taught and are absent. Improvising an explanation here would invent exactly the unaudited content that rule exists to prevent.
-R28b. IF every delivered question was flagged THEN display no score. Say instead: "All N questions were flagged — no score. Flagged questions are in `extracted/flagged_questions_<arg>.md`." R28b overrides R28.
-     // Commentary: R24 excludes flagged questions from the total, so an all-flagged run makes the R28 score line read "0 / 0".
 
 // Catch-all
 R29. IF any condition not covered by R1–R28 (including all lettered sub-rules) arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
