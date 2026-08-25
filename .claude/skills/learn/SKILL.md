@@ -1,14 +1,19 @@
 ---
 name: learn
-description: Teach the user course material concept by concept, then check understanding with questions. `/learn week1` drills what the professor actually taught that week; `/learn chapter1` drills the textbook chapter. Both deliver every question in their file — there is no filter. Pass no_context for a blind review mode that hides the teaching content and just scores answers. Say "flag" on a question to log it with a reason for later processing. Say "en" on a question to see its English translation when the material is not in English. `/learn save` writes progress to disk mid-session; `/learn resume` picks up where you left off in a new chat. Requires a pre-generated questions file from /generate_questions. Week files live in extracted/class/week<N>/, chapter files in extracted/textbook/chapters/chapter<N>/.
+description: Teach the user course material concept by concept, then check understanding with questions. `/learn week1` drills the textbook questions covering what the professor taught that week — the study list; `/learn chapter1` drills the whole textbook chapter — the reference bank. Both deliver every question in their file, there is no filter, and every question in both comes from the textbook. Pass no_context for a blind review mode that hides the teaching content and just scores answers. Say "flag" on a question to log it with a reason for later processing. Say "en" on a question to see its English translation when the material is not in English. `/learn save` writes progress to disk mid-session; `/learn resume` picks up where you left off in a new chat. Requires a pre-generated questions file from /generate_questions. Week files live in extracted/class/week<N>/, chapter files in extracted/textbook/chapters/chapter<N>/.
 ---
 
 Deliver course material question by question using a pre-generated questions file. `/learn` is a delivery engine — it does not generate content or questions. Those come from `/generate_questions`.
 
 Two topics, two files, both delivered in full:
 
-- `/learn week1` — the class material the professor delivered in week 1. This is the study list for a course you are currently taking.
-- `/learn chapter1` — the textbook chapter. This is the reference bank: everything the book explains, whether the course reached it or not.
+- `/learn week1` — the textbook questions covering what the professor taught in week 1. This is the study list for a course you are currently taking.
+- `/learn chapter1` — the whole textbook chapter. This is the reference bank: everything the book explains, whether the course reached it or not.
+
+Every question in both files was generated from the textbook. The difference is scope, not source:
+`/generate_questions chapter<N>` writes the pool, and `/generate_questions week<N>` copies the subset
+of that pool matching what the professor covered. A week file is therefore a strict subset of the
+chapter files it draws from, and each of its entries records where it came from.
 
 Which file to run is the only scoping decision, and it is made by the topic argument. There is no priority tier, no core subset, and no `+` suffix — `/generate_questions` writes no `Priority` field for anything to filter on.
 
@@ -28,7 +33,7 @@ R1d. IF an entry carries a `Priority:` field THEN ignore it. It is legacy data w
      // Commentary: eight questions files on this system predate the split and still carry `Priority: core | supporting`. /generate_questions R5e1 deliberately leaves those fields in place rather than churning files the user has been studying. Reading them here would resurrect the tier this change removed.
 R2.  IF the arguments do not contain a no_context flag THEN mode = teach.
 R2a. The mode flag (R1) and the topic argument are independent and may be given in either order.
-     // Example: `/learn week1 no_context` = review mode over week 1's class material.
+     // Example: `/learn week1 no_context` = review mode over week 1's study list.
 // File lookup
 R3.  IF <arg> normalizes to a week — `week<N>` or `wk<N>` — THEN look for `extracted/class/week<N>/questions_week<N>.md`.
 R3a. IF <arg> normalizes to a chapter — `chapter<N>` or `capitulo<N>` — THEN look for `extracted/textbook/chapters/chapter<N>/questions_chapter<N>.md` (or `capitulo<N>/questions_capitulo<N>.md` for Spanish-language classes).
@@ -43,11 +48,12 @@ R6.  IF no <arg> is given THEN list all `questions_*.md` files under `extracted/
 // Course scope notice
 R6a. After loading the file per R3–R4 and before the first question: IF the topic is a chapter AND the class `CLAUDE.md` holds a `### Course Scope` entry listing that chapter as not covered THEN print one line saying the course does not cover it. Then proceed normally.
      // Example: `Note: CS4470 does not cover chapter 7 — this is textbook material beyond the course.`
-R6a1. IF the topic is a week — `week<N>` or `wk<N>` — THEN print no scope notice, whatever the `### Course Scope` entry says. Material the professor delivered is in scope by definition.
+R6a1. IF the topic is a week — `week<N>` or `wk<N>` — THEN print no scope notice, whatever the `### Course Scope` entry says. A week file holds only questions the professor's own material selected, so it is in scope by construction.
+     // Commentary: this holds even when a week file draws on a chapter the syllabus lists as not covered. /generate_questions R0j4 deliberately lets that happen — if the professor taught it, what the syllabus planned is beside the point.
 R6b. R6a is a notice, not a gate. Do NOT refuse, do NOT ask for confirmation, and do NOT change the filter.
      // Commentary: studying a chapter the course skipped is a deliberate act — after the final, or out of interest. The notice sets the expectation that none of it will be on the exam; blocking it would remove the reason the questions were generated at all.
 R6c. IF the loaded chapter is in scope, or the class has no `### Course Scope` entry, THEN print no notice.
-R6d. IF a `### Course Scope` entry exists but carries no derivable chapter list — its `covers` field reads `NOT DETERMINED`, is empty, or names no chapter — THEN treat the class as having no scope entry and print no notice. Do NOT stop under R29.
+R6d. IF a `### Course Scope` entry exists but carries no derivable chapter list — its `covers` field reads `NOT DETERMINED`, is empty, or names no chapter — THEN treat the class as having no scope entry and print no notice. Do NOT stop under R35.
      // Commentary: mirrors /generate_questions R0j3. /updateclass R26d writes such an entry when a syllabus defers its schedule elsewhere. The chapter is then neither in scope nor out of it, which matched no branch of R6a–R6c and sent a plain `/learn chapter3` to the catch-all.
 
 R7.  IF starting a new unit THEN display "Unit X of Y — <title>" as a level-2 markdown heading: `## Unit X of Y — <title>`.
@@ -61,8 +67,12 @@ R8c. R8b overrides the global CLAUDE.md response-style ban on `---` horizontal r
 R9.  IF mode = review THEN do NOT display Teach fields at any point.
      // Commentary: review mode is retrieval practice — showing the material before the question makes it an open-book test of text on screen.
 R10. Do NOT rewrite, summarize, or add to the Teach field.
-R11. Do NOT display `Concept`, `Source quote`, `Tests`, `Audit`, or a legacy `Priority` field at any point.
-     // Commentary: `Concept` is the merge key /generate_questions R13f writes; it names the answer, so showing it before the user answers gives the question away. A legacy `Priority` field is inert under R1d, and displaying it would invite treating `supporting` entries as skippable when nothing skips them.
+R11. Do NOT display `Concept`, `Source quote`, `Tests`, `Audit`, `Origin`, `Origin generated`, or a legacy `Priority` field at any point.
+     // Commentary: `Concept` is the selection key /generate_questions R13f writes; it names the answer, so showing it before the user answers gives the question away. A legacy `Priority` field is inert under R1d, and displaying it would invite treating `supporting` entries as skippable when nothing skips them.
+R11a1. `Origin` and `Origin generated` appear only in a week file, where /generate_questions R0r4 writes them to record which chapter entry each question was copied from. They are provenance for a resync, not study material.
+     // Commentary: this rule exists because R11 is a blacklist rather than a whitelist — an unlisted field would be displayed by default. `Origin: chapter4 Q7` printed above a question is noise at best, and at worst a hint about the answer's subject before the user has attempted it.
+R11a2. IF an entry's `Origin` field records `ORPHANED` THEN still deliver the question normally and still say nothing about it during delivery. Report it once, after the R28 score, per R28d.
+     // Commentary: an orphaned entry is a bookkeeping problem — its origin chapter was regenerated and no longer holds a matching concept. The question itself passed a full audit and is perfectly answerable, so interrupting a study session over it would be noise at exactly the wrong moment.
 R11c. `Source quote` is barred in BOTH modes, and most strictly in review. It is the raw source sentence /generate_questions R13g records for its R18b audit, and it states the answer outright.
      // Commentary: R9 hides the Teach field in review mode precisely so retrieval is unaided. `Source quote` is a denser giveaway than the Teach field it was used to check — displaying it would defeat both modes at once.
 R11d. R11 is a denylist and R8 is the allowlist. IF an entry carries a field R8 does not name THEN do NOT display it, whether or not R11 lists it.
@@ -79,7 +89,7 @@ R12c1. The R12c heading is `**English translation**`, NOT `**English reference:*
      // Commentary: R26 appends the standard English name of a single term after a correct answer. R12c prints a whole entry on request. Two different outputs must not carry one label.
 R12d. IF mode = review THEN do NOT display `Teach_EN`. Only `Question_EN` is shown.
      // Commentary: review mode hides the Teach field (R9). Showing its translation would turn retrieval practice back into an open-book read.
-R12e. IF the entry has no `Teach_EN` and no `Question_EN` field THEN say in one line that this questions file carries no translations, then re-display the question per R20. Do NOT stop under R29.
+R12e. IF the entry has no `Teach_EN` and no `Question_EN` field THEN say in one line that this questions file carries no translations, then re-display the question per R20. Do NOT stop under R35.
 R12f. R12a–R12e override R13–R18: `en` is neither an answer nor a skip. Do not grade it, do not mark it wrong, do not display `Answer key` or `Elaboration`.
      // Commentary: mirrors R25, which gives `flag` the same protection. Without this, `en` reads as a wrong answer and burns the question.
 R12g. A question the user asked `en` on remains pending: it is graded normally when answered, and counts in both the correct count and the total.
@@ -145,9 +155,13 @@ R28a. The R28 score line names the topic and the file's full size, with no filte
      // Example: `**Final score: 24 / 33** (week1 — all 33 questions in this file.)`
 R28b. IF every delivered question was flagged THEN display no score. Say instead: "All N questions were flagged — no score. Flagged questions are in `extracted/flagged_questions_<arg>.md`." R28b overrides R28.
      // Commentary: R24 excludes flagged questions from the total, so an all-flagged run makes the R28 score line read "0 / 0".
-R28c. IF the topic was a chapter AND `extracted/class/` contains any `week<N>/questions_week<N>.md` files THEN, after the R28 score, print one line saying this was textbook coverage and naming the week files as the record of what was actually taught.
-     // Example: `This was the textbook chapter. What the professor covered is in class/week1/questions_week1.md and class/week2/questions_week2.md.`
-     // Commentary: the two files are independent and neither is a subset of the other. A strong score on a chapter says nothing about exam readiness, and this is the one moment the user is thinking about coverage.
+R28c. IF the topic was a chapter AND `extracted/class/` contains any `week<N>/questions_week<N>.md` files THEN, after the R28 score, print one line saying this was the full chapter and naming the week files as the subset the course actually covered.
+     // Example: `This was the full chapter. The subset the professor covered is in class/week1/questions_week1.md and class/week2/questions_week2.md.`
+     // Commentary: a week file is now a strict subset of the chapter files it draws from, so a chapter run necessarily includes material no lecture reached. A strong score here is therefore weaker evidence of exam readiness than the same score on a week file, and this is the one moment the user is thinking about coverage.
+R28d. IF the topic was a week AND any delivered entry's `Origin` field records `ORPHANED` THEN, after the R28 score, print one line naming the count and the fix: re-run `/generate_questions week<N>` and choose `reselect`.
+     // Example: `Note: 2 questions in this file are orphaned — their chapter was regenerated and no longer matches. Run /generate_questions week3 and choose reselect to rebuild.`
+     // Commentary: an orphaned entry is still a good question, so this is a maintenance note rather than a warning. The end of a session is the right place for it: the user has finished studying and is deciding what to do next, which is exactly when a one-line "your study list has drifted from the book" is actionable.
+R28e. IF the topic was a week AND no entry is orphaned THEN print nothing under R28d. Do NOT print a clean bill of health.
 
 // Save & resume
 R30.  IF the argument is `save` THEN this is a save request, not a topic. R30 applies only when a `/learn` session is active (a questions file is loaded and at least one question has been displayed).
@@ -191,19 +205,20 @@ R35. IF any condition not covered by R1–R31 (including all lettered sub-rules)
 ## Usage
 
 ```
-/generate_questions week1         ← run this first
-/learn week1                      ← first pass over week 1's class material: teach then ask
+/generate_questions chapter2      ← build the pool first — this is where questions are made
+/generate_questions week1         ← then select week 1's subset out of it
+/learn week1                      ← first pass over week 1's study list: teach then ask
 /learn week1 no_context           ← review pass over the same: blind questions
 
-/generate_questions chapter2      ← the textbook path
-/learn chapter2                   ← first pass over the whole chapter
+/learn chapter2                   ← first pass over the whole chapter — the reference bank
 /learn chapter2 no_context        ← review pass over the whole chapter
 
 /learn save                       ← save progress to disk mid-session, then close the chat
 /learn resume                     ← pick up where you left off in a new chat
 ```
 
-Every run delivers the entire file. To study less, pick a narrower topic — that is what `week<N>` is.
+Every run delivers the entire file. To study less, pick a narrower topic — that is what `week<N>` is:
+the questions from the book that this week's lectures actually reached.
 
 In-session keywords, typed in reply to a pending question:
 
