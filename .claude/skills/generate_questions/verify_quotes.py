@@ -100,6 +100,16 @@ def resolve_sources(qpath, argv_sources):
                 if alt.exists():
                     cand = alt
                     break
+        # A select run's source is a chapter slice in a different subtree.
+        # Search under extracted/textbook/chapters/ from the class root.
+        if not cand.exists():
+            for up in qpath.parents:
+                chapters_dir = up / "extracted" / "textbook" / "chapters"
+                if chapters_dir.is_dir():
+                    matches = list(chapters_dir.rglob(name))
+                    if matches:
+                        cand = matches[0]
+                    break
         resolved.append(cand)
     return resolved
 
