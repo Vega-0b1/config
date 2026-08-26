@@ -2,12 +2,12 @@
 name: learn
 model: haiku
 effort: low
-description: Deliver course material concept by concept — teach, ask, then serve the stored answers on request. `/learn week1` drills the textbook questions covering what the professor taught that week — the study list; `/learn chapter1` drills the whole textbook chapter — the reference bank. Both deliver every question in their file, there is no filter, and every question in both comes from the textbook. Questions arrive one at a time; nothing is graded and no score is kept: type "next" to see the stored answer and move on. Pass batch<N> for several questions per turn. Pass no_context for a blind review mode that hides the teaching content. Your place autosaves every 10 questions; `/learn save` forces a save now and `/learn resume` picks it up in a new chat. Requires a pre-generated questions file from /generate_questions. Week files live in extracted/class/week<N>/, chapter files in extracted/textbook/chapters/chapter<N>/.
+description: 'Deliver course material concept by concept — teach, ask, then serve the stored answers on request. `/learn week1` drills the textbook questions covering what the professor taught that week — the study list; `/learn chapter1` drills the whole textbook chapter — the reference bank. By default both deliver every question in their file; pass start<N> to begin at absolute question position N. Every question comes from the textbook. Questions arrive one at a time; nothing is graded and no score is kept: type "next" to see the stored answer and move on. Pass batch<N> for several questions per turn. Your place autosaves every 10 questions; `/learn save` forces a save now and `/learn resume` picks it up in a new chat. Requires a pre-generated questions file from /generate_questions. Week files live in extracted/class/week<N>/, chapter files in extracted/textbook/chapters/chapter<N>/.'
 ---
 
 Deliver course material question by question using a pre-generated questions file. `/learn` is a delivery engine — it does not generate content or questions, and it does not grade. Content comes from `/generate_questions`; the verdict comes from you.
 
-Two topics, two files, both delivered in full:
+Two topics, two files, both delivered from the selected starting position through the end:
 
 - `/learn week1` — the textbook questions covering what the professor taught in week 1. This is the study list for a course you are currently taking.
 - `/learn chapter1` — the whole textbook chapter. This is the reference bank: everything the book explains, whether the course reached it or not.
@@ -17,21 +17,26 @@ Every question in both files was generated from the textbook. The difference is 
 of that pool matching what the professor covered. A week file is therefore a strict subset of the
 chapter files it draws from, and each of its entries records where it came from.
 
-Which file to run is the only scoping decision, and it is made by the topic argument.
+The topic argument selects the file. The optional `start<N>` argument selects the first absolute question position to deliver; without it, delivery begins at position 1.
 
 **The loop:** teach material, ask the question, wait. You answer however you like — out loud, on paper, in your head. Type `next` and the stored answer appears. Compare it yourself, then the next question follows. Nothing you type is judged, and no score is kept.
 
-Two modes: **teach** (default) shows each question's Teach field before asking — first contact with material. **review** (`no_context` flag) hides all Teach fields and asks blind — retrieval practice for material already learned. The modes differ only in Teach field visibility; the loop is identical in both.
 
 ## Rules
 
-// Mode selection & loading
-R1.  IF the arguments contain `no_context` or `--no_context` THEN mode = review; remove that token from the arguments.
-R1a. IF more than one argument remains after removing the mode flag (R1) THEN stop and ask the user which one is the topic. STOP until user responds.
+// Argument parsing and loading
+R1. IF a `/learn` invocation begins THEN preserve its unmodified argument tokens as ORIGINAL_ARGUMENTS.
+R1a. IF more than one argument remains after removing the option tokens under R1b, R12i, and R29e THEN stop and ask the user which one is the topic. STOP until user responds.
+R1b. IF ORIGINAL_ARGUMENTS contains exactly one token matching `start<N>` where N is an integer greater than zero THEN START = N; remove that token from the working arguments.
+R1b1. IF ORIGINAL_ARGUMENTS contains no token beginning with `start` THEN START = 1.
+R1b2. IF ORIGINAL_ARGUMENTS contains more than one token beginning with `start` THEN stop and tell the user: "Use exactly one start<N> argument."
+R1b3. IF an ORIGINAL_ARGUMENTS token begins with `start` but does not match `start<N>` where N is an integer greater than zero THEN stop and tell the user: "Invalid start position — use start<N> with N greater than zero."
+R1b4. IF ORIGINAL_ARGUMENTS contains a `start<N>` token AND contains `save` or `resume` THEN stop and tell the user: "start<N> cannot be combined with save or resume."
+R1b5. IF R1b2 and R1b3 both apply THEN R1b2 overrides R1b3.
 // Delivery scope
-R1c. Deliver EVERY entry in the loaded file. There is no filter, no subset, and no rule that skips an entry on the basis of any field it carries.
-R2.  IF the arguments do not contain a no_context flag THEN mode = teach.
-R2a. The mode flag (R1) and the topic argument are independent and may be given in either order.
+R1c. IF START = 1 THEN deliver EVERY entry in the loaded file.
+R1c1. IF START > 1 THEN deliver EVERY entry at absolute position START or later and deliver no entry before START.
+R1c2. IF START is resolved THEN interpret it as the ABSOLUTE POSITION from the R4c step-2 index, never as the `Q<n>` label carried by a question heading.
 
 // File lookup
 R3.  IF <arg> normalizes to a week — `week<N>` or `wk<N>` — THEN look for `extracted/class/week<N>/questions_week<N>.md`.
@@ -46,15 +51,17 @@ R4c. Loading the file = four small reads, never a whole-file read:
        1. The frontmatter — read the first 10 lines.
        2. The question index — `grep -n '^#### Q' <file> | cut -d: -f1 | nl -ba`. This yields one row per question: POSITION, then the line it starts on. It carries no `Q<n>` labels.
        3. The unit index — `grep -n '^## Unit ' <file>`, for unit headings and titles.
-       4. The first window — from the line shown at position 1 through the line before the line shown at position WINDOW+1, or end of file when the index has no such position.
+       4. The initial window — for a topic launch, from the line shown at position START through the line before the line shown at position START+WINDOW, or end of file when the index has no such position; for a resume, use `current_question` in place of START.
 R4c1. Address questions by their ABSOLUTE POSITION — the left column of the R4c step-2 index — never by the `Q<n>` label a heading carries.
       // Commentary: `Q<n>` restarts at Q1 in every unit and multiple `Q1`s exist in every multi-unit file. The step-2 command strips labels deliberately.
 R4c2. IF the window edge is being determined THEN read it from the step-2 index by POSITION lookup. Do NOT compute it from question labels, from line counts, or by estimating lines-per-question.
+R4c3. IF a topic launch has START greater than the total number of positions in the step-2 index THEN stop and tell the user: "Start position out of range — this file has M questions."
+R4c4. IF a resume has `current_question` greater than the total number of positions in the step-2 index THEN stop and tell the user: "Saved position out of range — this file has M questions."
 R4d. IF the currently loaded window is exhausted AND unloaded questions remain THEN load the next WINDOW questions by the same line-range read. Do NOT re-read the frontmatter or the index.
 R4e. IF a question outside the loaded window is needed for any reason THEN load its window first.
 R4f. The index from R4c step 2 is internal metadata. Do NOT display it, and do NOT display line numbers or window boundaries to the user.
 R4g. Window boundaries are invisible to the user. Do NOT announce loading, do NOT say "loading the next 10", and do NOT pause at a window edge.
-R4h. IF the index shows WINDOW or fewer questions in total THEN the first window is the whole file and R4d never fires.
+R4h. IF WINDOW or fewer questions remain at or after the initial position THEN the initial window contains every remaining question and R4d never fires.
 R5.  IF the file does not exist THEN stop and tell the user: "Run /generate_questions <arg> first."
 R6.  IF no <arg> is given THEN list all `questions_*.md` files under `extracted/textbook/chapters/` and `extracted/class/` and ask the user to pick one. STOP until user responds.
 
@@ -66,22 +73,24 @@ R6d. IF a `### Course Scope` entry exists but carries no derivable chapter list 
 
 // Unit and question delivery
 R7.  IF starting a new unit THEN display "Unit X of Y — <title>" as a level-2 markdown heading: `## Unit X of Y — <title>`.
-R8.  IF mode = teach AND about to display a question THEN first display that question's `Teach:` field verbatim as a markdown blockquote — prefix every line with `> `. IF the entry has a `Legend:` field THEN append it inside the same blockquote.
+R7a. IF displaying the first question of a session from the middle of a unit THEN display that unit's heading per R7 before the question.
+R8.  IF about to display a question THEN first display that question's `Teach:` field verbatim as a markdown blockquote and prefix every line with `> `.
+R8d. IF R8 displays Teach AND the entry has a `Legend:` field THEN append Legend inside the same blockquote.
 R8a. The `> ` blockquote prefix in R8 is display framing, not content. R10 does not prohibit it.
-R8b. IF mode = teach THEN after the Teach blockquote and before the Question, output a blank line, a `---` horizontal rule, and a blank line.
+R8b. IF R8 displays Teach THEN after the Teach blockquote and before the Question, output a blank line, a `---` horizontal rule, and a blank line.
 R8c. R8b overrides the global CLAUDE.md response-style ban on `---` horizontal rules, for the Teach/Question separator only.
-R9.  IF mode = review THEN do NOT display Teach or Legend fields at any point.
 R10. Do NOT rewrite, summarize, or add to the Teach field.
 R11. Do NOT display `Concept`, `Source quote`, `Tests`, `Audit`, `Origin`, `Origin generated`, `Teach_EN`, or `Question_EN` at any point.
-R11d. R11 is a denylist and R8/R12k are the allowlist. IF an entry carries a field they do not name THEN do NOT display it.
-R11a. Do NOT display the `Answer key` or `Elaboration` field when delivering a question, in either mode. They are released only under R13a.
+R11d. IF delivering a question THEN display only `Teach`, optional `Legend`, and `Question` per R8 and R12k.
+R11d1. IF releasing an answer THEN display only `Answer key` and optional `Elaboration` per R13a.
+R11a. Do NOT display the `Answer key` or `Elaboration` field when delivering a question. They are released only under R13a.
 R11a2. IF an entry's `Origin` field records `ORPHANED` THEN still deliver the question normally. Report it once in the R28 wrap-up per R28d.
 
 // Batch delivery
 R12. BATCH = 1. Deliver BATCH questions per turn, then STOP and wait for the user.
 R12i. IF the user's arguments contain `batch<N>` (e.g. `batch3`, `batch5`) THEN BATCH = N for this session; remove that token from the arguments before R1a counts them.
 R12j. IF fewer than BATCH questions remain undelivered THEN the final batch is however many remain.
-R12k. Displaying one question = its `Question` field rendered as a level-3 markdown heading with a `❓` anchor and a UNIT-QUALIFIED label: `### ❓ U<u>·Q<n> — <question text>`, where `<u>` is its unit number and `<n>` is the `Q<n>` label its heading carries. IF mode = teach THEN R8 and R8b precede it.
+R12k. Displaying one question = its `Question` field rendered as a level-3 markdown heading with a `❓` anchor and a UNIT-QUALIFIED label: `### ❓ U<u>·Q<n> — <question text>`, where `<u>` is its unit number and `<n>` is the `Q<n>` label its heading carries. R8 and R8b precede it.
 R12k1. IF the file holds exactly one unit THEN drop the `U<u>·` prefix and label the question `Q<n>`.
 R12l. Display the batch's questions in ascending position order, one after another in a single turn, each per R12k. Do NOT reveal any answer.
 R12m. After the last question of the batch, STOP. Do NOT display the next batch until the current batch's answers have been released under R13a.
@@ -99,17 +108,19 @@ R16. There is no correct count, no wrong count, and no score.
 R17. IF a batch is pending AND the user's message is a clarifying or follow-up question about the material THEN R20 applies: answer it, re-display the pending batch, do NOT release any answer, and do NOT advance.
 R18. IF the user's message on a pending batch is ambiguous between R14 and R17 THEN treat it as R17: answer it and re-display the batch. Do NOT advance.
      // Example: "wait, is dependability the same as reliability?" → R17. "something about it being an engineering discipline" → R14.
-R19. IF a batch's answers have been released under R13a THEN advance: load the next window first if the current one is exhausted (R4d), then deliver the next BATCH questions per R12l. IF mode = teach THEN each question's Teach field precedes its Question field, per R8 and R8b.
+R19. IF a batch's answers have been released under R13a THEN advance: load the next window first if the current one is exhausted (R4d), then deliver the next BATCH questions per R12l.
 
 // Pacing
 R20. IF the user sends a clarifying or follow-up question THEN answer it fully, then re-display the current pending batch in full. Do not ask "Ready to continue?"
-R21. Move through units in order. Every question is delivered; nothing gates advancing.
+R21. IF questions remain in the delivery scope defined by R1c–R1c1 THEN deliver them in ascending position order across units without an additional gate.
 
 // Wrap up
 R28. IF the final batch's answers have been released under R13a AND no unloaded questions remain in the file, THEN display a completion line per R28a and stop.
 R28f. Check the R4c index, not the loaded window, to decide whether questions remain.
-R28a. The completion line names the topic and the file's full size. Every question in the file was delivered, so the count IS the file.
+R28a. IF START = 1 THEN the completion line names the topic and the file's full size.
      // Example: `**Complete — 33 questions delivered** (week1 — all 33 questions in this file.)`
+R28a1. IF START > 1 THEN the completion line names the topic, M - START + 1 questions delivered, positions START through M, and the file's full size M.
+     // Example: `**Complete — 24 questions delivered** (chapter1 — positions 10–33 of 33.)`
 R28b. Do NOT display a score, a correct/total ratio, a list of missed questions, or a summary of weak areas. Nothing was graded.
 R28c. IF the topic was a chapter AND `extracted/class/` contains any `week<N>/questions_week<N>.md` files THEN, after the completion line, print one line naming the week files as the course-scoped subset.
 R28d. IF the topic was a week AND any delivered entry's `Origin` field records `ORPHANED` THEN, after the completion line, print one line naming the count and the fix: re-run `/generate_questions week<N>` and choose `reselect`.
@@ -132,12 +143,12 @@ R30b1. A save is ONE tool call: the Write. Do NOT read the questions file, do NO
 R30b2. IF the state R30c requires is NOT already in context THEN no session is active and R30a applies.
 R30c. The progress file contains exactly these fields:
        - `topic:` — the normalized topic argument (e.g. `chapter3`, `week1`)
-       - `mode:` — `teach` or `review`
        - `questions_file:` — absolute path to the loaded questions file
        - `current_unit:` — unit number the session is on
        - `current_question:` — the ABSOLUTE POSITION (R4c1) of the NEXT question to deliver
        - `current_label:` — that question's R12k label, for human readability only
        - `batch:` — the BATCH size in force for this session
+       - `start_question:` — the original START absolute position for this session
        - `delivered:` — count of questions whose answer was released
 R30c1. Do NOT write a `correct:`, `wrong:`, or `wrong_list:` field. Nothing is graded.
 R30d. IF the progress file already exists THEN overwrite it.
@@ -156,8 +167,8 @@ R31b. IF exactly one progress file exists THEN load it and proceed to R31e.
 R31c. IF multiple progress files exist THEN list them with their topic, the file's MODIFICATION TIME, and progress (question N of M). Ask the user to pick one. STOP until user responds.
 R31d. IF no progress file exists THEN say "No saved sessions found." Do NOT stop under R35.
 R31e. Load the questions file from the `questions_file:` path per R4c. IF the file does not exist THEN say "Questions file missing — cannot resume." Do NOT stop under R35.
-R31f. Restore mode from the progress file's `mode:` field.
-R31f1. Restore BATCH from the progress file's `batch:` field. IF the file carries no `batch:` field THEN BATCH = 1.
+R31f. Restore BATCH from the progress file's `batch:` field. IF the file carries no `batch:` field THEN BATCH = 1.
+R31f1. Restore START from the progress file's `start_question:` field. IF the file carries no `start_question:` field THEN START = 1.
 R31g. Restore the delivered count from the progress file.
 R31h. Skip to the unit and question recorded in `current_unit:` and `current_question:`. Deliver a full batch starting at that question.
 R31i. After the resumed session ends normally (R28), delete the progress file.
@@ -172,10 +183,9 @@ R35. IF any condition not covered by R1–R31 (including all lettered sub-rules)
 /generate_questions chapter2      ← build the pool first — this is where questions are made
 /generate_questions week1         ← then select week 1's subset out of it
 /learn week1                      ← first pass over week 1's study list: teach then ask
-/learn week1 no_context           ← review pass over the same: blind questions
 
 /learn chapter2                   ← first pass over the whole chapter — the reference bank
-/learn chapter2 no_context        ← review pass over the whole chapter
+/learn chapter2 start10           ← begin at absolute question position 10
 /learn chapter2 batch3            ← three questions per turn instead of one
 /learn chapter2 autosave3         ← autosave every 3 questions instead of 10
 /learn chapter2 autosave off      ← turn autosave off
@@ -191,8 +201,9 @@ Questions arrive **one at a time** by default: read it, answer out loud, type `n
 stored answer and move on. Pass `batch<N>` to get several per turn instead — fewer round trips,
 lower cost, but you hold several questions in your head at once.
 
-Every run delivers the entire file, ten questions at a time behind the scenes — you never see the
-window boundaries. To study less, pick a narrower topic — that is what `week<N>` is: the questions
+Without `start<N>`, every run delivers the entire file. With `start<N>`, the run delivers every
+question from absolute position N through the end. Questions load ten at a time behind the scenes —
+you never see the window boundaries. To study a course-scoped subset, pick `week<N>`: the questions
 from the book that this week's lectures actually reached.
 
 In-session keywords, typed in reply to a pending question:
@@ -207,3 +218,4 @@ a question about the material, which is answered and the question re-asked (R17)
 
 In a multi-unit file, questions are labeled `U2·Q5` — unit 2, question 5. The `Q<n>` numbers restart
 in every unit, so the unit prefix is what makes a label unique. Single-unit files just show `Q5`.
+The `start<N>` argument uses the absolute position in the file, not either displayed label.
