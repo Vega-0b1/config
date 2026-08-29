@@ -101,9 +101,17 @@ R24i1. On a SELECT run R24i is satisfied by COPYING, not by writing: R0r2 carrie
 R24i2. On a SELECT run every entry additionally carries `Origin:` and `Origin generated:` per R0r4.
 
 // Mechanical verification — select specifics
-R24k4. R24k runs on a SELECT run too, over the whole file, on a first selection and on a resync alike. Legacy entries carrying no `Source quote:` are counted and skipped, not failed (R18b3).
-R24k4a. IF R24k fails on a SELECT run THEN the defect is in the COPY, not in the pool. Re-copy the named entry verbatim from its origin (R0r2) and re-run. Do NOT edit the chapter file.
-R24k4b. IF a re-copy still fails THEN the pool entry itself is bad. Report it, name the chapter and Q number, and tell the user to regenerate that chapter.
+R24k4. IF a SELECT questions file is written on a first selection, resync, or reselect THEN run `python3 <skill dir>/verify_quotes.py --legacy <output path>`.
+R24k4a. IF the legacy verifier reports a missing quote match or a malformed copied quote field THEN re-copy the named entry verbatim from its origin under R0r2.
+R24k4a1. IF an entry is re-copied under R24k4a THEN re-run the verifier.
+R24k4a2. IF R24k4a applies THEN do NOT edit the chapter file.
+R24k4b. IF the R24k4a1 re-run still fails THEN report the bad pool entry.
+R24k4b1. IF reporting a bad pool entry under R24k4b THEN name its chapter and Q number.
+R24k4b2. IF reporting a bad pool entry under R24k4b THEN tell the user to regenerate that chapter.
+R24k4c. IF the legacy verifier reports zero checked quote fragments THEN stop the SELECT run.
+R24k4c1. IF the SELECT run stops under R24k4c THEN report that the file contains no verifiable provenance.
+R24k4d. IF the legacy verifier finds an entry with no `Source quote:` field THEN skip it under R18b3.
+R24k4d1. IF the legacy verifier skips entries under R24k4d THEN report their count.
 
 ## Output Format — select run
 
@@ -121,8 +129,13 @@ nothing from them. It then copies the pool questions matching those topics into 
 is the study list.
 
 Because it selects rather than generates, a terse slide costs nothing: a slide reading only
-"Nagle's algorithm" is a perfect coverage signal, and the book supplies the depth. A roadmap slide
-listing the week's topics is among the best signals there is.
+"Nagle's algorithm" is a perfect coverage signal, and the book supplies the depth — R0n2 imposes no
+depth requirement.
+
+A roadmap or agenda slide is the exception. R0n2a keeps it out of the profile: naming a topic in a
+"what we will cover" list promises future coverage rather than delivering it. R0n2b readmits the
+enumeration whose items carry their own definitions, because there the list is the lesson. The
+distinction is whether the slide teaches the topic or merely announces it.
 
 Re-running a week offers two operations:
 - `resync` — keep the same selection, refresh each copy from its origin chapter. Use after

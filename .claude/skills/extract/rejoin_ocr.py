@@ -19,6 +19,8 @@ Safety rules, in order of how much they matter:
   4. Skip shell transcripts, preprocessor lines, and symbol-dense lines (code).
      Indentation is NOT a code signal: this extraction indents the first line of
      every paragraph, and treating that as code skips half the body text.
+  5. Preserve every fenced code block byte-for-byte. A fence protects all lines
+     through its matching close; an unclosed fence protects through end-of-file.
 
 Usage:
     rejoin_ocr.py <corpus.md> <target.md> <output.md>     # target may equal corpus
@@ -42,6 +44,27 @@ REAL_SHORT = {
 }
 
 CODE_PREFIXES = ("$", "#include", "#define", "```", "//", "/*", "-rw", "drw")
+FENCE_OPEN_RE = re.compile(r"^[ \t]{0,3}(`{3,}|~{3,})(.*)$")
+
+
+def opening_fence(line):
+    m = FENCE_OPEN_RE.match(line)
+    if not m:
+        return None
+    marker, info = m.groups()
+    if marker[0] == "`" and "`" in info:
+        return None
+    return marker[0], len(marker)
+
+
+def closes_fence(line, fence):
+    char, minimum = fence
+    return bool(
+        re.fullmatch(
+            rf"^[ \t]{{0,3}}{re.escape(char)}{{{minimum},}}[ \t]*$",
+            line,
+        )
+    )
 
 
 def build_vocab(corpus_text):
@@ -113,6 +136,25 @@ def rejoin_line(line, freq, vocab, log):
     return "".join(parts)
 
 
+def rejoin_pass(text, freq, vocab, log):
+    """Run one repair pass while preserving fenced blocks byte-for-byte."""
+    lines = []
+    fence = None
+    for line in text.split("\n"):
+        if fence is not None:
+            lines.append(line)
+            if closes_fence(line, fence):
+                fence = None
+            continue
+        opened = opening_fence(line)
+        if opened is not None:
+            fence = opened
+            lines.append(line)
+            continue
+        lines.append(rejoin_line(line, freq, vocab, log))
+    return "\n".join(lines)
+
+
 def rejoin_text(corpus_text, target_text, max_passes=4):
     """Rejoin repeatedly until no further merges are found.
 
@@ -127,9 +169,7 @@ def rejoin_text(corpus_text, target_text, max_passes=4):
     text = target_text
     for _ in range(max_passes):
         pass_log = collections.Counter()
-        text = "\n".join(
-            rejoin_line(l, freq, vocab, pass_log) for l in text.split("\n")
-        )
+        text = rejoin_pass(text, freq, vocab, pass_log)
         if not pass_log:
             break
         log.update(pass_log)

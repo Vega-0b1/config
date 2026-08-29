@@ -19,15 +19,19 @@ R6.  IF the output file already exists THEN stop and warn the user before overwr
 R7.  IF no extractable content files are found THEN stop and tell the user.
 
 // Reading
-R8.  Supported formats: PDF, DOCX, PPTX, EPUB, and the legacy binaries PPT, DOC, XLS via the conversion in R8a–R8f.
+R8.  Supported formats: PDF, DOCX, PPTX, EPUB, and the legacy binaries PPT and DOC via the conversion in R8a–R8f.
 
 // Legacy binary formats
-R8a. IF a target file's extension is `.ppt`, `.doc`, or `.xls` THEN convert it to the modern equivalent before extracting.
+R8a. IF a target file's extension is `.ppt` or `.doc` THEN convert it to the modern equivalent before extracting.
 R8b. Confirm the file is OLE2 by reading its first 8 bytes (`d0 cf 11 e0 a1 b1 1a e1`). IF they do not match THEN skip the conversion and extract as the modern counterpart.
-R8c. Convert with `soffice --headless --convert-to <target> <file>`. Target = `pptx` for `.ppt`, `docx` for `.doc`, `xlsx` for `.xls`.
+R8c. Convert with `soffice --headless --convert-to <target> <file>`. Target = `pptx` for `.ppt` and `docx` for `.doc`.
 R8d. IF `soffice` is not on PATH THEN stop and tell the user the file needs LibreOffice to convert.
 R8e. IF the conversion produces no output file THEN stop and report it.
-R8f. Extract from the CONVERTED file. Keep the original. R17–R18 move both to `source/`.
+R8f. Extract from the CONVERTED file. Keep the original. R17a or R18a moves both after successful incorporation.
+R8g. IF an extraction run begins THEN initialize EXTRACTED_SOURCES as an empty ordered set of absolute paths.
+R8h. IF a target file's content is incorporated into the output without conversion THEN add that target file's absolute path to EXTRACTED_SOURCES.
+R8i. IF a converted file's content is incorporated into the output THEN add the original and converted files' absolute paths to EXTRACTED_SOURCES.
+R8j. IF a target file is skipped OR its extraction fails THEN do NOT add that target or its converted file to EXTRACTED_SOURCES.
 
 R9.  IF a file is unrelated (`.gitignore`, lock files, code files, existing markdown in `extracted/`) THEN skip it.
 R10. IF multiple files are targeted THEN read them in parallel.
@@ -125,20 +129,27 @@ R16a3. IF the user answers `cancel` THEN write the full notes file but do NOT sp
 R16a4. IF the user answers `overwrite` THEN split normally and report how many repaired chapters were discarded and that they need re-repair on their next `/generate_questions` run.
 R16a5. R16a1's scan is a precondition of R16a, not of R16b. Run it once before the first slice is written, never per slice.
 R16b. IF R16a applies THEN for each chapter found by the heading pattern: create `OUTDIR/chapters/chapter<N>/` and write that chapter's content (from its heading to the line before the next chapter heading) to `OUTDIR/chapters/chapter<N>/chapter<N>.md`.
-R16b1. The chapter heading line IS the first line of its slice. A slice that begins with anything else is wrong.
+R16b1. IF a slice has no `<!-- visual-repair: done -->` marker THEN its chapter heading line IS its first line.
+R16b1a. IF a slice has `<!-- visual-repair: done -->` as its first line THEN its chapter heading line IS its second line.
+R16b1b. IF any line other than the visual-repair marker precedes the chapter heading line THEN the slice is wrong.
 R16b2. The boundary is anchored on the CHAPTER heading only. Do NOT anchor it on a section heading, a page locator, or any other pattern.
 R16b3. Cutting late loses the chapter opener, which is content, not front matter.
-R16b4. After writing the slices, verify R16b1 for every one: the slice's first line must equal the chapter heading line it was cut at. Report the count checked and any that failed.
+R16b4. After writing the slices, verify R16b1–R16b1b for every one. Report the count checked and any that failed.
 R16c. IF the class uses a non-English chapter convention (e.g. `capitulo`) THEN use that convention for directory and file names: `OUTDIR/chapters/capitulo<N>/capitulo<N>.md`.
 R16d. IF the textbook has content before the first chapter heading (front matter, preface) THEN do NOT create a slice for it. It lives only in the full book file.
 R16e. The full book file written by R15 is NOT affected by the split. Both the full file and the per-chapter slices exist side by side.
 R16f. IF R16a does not apply THEN skip the split entirely.
 
 // Moving sources
-R17. IF the output write succeeded AND the argument was a subfolder THEN create `source/` if needed and move the whole subfolder to `source/<subfolder>/`.
-R18. IF the output write succeeded AND the target was a single file or loose files THEN create `source/` if needed and move each file individually into `source/`.
+R17. IF the output write succeeded AND the argument was a subfolder THEN create `source/<subfolder>/` if needed.
+R17a. IF R17 applies THEN move each path in EXTRACTED_SOURCES into `source/<subfolder>/`, preserving its filename.
+R17b. IF R17a leaves the target subfolder empty THEN remove the empty target subfolder.
+R18. IF the output write succeeded AND the target was a single file or loose files THEN create `source/` if needed.
+R18a. IF R18 applies THEN move each path in EXTRACTED_SOURCES individually into `source/`, preserving its filename.
+R18b. IF R17 or R18 applies THEN leave every path not in EXTRACTED_SOURCES at its original location.
 R19. IF the output write failed THEN do NOT move any files.
-R20. Do NOT move `extracted/`, `source/`, `code/`, `CLAUDE.md`, or `README.md`.
+R20. IF a candidate move path is `extracted/`, `source/`, `code/`, `CLAUDE.md`, or `README.md` THEN do NOT move it.
+R20a. IF R20 and either R17a or R18a apply THEN R20 overrides R17a and R18a.
 
 // CLAUDE.md Contents update
 R21. IF the output write succeeded AND the class root contains a `CLAUDE.md` with a `## Contents` section THEN add a one-line entry for the new notes file under its `**extracted/**` group and update the `**source/**` group to reflect the moved files.
@@ -152,7 +163,7 @@ R25a. IF a PDF was extracted under R11a1 THEN also report: running heads removed
 R25b. IF R16a1 found repaired slices THEN report which chapters were discarded or preserved, and that a discarded chapter re-repairs on its next `/generate_questions` run.
 
 // Catch-all
-R26. IF any condition not covered by R1–R25 (including lettered sub-rules) arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R26. IF any condition not covered by R0–R25 (including lettered sub-rules) arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Sanitization (single-file argument)
 

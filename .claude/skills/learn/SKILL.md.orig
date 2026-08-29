@@ -101,7 +101,6 @@ R12k1. IF the file holds exactly one unit THEN drop the `U<u>·` prefix and labe
 R12l. Display the batch's questions in ascending position order, one after another in a single turn, each per R12k. Do NOT reveal any answer.
 R12m. After the last question of the batch, STOP. Do NOT display the next batch until the current batch's answers have been released under R13a.
 R12n. IF a unit boundary falls inside a batch THEN display the R7 unit heading at that point and continue the batch across it.
-R12o. IF a batch is pending AND the user's message, after trimming whitespace and ignoring case, is exactly `exit` THEN clear the active in-chat batch, say "Learn session ended.", and stop. Do NOT release an answer, advance, or write session state. R12o overrides R13c, R14, R17, and R18.
 
 R13. IF a batch is pending AND the user's message, after trimming whitespace and ignoring case, is exactly `next` THEN display the answers per R13a and advance per R19.
 R13a. Displaying the answers = for EVERY question in the pending batch, in ascending position order, output the heading `**Answer — <label>**` using that question's R12k label, then its `Answer key` verbatim, then its `Elaboration` verbatim when it has one.
@@ -162,7 +161,6 @@ In-session keywords, typed in reply to a pending question:
 
 ```
 next      ← show the stored answer, then deliver the next question (R13)
-exit      ← end the learn session without revealing an answer (R12o)
 ```
 
 Anything else you type leaves the pending batch in place. An attempted answer is not graded; an answer request prompts you to type `next`; a question about the material is answered and then the pending batch is re-displayed (R14, R13c, R17).

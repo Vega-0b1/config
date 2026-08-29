@@ -76,14 +76,26 @@ R24h. IF saving THEN write `kind: book` or `kind: select` into the frontmatter, 
 R24i. IF saving an entry THEN write its `Concept:` field per R13f and its `Source quote:` field per R13g.
 
 // Shared audit fact — cited by the book audit (R18b) and by the select verify (R24k4)
-R18b3. IF an entry carries no `Source quote:` field THEN skip R18b for that entry and report it. Do NOT mark FAIL, and do NOT backfill the field.
+R18b3. IF a SELECT entry carries no `Source quote:` field THEN skip R18b for that entry.
+R18b3a. IF an entry is skipped under R18b3 THEN report it.
+R18b3b. IF an entry is skipped under R18b3 THEN do NOT mark it FAIL.
+R18b3c. IF an entry is skipped under R18b3 THEN do NOT backfill the field.
 
 // Mechanical verification — after saving, before reporting
-R24k. After saving the questions file, run `python3 <skill dir>/verify_quotes.py <output path>`. The run is NOT complete until it has been run.
-R24k1. IF verify_quotes.py exits non-zero THEN fix every quote it names and re-run it. Repeat until it exits 0. Do NOT report the run as complete on a failing verify.
-R24k2. IF a quote is genuinely present but the script cannot find it THEN that is a normalization defect in verify_quotes.py. Fix the script, do NOT edit the quote to match the script.
-R24k3. IF the script exits 2 — no readable source — THEN say so in the report and name the path it tried.
-R24k5. The user may run verify_quotes.py themselves against any questions file, with no model involved. IF they ask how to check a file THEN give them the command.
+R24k. IF a questions file is saved THEN apply the verifier rule for its run type before reporting the run complete.
+R24k0. IF a BOOK questions file is saved THEN run `python3 <skill dir>/verify_quotes.py <output path>` in strict mode.
+R24k1. IF verify_quotes.py exits non-zero THEN do NOT report the run as complete.
+R24k1a. IF verify_quotes.py exits 1 and names schema or quote problems THEN fix every named problem.
+R24k1b. IF every problem named under R24k1a is fixed THEN re-run verify_quotes.py.
+R24k1c. IF the R24k1b re-run exits 1 THEN R24k1a applies again.
+R24k2. IF a quote is genuinely present but the script cannot find it THEN fix the normalization defect in verify_quotes.py.
+R24k2a. IF R24k2 applies THEN do NOT edit the quote to match the script.
+R24k3. IF the script exits 2 THEN report the source or usage error exactly as printed.
+R24k5. IF the user asks how to check a BOOK questions file THEN give them the strict command.
+R24k5a. IF the user asks how to check a SELECT questions file THEN give them the `--legacy` command.
+R24k6. IF strict mode finds an entry without an exact non-empty `Source quote:` field THEN exit 1.
+R24k7. IF either mode finds a malformed question heading, a malformed or empty `Source quote:` field, zero valid entries, OR zero checked quote fragments THEN exit 1.
+R24k8. IF a quote fragment has non-empty normalized text THEN verify it regardless of its character count.
 
 // Report
 R25. After saving, report errors, warnings, and a summary. Report only what the user needs to act on or verify — do not enumerate everything that went right.

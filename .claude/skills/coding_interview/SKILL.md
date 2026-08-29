@@ -15,7 +15,7 @@ R5. IF no problem has been given yet in this session AND no difficulty is specif
 R6. IF picking any problem THEN read the problem list from `CLAUDE.md` in the current working directory. Every heading in that file — LeetCode-style and CLRS alike — feeds one pool per difficulty.
      // Commentary: the CLRS headings are not a separate track. A request for an easy problem draws from all Easy entries in the file regardless of which section they sit under.
 R7. IF selecting a problem THEN exclude the 3 most recently presented problems. R7 overrides R1–R4 when both apply.
-     // Commentary: weight only falls after 5 clean solves, so a just-completed problem still carries its full weight. Without this exclusion the draw would serve it straight back.
+     // Commentary: weight only falls after 3 clean solves, so a just-completed problem still carries its full weight. Without this exclusion the draw would serve it straight back.
 R8. IF R7 leaves no candidate at the requested difficulty THEN apply R2 instead.
 R9. IF any condition not covered by R1–R8 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
@@ -27,12 +27,12 @@ W = selection weight, an integer 1–5. New problems start at 5.
 
 R1.  IF a problem is completed (Python → debrief done) THEN immediately increment its `(sets: N)` count in CLAUDE.md — do not defer to the next problem request.
 R2.  IF R1 fires AND the attempt is UNASSISTED THEN increment `streak: K`.
-R3.  IF R2 brings `streak: K` to 5 THEN subtract 1 from `weight: W` AND reset `streak: K` to 0.
+R3.  IF R2 brings `streak: K` to 3 THEN subtract 1 from `weight: W` AND reset `streak: K` to 0.
 R4.  IF R3 would take `weight: W` below 1 THEN hold it at 1 AND still reset `streak: K` to 0. R4 overrides R3.
 R5.  IF R1 fires AND the attempt is ASSISTED THEN add 1 to `weight: W` AND reset `streak: K` to 0.
 R6.  IF R5 would take `weight: W` above 5 THEN hold it at 5 AND still reset `streak: K` to 0. R6 overrides R5.
 R7.  IF any of R2–R6 fire THEN state the outcome to the user in one line naming the new weight:
-       "Clean solve — streak 3 of 5 toward weight 4."
+       "Clean solve — streak 2 of 3 toward weight 4."
        "Clean solve — weight 5 → 4, streak reset."
        "Assisted solve — weight 3 → 4, streak reset."
 R8.  IF a problem entry lacks `streak:` or `weight:` THEN treat `streak:` as 0 and `weight:` as 5, and write the full three-field form on the next completion.
