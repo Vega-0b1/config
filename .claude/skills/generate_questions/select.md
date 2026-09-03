@@ -62,9 +62,10 @@ R0r. Units come from the POOL, not from the registry: one unit per origin chapte
 R0r1. Order entries within a unit by their original order in the origin chapter file.
 R0r2. Copy each selected entry VERBATIM — `Concept:`, `Source quote:`, `Teach:`, `Teach_EN:`, `Question:`, `Question_EN:`, `Tests:`, `Answer key:`, `Elaboration:`, `Audit:` — every field it carries, byte for byte, including fields this skill no longer writes.
 R0r3. Do NOT rewrite, reword, shorten, reformat, re-translate, or re-audit a copied entry.
-R0r4. Add exactly two fields to each copied entry, placed immediately after `Concept:`:
+R0r4. Add exactly three fields to each copied entry, placed immediately after `Concept:`:
      - `Origin: chapter<N> Q<n>` — the origin file and the entry's number IN that file.
-     - `Origin generated: <the origin file's frontmatter `generated:` date>`
+     - `Origin generated: <the origin file frontmatter `generated:` date>`
+     - `Origin fingerprint: <SHA-256 of the exact origin entry bytes>`
 R0r5. Renumber copied entries sequentially within their unit — Q1, Q2, Q3. `Origin:` preserves the original number.
 
 // Existing file — select branch of R5
@@ -72,9 +73,9 @@ R5a. IF this is a SELECT run THEN state the recommended operation and ask the us
 
 // Existing file: resync
 R0s. RESYNC keeps the current selection and refreshes each copied entry from its origin. It does NOT reconsider which concepts are selected.
-R0s1. For each copied entry, open the file named by its `Origin:`. IF that file's frontmatter `generated:` equals the entry's `Origin generated:` THEN the entry is current. Leave it byte-identical.
-R0s2. IF the two dates differ THEN locate the origin entry by its `Concept:` field, NEVER by its Q number. Q numbers do not survive a regeneration.
-R0s3. IF the concept IS found in the regenerated origin file THEN replace every copied field with the origin's current values, update `Origin:` to its new Q number and `Origin generated:` to the new date, and report the entry as REFRESHED.
+R0s1. For each copied entry, open the file named by its `Origin:` and calculate the SHA-256 fingerprint of the exact current origin entry bytes. IF it equals the entry's `Origin fingerprint:` THEN the entry is current; leave it byte-identical. For a legacy entry without an Origin fingerprint, compare every copied origin field byte-for-byte before declaring it current.
+R0s2. IF the fingerprint differs, or the legacy field comparison differs, locate the origin entry by its `Concept:` field, NEVER by its Q number. Q numbers do not survive a regeneration.
+R0s3. IF the concept IS found in the regenerated origin file THEN replace every copied field with the current origin values, update `Origin:` to its new Q number, `Origin generated:` to the new date, and `Origin fingerprint:` to the current SHA-256, and report the entry as REFRESHED. R5k6 overrides this rule for `Source quote:` only: an entry that lacked that field retains no such field during resync.
 R0s4. IF the concept is NOT found in the regenerated origin file THEN keep the copied entry exactly as it stands, rewrite its `Origin:` field to `chapter<N> Q<n> — ORPHANED`, and report it.
 R0s5. IF an origin chapter questions file no longer exists at all THEN every entry copied from it is ORPHANED under R0s4.
 R0s7. IF a resync refreshes nothing and orphans nothing THEN write NOTHING. Report no change and stop.
@@ -98,7 +99,7 @@ R24h1. On a SELECT run the frontmatter `source:` field lists the textbook chapte
 R24h2. On a SELECT run additionally write `pool:` — one line per origin chapter questions file, each with the `generated:` date this run read from it.
 R24h3. On a SELECT run additionally write `coverage_source:` — every registered `### Teaching` file read to build the coverage profile, comma-separated. Documentation only, never resolved.
 R24i1. On a SELECT run R24i is satisfied by COPYING, not by writing: R0r2 carries `Concept:` and `Source quote:` over unchanged from the pool entry. R5k6 governs an entry that has no quote to copy.
-R24i2. On a SELECT run every entry additionally carries `Origin:` and `Origin generated:` per R0r4.
+R24i2. On a SELECT run every entry additionally carries `Origin:`, `Origin generated:`, and `Origin fingerprint:` per R0r4.
 
 // Mechanical verification — select specifics
 R24k4. IF a SELECT questions file is written on a first selection, resync, or reselect THEN run `python3 <skill dir>/verify_quotes.py --legacy <output path>`.
@@ -118,7 +119,7 @@ R24k4d1. IF the legacy verifier skips entries under R24k4d THEN report their cou
 Same entry fields as the book format in `book.md`, all copied verbatim from the pool (R0r2). Differences:
 
 - Frontmatter: `kind: select`, `source:` lists textbook SLICES not class files (R24h1), adds `pool:` (R24h2) and `coverage_source:` (R24h3).
-- Each entry adds `Origin: chapter<N> Q<n>` and `Origin generated: <date>` after `Concept:` (R0r4). An orphaned entry reads `Origin: chapter<N> Q<n> — ORPHANED` (R0s4).
+- Each entry adds `Origin: chapter<N> Q<n>`, `Origin generated: <date>`, and an `Origin fingerprint: <SHA-256>` after `Concept:` (R0r4). An orphaned entry reads `Origin: chapter<N> Q<n> — ORPHANED` (R0s4).
 - Units = one per origin chapter that contributed entries, in ascending chapter order (R0r). Entries renumbered within each unit (R0r5).
 
 ## Notes

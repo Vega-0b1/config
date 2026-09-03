@@ -83,7 +83,7 @@ def looks_like_toc(text, full_line):
 
 def clean_title(text):
     """Collapse the runs of spaces `-layout` uses for alignment."""
-    return re.sub(r"\s{2,}", " ", text).strip().rstrip(". ").strip() or text.strip()
+    return re.sub(r"\s{2,}", " ", text).strip() or text.strip()
 
 
 def extract_chapter_title(lines, i):

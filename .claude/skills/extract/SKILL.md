@@ -83,7 +83,7 @@ R11o8. After writing, verify for each heading level that the total count equals 
 R11o9. IF a heading level's unique count is far below the count of that level's entries in the book's table of contents THEN the numeral pattern is too strict — widen it under R11o4 and re-run.
 
 R12. IF the file is a DOCX THEN extract with Python `zipfile` + `xml.etree.ElementTree`: unzip, parse `word/document.xml`, collect all `<w:t>` text nodes per paragraph.
-R13. IF the file is an EPUB THEN extract with Python `zipfile` + `xml.etree.ElementTree`: unzip, find `.xhtml`/`.html` files in spine order (via `META-INF/container.xml` → `content.opf`), strip tags, concatenate. Skip nav/TOC files.
+R13. IF the file is an EPUB THEN extract with Python `zipfile` + `xml.etree.ElementTree`: unzip, find `.xhtml`/`.html` files in spine order (via `META-INF/container.xml` → `content.opf`), strip tags, concatenate. Skip EPUB navigation/TOC documents. This exclusion overrides R16 and R16g because those documents are duplicated structural furniture; it does not exclude a body-spine page merely titled Contents or any caption/body text.
 
 // Figures — no format extracts them
 R13a. Do NOT extract embedded images from ANY source format, and do NOT create an `images/` directory. `<img>` tags are stripped like every other tag under R13.
@@ -113,7 +113,7 @@ R14f. `## Page <N>` (R11b) and `## Slide <N> — <title>` (R14b) are locator hea
 // Writing
 R15. Write all extracted text verbatim to the output file. Preserve structure (headings, lists, tables, code blocks) where possible.
 R15a. R11b, R14b, and R14e emit headings that do not appear in the source. R15's verbatim requirement governs the extracted text only.
-R15b. R11o rewrites a numbered heading line into markdown heading form. The line's text survives; only its leading whitespace and alignment padding are dropped.
+R15b. R11o may join a detected chapter-number line with its verbatim title line(s) and insert Markdown heading punctuation. Aside from that reconstruction, the source words survive unchanged; only leading whitespace and alignment padding may be dropped.
 R16. Do NOT summarize, filter, or omit anything.
 R16g. R11n overrides R16: running heads are removed. No other rule may omit source text.
 R16h. Verify the `pdf_layout.py` output against the `pdftotext` text: every non-heading line in the output must appear in the raw text. IF a line was invented THEN stop and report.

@@ -127,7 +127,7 @@ R12t1. A curated question is ADOPTABLE if all three hold: (a) it maps to exactly
 R12t2. A curated question is NOT adoptable if any of these apply: it is a discussion prompt with no answer in the source; it is a skill checklist item; it is an ethical dilemma or open-ended question the author deliberately left unanswered; it is a process-step definition where the question IS the content; it duplicates a question already adopted for the same concept; or it fails R15 (definitional recall).
 R12t3. For each adopted question: preserve the author's question wording in the `Question:` field. Build `Teach:`, `Answer key:`, `Elaboration:`, and `Audit:` from the source content per the same rules as generated questions (R10–R12b, R16a–R16e, R17). Record `Concept:` per R13f and `Source quote:` per R13g2.
 R12t4. IF a curated question's wording is compound (two `?` marks, or two independent facts required) THEN split it into two entries per R15a–R15b, preserving the author's phrasing for each half.
-R12t5. IF a curated question maps to an inventory concept but fails R15 (definitional recall) THEN adopt it ONLY IF the concept is being introduced for the first time in this source. IF the concept was already introduced in a prior unit or chapter THEN do NOT adopt it — R13 generates a question for it instead.
+R12t5. R12t5 overrides only R12t1(c), the definitional-recall clause of R12t2, and R15: adopt a curated definitional-recall question only when the first inventory-admissible explanatory occurrence (R12d–R12e) is this occurrence in document order. Bare mentions, objective lists, roadmaps, and headings do not introduce a concept. If an earlier explanatory occurrence exists in any prior unit or chapter, do NOT adopt it — R13 generates a question instead.
 R12t6. IF multiple curated questions map to the same inventory concept THEN adopt the one that best satisfies R15 (mechanism > scenario > contrast > none). Discard the rest.
 R12t7. Adopted questions go through the same audit (R17–R23a) as generated questions. An adopted question that fails audit is dropped and its concept becomes eligible for generation under R13.
 R12t8. Adoption is per-unit: a curated question belongs to the unit whose text physically contains it, UNLESS it carries an explicit label naming the section, chapter, or slide it tests (`SECTION 1.1`, `Chapter 3 Review`) — then it belongs to the unit that label names.
@@ -197,7 +197,7 @@ R20b1. A conjunction in the Question is NOT itself evidence of a compound requir
 R20c. IF the `Question` field points at its own `Teach` field deictically THEN mark FAIL with reason "question not self-contained — rewrite per R15g".
 R21. IF a candidate question is not marked FAIL by R17–R20 — including all lettered sub-rules — THEN mark PASS.
 R22. Drop all FAIL questions. Only PASS questions go into the output file.
-R23. R23 overrides R13: IF all candidates for a unit fail audit THEN generate a new round of candidates targeting inventory concepts not yet used, and re-audit each. IF every inventory concept has already been used THEN re-run R12c–R12g over the unit's notes to find concepts the first inventory missed.
+R23. R23 overrides R13: IF all candidates for a unit fail audit, count that audited round and generate a new round for every inventory concept not yet represented by a PASS or adopted question; a failed candidate does not make its concept used, so it may be revised. Re-run R12c–R12g to discover additional concepts, but the absence of new concepts does not block retrying failed ones. After the third failed audited round, R23a applies.
 R23a. IF 3 rounds of candidates for a unit have all failed audit THEN stop, show the user the failed candidates with their fail reasons and the unit's notes, and ask whether to (a) keep generating or (b) skip the unit. STOP until user responds.
 
 // Constructive exercises
@@ -221,7 +221,7 @@ kind: book
 Concept: <the inventory concept this question tests>
 Source quote: <the R12e sentence(s), VERBATIM from the source>
 Teach:
-<only the note excerpt(s) needed to answer Q1 — no more>
+<only the source-grounded restatement(s) needed to answer Q1 — no more>
 Teach_EN:                ← omit when language = en (R16i)
 <English translation of the Teach field — preserves structure>
 Question: <question text>

@@ -5,6 +5,7 @@
 .claude/*
 !.claude/skills/
 !.claude/skills/**
+__pycache__/
 
 # edu/ is deliberately NOT tracked here. The Nextcloud client syncs it
 # (localPath=/home/jcvega/edu/ -> targetPath=/edu), so it is backed up there

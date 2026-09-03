@@ -43,7 +43,8 @@ R0k3. IF this is a SELECT run THEN R9a–R23a do NOT run. Do NOT build a concept
 
 // Existing-file handling
 R5.  IF the output path (R24) already has a questions file THEN read its frontmatter and apply R5a or R5a1.
-R5b. IF the user chooses `regenerate` THEN discard the existing file and proceed to R7 as a first generation. IF `resync` THEN proceed under R0s–R0s7. IF `reselect` THEN proceed under R0t–R0t3. IF `cancel` THEN stop execution.
+R5b. When R5 finds an existing questions file, prompt for exactly one operation: `regenerate`, `resync`, `reselect`, or `cancel`. Parse the reply as operation tokens case-insensitively. Do not act until R5b1 accepts it.
+R5b1. IF the reply contains exactly one recognized operation token and no other operation token THEN apply that operation: `regenerate` discards the existing file and proceeds to R7 as a first generation; `resync` proceeds under R0s–R0s7; `reselect` proceeds under R0t–R0t3; `cancel` stops execution. IF the reply contains zero or more than one recognized operation token THEN make no file changes, repeat the operation prompt, and wait for a valid reply.
 R5c. IF the output path has no existing questions file THEN proceed as a first run — R7 on a book run, R0n on a select run. Do NOT prompt.
 
 // Recorded state
@@ -124,7 +125,7 @@ R26. IF any condition not covered by R0–R25 (including lettered sub-rules, in 
 
 ## Field semantics
 
-// Note: Concept, Source quote, Tests and Audit are internal metadata — /learn never displays them. Source quote is the raw source sentence, kept so R18b can check the Teach field against it. /learn displays only Teach and Question, grades on Answer key alone, and delivers every entry in the file. Elaboration is shown only alongside Answer key after a wrong answer or a skip. Teach_EN and Question_EN are printed only when the user types `en`. Origin and Origin generated are also internal.
+// Note: Concept, Source quote, Tests, Audit, Teach_EN, Question_EN, Origin, and Origin generated are internal metadata — /learn never displays them. Source quote is the raw source sentence, kept so R18b can check Teach against it. /learn displays Teach and Question, never grades responses, and releases Answer key plus optional Elaboration together after an answer request or attempted answer. Translation fields remain internal unless /learn later adds an explicit translation mode.
 
 ## Usage
 
