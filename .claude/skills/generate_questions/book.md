@@ -213,6 +213,8 @@ name: questions_<arg>
 source: <notes filename>
 generated: <today's date>
 kind: book
+model: <model ID>
+effort: <reasoning effort level>
 ---
 
 ## Unit 1 of N — <Unit Title>

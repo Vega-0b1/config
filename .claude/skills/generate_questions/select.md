@@ -118,7 +118,7 @@ R24k4d1. IF the legacy verifier skips entries under R24k4d THEN report their cou
 
 Same entry fields as the book format in `book.md`, all copied verbatim from the pool (R0r2). Differences:
 
-- Frontmatter: `kind: select`, `source:` lists textbook SLICES not class files (R24h1), adds `pool:` (R24h2) and `coverage_source:` (R24h3).
+- Frontmatter: `kind: select`, `source:` lists textbook SLICES not class files (R24h1), adds `pool:` (R24h2), `coverage_source:` (R24h3), and `model:`/`effort:` (R24h4).
 - Each entry adds `Origin: chapter<N> Q<n>`, `Origin generated: <date>`, and an `Origin fingerprint: <SHA-256>` after `Concept:` (R0r4). An orphaned entry reads `Origin: chapter<N> Q<n> — ORPHANED` (R0s4).
 - Units = one per origin chapter that contributed entries, in ascending chapter order (R0r). Entries renumbered within each unit (R0r5).
 

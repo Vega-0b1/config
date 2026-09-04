@@ -8,7 +8,7 @@ Run coding interview practice. Problems are stored in `CLAUDE.md` in the current
 ## Problem Selection
 
 R1. IF the user says "give me a [difficulty] problem" THEN pick a completed problem at that difficulty using the weighted draw in Set Tracking R9.
-R2. IF the user says "give me a new [difficulty] problem" THEN pick an uncompleted problem at that difficulty; mark it `[x]` and initialize it to `(sets: 0, streak: 0, weight: 5)` upon first completion, before Set Tracking R1–R6 apply.
+R2. IF the user says "give me a new [difficulty] problem" THEN pick an uncompleted problem at that difficulty; mark it `[x]` and initialize it to `(sets: 0, streak: 0, weight: 3, last: unknown)` upon first completion, before Set Tracking R1–R6 apply.
 R3. IF the user says "next problem" or "next question" THEN apply R1 using the difficulty of the current/last problem.
 R4. IF the user says "next new problem" or "give me a new problem" THEN apply R2 using the difficulty of the current/last problem.
 R5. IF no problem has been given yet in this session AND no difficulty is specified THEN ask the user for a difficulty before proceeding. Do not pick a problem.
@@ -21,24 +21,41 @@ R9. IF any condition not covered by R1–R8 arises THEN stop, describe the situa
 
 ## Set Tracking
 
-Each completed problem carries three fields: `(sets: N, streak: K, weight: W)`.
+Each completed problem carries four fields: `(sets: N, streak: K, weight: W, last: D)`.
 N = total completions. K = consecutive clean completions since the last weight change.
-W = selection weight, an integer 1–5. New problems start at 5.
+W = mastery weight, an integer 1–3. New problems start at 3.
+D = the date of the most recent completion, `YYYY-MM-DD`, or `unknown`.
+
+W measures how well the problem is known. D measures how long there has been to
+forget it. The draw (R9–R13) multiplies them.
 
 R1.  IF a problem is completed (Python → debrief done) THEN immediately increment its `(sets: N)` count in CLAUDE.md — do not defer to the next problem request.
 R2.  IF R1 fires AND the attempt is UNASSISTED THEN increment `streak: K`.
 R3.  IF R2 brings `streak: K` to 3 THEN subtract 1 from `weight: W` AND reset `streak: K` to 0.
 R4.  IF R3 would take `weight: W` below 1 THEN hold it at 1 AND still reset `streak: K` to 0. R4 overrides R3.
 R5.  IF R1 fires AND the attempt is ASSISTED THEN add 1 to `weight: W` AND reset `streak: K` to 0.
-R6.  IF R5 would take `weight: W` above 5 THEN hold it at 5 AND still reset `streak: K` to 0. R6 overrides R5.
+R6.  IF R5 would take `weight: W` above 3 THEN hold it at 3 AND still reset `streak: K` to 0. R6 overrides R5.
 R7.  IF any of R2–R6 fire THEN state the outcome to the user in one line naming the new weight:
-       "Clean solve — streak 2 of 3 toward weight 4."
-       "Clean solve — weight 5 → 4, streak reset."
-       "Assisted solve — weight 3 → 4, streak reset."
-R8.  IF a problem entry lacks `streak:` or `weight:` THEN treat `streak:` as 0 and `weight:` as 5, and write the full three-field form on the next completion.
-R9.  IF picking a completed problem for review THEN draw one at random with probability proportional to its `weight: W`. Candidates are the problems remaining after Problem Selection R7 filters the pool.
-     // Commentary: weight is the probability numerator directly. A weight-1 problem against nine weight-5 problems comes up 1 time in 46 — rare, never zero.
-R10. IF any condition not covered by R1–R9 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+       "Clean solve — streak 2 of 3 toward weight 2."
+       "Clean solve — weight 3 → 2, streak reset."
+       "Assisted solve — weight 1 → 2, streak reset."
+R8.  IF a problem entry lacks `streak:` or `weight:` THEN treat `streak:` as 0 and `weight:` as 3, and write the full four-field form on the next completion.
+R8a. IF R1 fires THEN set `last: D` to today's date in `YYYY-MM-DD` form.
+R9.  IF picking a completed problem for review THEN draw one at random with probability proportional to its EFFECTIVE WEIGHT, computed by R10–R12. Candidates are the problems remaining after Problem Selection R7 filters the pool.
+R10. IF computing effective weight THEN read the problem's review interval from `weight: W`:
+       W=3 (shaky) → 3 days.  W=2 → 10 days.  W=1 (solid) → 30 days.
+     // Commentary: a shakier problem is due sooner. Mastery buys a longer gap, never exemption.
+R11. IF computing effective weight THEN let `age` = days from `last: D` to today, and set the overdue multiplier:
+       age < interval          → 0.25
+       interval ≤ age < 2×interval → 1.0
+       age ≥ 2×interval        → 2.0
+R12. Effective weight = `weight: W` × the R11 multiplier.
+R13. IF a problem's `last:` is `unknown` or absent THEN treat its multiplier as 2.0. R13 overrides R11.
+     // Commentary: no date means no evidence it is fresh. Treat it as overdue and let the next
+     // completion write a real date.
+R14. IF the user asks why a problem was drawn THEN state its weight, days since last seen, interval, and effective weight in one line.
+     // Example: "Move Zeroes — weight 2, 12 days since last, 10-day interval → due, effective 2.0."
+R15. IF any condition not covered by R1–R14 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Problem Presentation
 

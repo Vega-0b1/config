@@ -74,6 +74,7 @@ R24d. IF updating the Contents section THEN do not modify any other part of `CLA
 
 // Frontmatter and per-entry metadata
 R24h. IF saving THEN write `kind: book` or `kind: select` into the frontmatter, from the run type selected by R0k/R0l.
+R24h4. IF saving THEN write `model: <model ID>` and `effort: <reasoning effort level>` into the frontmatter, recording the model and effort level used to generate or select the questions.
 R24i. IF saving an entry THEN write its `Concept:` field per R13f and its `Source quote:` field per R13g.
 
 // Shared audit fact — cited by the book audit (R18b) and by the select verify (R24k4)
