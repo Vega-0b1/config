@@ -40,23 +40,31 @@ R1d. IF the user asks /learn to save or resume a session position THEN say: "Lea
 R1d1. IF R1d applies THEN stop without treating save or resume as a topic.
 R1e. IF a learn session advances or ends THEN write no session state to disk.
 
+// Class root — resolve BEFORE any path in R3 is opened
+R2.  The paths in R3–R3b are relative to the CLASS ROOT, never to the current directory blindly. Resolve the class root first.
+R2a. IF the current working directory contains an `extracted/` directory THEN it is the class root.
+R2b. IF R2a does not apply THEN search one level under `~/edu/` for a directory whose `extracted/` tree holds the topic file named by R3–R3b.
+R2c. IF R2b finds EXACTLY ONE class holding that file THEN it is the class root. Do NOT prompt.
+R2d. IF R2b finds SEVERAL classes holding that file THEN stop, list them by directory name, and ask the user which course. STOP until user responds. Do NOT guess from conversation context and do NOT pick the most recently modified.
+R2e. IF R2b finds NO class holding that file THEN R5 applies.
+R2f. IF the class root was resolved under R2c or R2d THEN name that course in the R7b opener, so the user can see which one loaded.
+
 // File lookup
 R3.  IF <arg> normalizes to a week — `week<N>` or `wk<N>` — THEN look for `extracted/class/week<N>/questions_week<N>.md`.
 R3a. IF <arg> normalizes to a chapter — `chapter<N>` or `capitulo<N>` — THEN look for `extracted/textbook/chapters/chapter<N>/questions_chapter<N>.md` (or `capitulo<N>/questions_capitulo<N>.md` for Spanish-language classes).
 R3b. IF <arg> does not match either pattern THEN look for `extracted/questions_<arg>.md` as a fallback.
 R4. IF the file exists THEN set QUESTION_COUNT to the output of `grep -c '^#### Q' <file>`.
 R4a. IF QUESTION_COUNT = 0 THEN stop and tell the user: "Questions file is empty — re-run /generate_questions <arg>."
-R4a1. IF QUESTION_COUNT is greater than zero THEN load the file per R4b–R4d and proceed to R7.
+R4a1. IF QUESTION_COUNT is greater than zero THEN load the file per R4b–R4d, print the R7b opener, print any R6a scope notice, and begin delivery per R12.
 
 // Windowed loading — never read the whole questions file
 R4b. WINDOW = 10. This is the number of questions loaded into context at a time.
-R4c. Loading the file = four small reads, never a whole-file read:
+R4c. Loading the file = three small reads, never a whole-file read:
        1. The frontmatter — read the first 10 lines.
        2. The question index — `grep -n '^#### Q' <file> | cut -d: -f1 | nl -ba`. This yields one row per question: POSITION, then the line it starts on. It carries no `Q<n>` labels.
-       3. The unit index — `grep -n '^## Unit ' <file>`, for unit headings and titles.
-       4. The initial window — from the line shown at position START through the line before the line shown at position START+WINDOW, or end of file when the index has no such position.
-R4c1. Address questions by their ABSOLUTE POSITION — the left column of the R4c step-2 index — never by the `Q<n>` label a heading carries.
-      // Commentary: `Q<n>` restarts at Q1 in every unit and multiple `Q1`s exist in every multi-unit file. The step-2 command strips labels deliberately.
+       3. The initial window — from the line shown at position START through the line before the line shown at position START+WINDOW, or end of file when the index has no such position.
+R4c1. Address AND display questions by their ABSOLUTE POSITION — the left column of the R4c step-2 index — never by the `Q<n>` label a heading carries.
+      // Commentary: `Q<n>` restarts at Q1 in every unit and multiple `Q1`s exist in every multi-unit file. The step-2 command strips labels deliberately. Since R12k now displays the position too, the number on screen is the same number `start<N>` takes.
 R4c2. IF the window edge is being determined THEN read it from the step-2 index by POSITION lookup. Do NOT compute it from question labels, from line counts, or by estimating lines-per-question.
 R4c3. IF a topic launch has START greater than the total number of positions in the step-2 index THEN stop and tell the user: "Start position out of range — this file has M questions."
 R4d. IF the currently loaded window is exhausted AND unloaded questions remain THEN load the next WINDOW questions by the same line-range read. Do NOT re-read the frontmatter or the index.
@@ -66,6 +74,7 @@ R4g. Window boundaries are invisible to the user. Do NOT announce loading, do NO
 R4h. IF WINDOW or fewer questions remain at or after the initial position THEN the initial window contains every remaining question and R4d never fires.
 R5.  IF the file does not exist THEN stop and tell the user: "Run /generate_questions <arg> first."
 R6.  IF no <arg> is given THEN list all `questions_*.md` files under `extracted/textbook/chapters/` and `extracted/class/` and ask the user to pick one. STOP until user responds.
+R6c. IF R6 applies AND no class root was resolved under R2a THEN list the files per class across `~/edu/`, labelling each by its course directory, so two courses' `week2` are distinguishable.
 
 // Course scope notice
 R6a. After loading the file per R3–R4 and before the first question: IF the topic is a chapter AND the class `CLAUDE.md` holds a `### Course Scope` entry listing that chapter as not covered THEN print one line saying the course does not cover it. Then proceed normally.
@@ -73,16 +82,19 @@ R6a1. IF the topic is a week THEN print no scope notice. A week file holds only 
 R6b. R6a is a notice, not a gate. Do NOT refuse, do NOT ask for confirmation.
 R6d. IF a `### Course Scope` entry exists but carries no derivable chapter list — `covers` reads `NOT DETERMINED`, is empty, or names no chapter — THEN treat the class as having no scope entry and print no notice. Do NOT stop under R29.
 
-// Unit and question delivery
-R7.  IF starting a new unit THEN display "Unit X of Y — <title>" as a level-2 markdown heading: `## Unit X of Y — <title>`.
-R7a. IF displaying the first question of a session from the middle of a unit THEN display that unit's heading per R7 before the question.
+// Question delivery
+R7.  Delivery is FLAT. Do NOT display unit headings, unit numbers, unit titles, or unit boundaries at any point. The `## Unit X of Y` headings in the questions file are provenance metadata, not display structure.
+R7a. IF the file holds several units THEN deliver its questions as one continuous sequence across them. A unit boundary is invisible to the user and is never announced.
+R7b. Before the first question of a session, display ONE line naming the resolved course, the topic, and the delivery range — e.g. `software_engineering — week2, 120 questions.` IF START > 1 THEN the range reads `positions <START>–<M> of <M>`. This is the whole session opener; do NOT add a title, a rule, a summary, or a unit heading.
+R7c. R7b fires exactly once per session, before the first question only. Do NOT repeat it at a window edge, at a unit boundary, or when re-displaying a pending batch under R13c/R14/R17/R20.
 R8.  IF about to display a question THEN first display that question's `Teach:` field verbatim as a markdown blockquote and prefix every line with `> `.
 R8d. IF R8 displays Teach AND the entry has a `Legend:` field THEN append Legend inside the same blockquote.
 R8a. The `> ` blockquote prefix in R8 is display framing, not content. R10 does not prohibit it.
 R8b. IF R8 displays Teach THEN after the Teach blockquote and before the Question, output a blank line, a `---` horizontal rule, and a blank line.
 R8c. R8b overrides the global CLAUDE.md response-style ban on `---` horizontal rules, for the Teach/Question separator only.
 R10. Do NOT rewrite, summarize, or add to the Teach field.
-R11. Do NOT display `Concept`, `Source quote`, `Tests`, `Audit`, `Origin`, `Origin generated`, `Teach_EN`, or `Question_EN` at any point.
+R11. Do NOT display `Concept`, `Source quote`, `Tests`, `Audit`, `Origin`, `Origin generated`, `Origin fingerprint`, `Teach_EN`, or `Question_EN` at any point.
+R11b. R11d is the governing rule and it is a WHITELIST: an entry field not named there is never displayed, whether or not R11 enumerates it.
 R11d. IF delivering a question THEN display only `Teach`, optional `Legend`, and `Question` per R8 and R12k.
 R11d1. IF releasing an answer THEN display only `Answer key` and optional `Elaboration` per R13a.
 R11a. Do NOT display the `Answer key` or `Elaboration` field when delivering a question. They are released only under R13a.
@@ -96,11 +108,11 @@ R12i2. IF ORIGINAL_ARGUMENTS contains more than one token beginning with `batch`
 R12i3. IF an ORIGINAL_ARGUMENTS token begins with `batch` but does not match `batch<N>` where N is an integer greater than zero THEN stop and tell the user: "Invalid batch size — use batch<N> with N greater than zero."
 R12i4. IF R12i2 and R12i3 both apply THEN R12i2 overrides R12i3.
 R12j. IF fewer than BATCH questions remain undelivered THEN the final batch is however many remain.
-R12k. Displaying one question = its `Question` field rendered as a level-3 markdown heading with a `❓` anchor and a UNIT-QUALIFIED label: `### ❓ U<u>·Q<n> — <question text>`, where `<u>` is its unit number and `<n>` is the `Q<n>` label its heading carries. R8 and R8b precede it.
-R12k1. IF the file holds exactly one unit THEN drop the `U<u>·` prefix and label the question `Q<n>`.
+R12k. Displaying one question = its `Question` field rendered as a level-3 markdown heading with a `❓` anchor and its ABSOLUTE POSITION as the label: `### ❓ Q<p> — <question text>`, where `<p>` is the question's absolute position from the R4c step-2 index. R8 and R8b precede it.
+R12k1. IF a question's heading in the file carries a `Q<n>` label THEN IGNORE it for display. That label restarts at Q1 in every unit and is not unique; the absolute position is. Do NOT display it and do NOT combine it with a unit prefix.
 R12l. Display the batch's questions in ascending position order, one after another in a single turn, each per R12k. Do NOT reveal any answer.
 R12m. After the last question of the batch, STOP. Do NOT display the next batch until the current batch's answers have been released under R13a.
-R12n. IF a unit boundary falls inside a batch THEN display the R7 unit heading at that point and continue the batch across it.
+R12n. IF a unit boundary falls inside a batch THEN continue the batch across it with no heading, no separator, and no announcement.
 R12o. IF a batch is pending AND the user's message, after trimming whitespace and ignoring case, is exactly `exit` THEN clear the active in-chat batch, say "Learn session ended.", and stop. Do NOT release an answer, advance, or write session state. R12o overrides R13c, R14, R17, and R18.
 
 R13. IF a batch is pending AND the user's message, after trimming whitespace and ignoring case, is exactly `next` THEN display the answers per R13a and advance per R19.
@@ -167,6 +179,15 @@ exit      ← end the learn session without revealing an answer (R12o)
 
 Anything else you type leaves the pending batch in place. An attempted answer is not graded; an answer request prompts you to type `next`; a question about the material is answered and then the pending batch is re-displayed (R14, R13c, R17).
 
-In a multi-unit file, questions are labeled `U2·Q5` — unit 2, question 5. The `Q<n>` numbers restart
-in every unit, so the unit prefix is what makes a label unique. Single-unit files just show `Q5`.
-The `start<N>` argument uses the absolute position in the file, not either displayed label.
+Questions are numbered straight through the file — `Q1` to `Q<M>` — with no unit headings and no
+restart at a chapter boundary. A multi-chapter week reads as one continuous sequence. The number on
+screen is the absolute position, so `start<N>` takes exactly the number you last saw: stop at `Q47`,
+resume with `start47`.
+
+The questions file still groups entries under `## Unit` headings recording which chapter each came
+from. That is provenance for `/generate_questions resync`; `/learn` never displays it.
+
+The course is resolved from the current directory when you are inside a class, and otherwise by
+searching `~/edu/` for the topic file. Several courses have a `week2`, so when the search matches
+more than one the run stops and asks which — it never guesses. The session opens with one line
+naming the course it loaded.
