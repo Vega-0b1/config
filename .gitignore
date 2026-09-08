@@ -1,15 +1,2 @@
-/*
-!.gitignore
-!CLAUDE.md
-!.claude/
-.claude/*
-!.claude/skills/
-!.claude/skills/**
 __pycache__/
-
-# edu/ is deliberately NOT tracked here. The Nextcloud client syncs it
-# (localPath=/home/jcvega/edu/ -> targetPath=/edu), so it is backed up there
-# rather than versioned here. The scrapes tooling under edu/scrapes was tracked
-# briefly on 2026-08-17 and untracked on 2026-08-18; do not re-add it without
-# also fixing R26 in .claude/skills/scrapes/SKILL.md, which describes how those
-# files are stored.
+*.orig
