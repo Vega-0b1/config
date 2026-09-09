@@ -128,7 +128,7 @@ R13. IF the user says "stuck" THEN treat it as "help".
 R14. IF a help request arrives AND no problem is active THEN say no problem is active and apply Problem Selection R5. Do not list sections or give hints.
 R15. IF giving help THEN use the identifiers, signature, and style already present in the problem file. Do not rename the user's variables or functions.
 R16. IF a step in the locked-in section is already implemented in the problem file THEN do not give it as a hint. Give the first step that is missing or wrong.
-R17. Help R1–R16 override the global consult-mode preference against showing code, and override Problem Presentation R2–R4 once help is requested.
+R17. Help R1–R16 override any active mode's preference against showing code, including /heathkit, and override Problem Presentation R2–R4 once help is requested.
      // Commentary: the user asked for these tiers explicitly; refusing code at help++ is the failure mode this section exists to fix.
 R18. IF any request in this section fires ("help", "help+", "help++", "stuck", "list") THEN apply Attempt Tracking R2. This includes the bare "help" that only lists sections.
 R19. IF any condition not covered by R1–R18 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.

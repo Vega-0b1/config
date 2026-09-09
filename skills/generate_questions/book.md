@@ -213,6 +213,7 @@ name: questions_<arg>
 source: <notes filename>
 generated: <today's date>
 kind: book
+format: 2
 model: <model ID>
 effort: <reasoning effort level>
 ---
@@ -223,9 +224,10 @@ effort: <reasoning effort level>
 Concept: <the inventory concept this question tests>
 Source quote: <the R12e sentence(s), VERBATIM from the source>
 Teach:
-<only the source-grounded restatement(s) needed to answer Q1 — no more>
+  <only the source-grounded restatement(s) needed to answer Q1 — no more>
+  <every continuation line indented two spaces; blank lines stay blank>
 Teach_EN:                ← omit when language = en (R16i)
-<English translation of the Teach field — preserves structure>
+  <English translation of the Teach field — preserves structure>
 Question: <question text>
 Question_EN: <English translation of the Question field>   ← omit when language = en
 Tests: <one-line description of the concept being tested>
@@ -238,8 +240,33 @@ Audit: PASS — <cite the exact phrase in the Teach field that contains the answ
 <Elaboration omitted entirely when the minimal idea is the whole answer (R16e)>
 
 ## Unit 2 of N — <Unit Title>
-<same entry structure>
+
+#### Q3
+<same entry structure — numbering does NOT restart at a unit boundary>
 ```
+
+## Format 2
+
+F1.  IF writing a questions file THEN write `format: 2` into the frontmatter.
+F2.  IF a field's value spans more than one line THEN indent every continuation line exactly two
+     spaces. Only `Teach`, `Teach_EN`, and `Source quote` are ever multi-line.
+F3.  IF a continuation line is blank THEN leave it blank. Do NOT indent it.
+     // Commentary: R13g1 separates independently-findable quote sentences with a blank line, and
+     // verify_quotes.py splits `Source quote` on them. An indented "blank" line is not blank.
+F4.  IF numbering a question heading THEN use its ABSOLUTE position in the file, counting from 1
+     across every unit. Numbering does NOT restart at a unit boundary.
+F5.  Question headings stay `#### Q<n>` with nothing after the number.
+     // Commentary: verify_quotes.py matches `^#### Q\d+[ \t]*$`. Provenance belongs in the
+     // `Origin:` field, which already carries it; duplicating it in the heading would break the
+     // verifier for no gain.
+F6.  IF any line in a field body would otherwise begin at column 0 THEN F2 has already moved it.
+     A column-0 `Word:` line is a field key, unconditionally, and nothing else.
+     // Commentary: this is the whole point of format 2. In format 1, 476 of 1,242 entries were
+     // misparsed by a reader that assumed this, because Teach bodies contain lines like
+     // "The mechanism:" and "There are three main activities in the requirements engineering
+     // process:" sitting at column 0.
+F7.  IF any condition not covered by F1–F6 arises THEN stop, describe the situation to the user,
+     and ask how to proceed. Do not improvise.
 
 ## Notes
 

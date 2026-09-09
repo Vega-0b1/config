@@ -63,8 +63,10 @@ R4c. Loading the file = three small reads, never a whole-file read:
        1. The frontmatter — read the first 10 lines.
        2. The question index — `grep -n '^#### Q' <file> | cut -d: -f1 | nl -ba`. This yields one row per question: POSITION, then the line it starts on. It carries no `Q<n>` labels.
        3. The initial window — from the line shown at position START through the line before the line shown at position START+WINDOW, or end of file when the index has no such position.
-R4c1. Address AND display questions by their ABSOLUTE POSITION — the left column of the R4c step-2 index — never by the `Q<n>` label a heading carries.
-      // Commentary: `Q<n>` restarts at Q1 in every unit and multiple `Q1`s exist in every multi-unit file. The step-2 command strips labels deliberately. Since R12k now displays the position too, the number on screen is the same number `start<N>` takes.
+R4c1. Address AND display questions by their ABSOLUTE POSITION — the left column of the R4c step-2 index.
+R4c1a. IF the frontmatter carries `format: 2` THEN the `Q<n>` label in a heading EQUALS that question's absolute position, and R12k1 does not apply.
+R4c1b. IF the frontmatter carries no `format:` line, or a value other than 2, THEN the file is format 1: its labels restart at Q1 in every unit and MUST be ignored per R12k1.
+      // Commentary: format 2 numbers headings absolutely across the whole file, so the label and the position are the same number. Format 1 files restart per unit and multiple `Q1`s exist in them; the step-2 index is the authority for those.
 R4c2. IF the window edge is being determined THEN read it from the step-2 index by POSITION lookup. Do NOT compute it from question labels, from line counts, or by estimating lines-per-question.
 R4c3. IF a topic launch has START greater than the total number of positions in the step-2 index THEN stop and tell the user: "Start position out of range — this file has M questions."
 R4d. IF the currently loaded window is exhausted AND unloaded questions remain THEN load the next WINDOW questions by the same line-range read. Do NOT re-read the frontmatter or the index.
@@ -109,7 +111,8 @@ R12i3. IF an ORIGINAL_ARGUMENTS token begins with `batch` but does not match `ba
 R12i4. IF R12i2 and R12i3 both apply THEN R12i2 overrides R12i3.
 R12j. IF fewer than BATCH questions remain undelivered THEN the final batch is however many remain.
 R12k. Displaying one question = its `Question` field rendered as a level-3 markdown heading with a `❓` anchor and its ABSOLUTE POSITION as the label: `### ❓ Q<p> — <question text>`, where `<p>` is the question's absolute position from the R4c step-2 index. R8 and R8b precede it.
-R12k1. IF a question's heading in the file carries a `Q<n>` label THEN IGNORE it for display. That label restarts at Q1 in every unit and is not unique; the absolute position is. Do NOT display it and do NOT combine it with a unit prefix.
+R12k1. IF the file is format 1 per R4c1b THEN IGNORE the heading's `Q<n>` label for display; it restarts at Q1 in every unit and is not unique. Do NOT display it and do NOT combine it with a unit prefix.
+R12k2. IF the file is format 2 per R4c1a THEN the heading label and the absolute position are the same number, and displaying either is correct.
 R12l. Display the batch's questions in ascending position order, one after another in a single turn, each per R12k. Do NOT reveal any answer.
 R12m. After the last question of the batch, STOP. Do NOT display the next batch until the current batch's answers have been released under R13a.
 R12n. IF a unit boundary falls inside a batch THEN continue the batch across it with no heading, no separator, and no announcement.
@@ -183,6 +186,11 @@ Questions are numbered straight through the file — `Q1` to `Q<M>` — with no 
 restart at a chapter boundary. A multi-chapter week reads as one continuous sequence. The number on
 screen is the absolute position, so `start<N>` takes exactly the number you last saw: stop at `Q47`,
 resume with `start47`.
+
+In format 2 files the heading in the file carries that same absolute number, so what you see on
+screen, what `start<N>` takes, and what is written in the file all agree. Format 1 files number
+their headings per unit instead — several `Q1`s in one file — and for those the position is counted
+rather than read.
 
 The questions file still groups entries under `## Unit` headings recording which chapter each came
 from. That is provenance for `/generate_questions resync`; `/learn` never displays it.

@@ -66,7 +66,8 @@ R0r4. Add exactly three fields to each copied entry, placed immediately after `C
      - `Origin: chapter<N> Q<n>` — the origin file and the entry's number IN that file.
      - `Origin generated: <the origin file frontmatter `generated:` date>`
      - `Origin fingerprint: <SHA-256 of the exact origin entry bytes>`
-R0r5. Renumber copied entries sequentially within their unit — Q1, Q2, Q3. `Origin:` preserves the original number.
+R0r5. Renumber copied entries by ABSOLUTE position across the whole file per book.md F4 — Q1 through
+      Q<M>, never restarting at a unit boundary. `Origin:` preserves the original number.
 
 // Existing file — select branch of R5
 R5a. IF this is a SELECT run THEN state the recommended operation and ask the user to choose `resync`, `reselect`, or `cancel`. STOP until user responds. The recommended operation is `resync` unless the week's registered material has changed since the file's `generated:` date or a new chapter has entered the pool, in which case it is `reselect`.
@@ -116,11 +117,13 @@ R24k4d1. IF the legacy verifier skips entries under R24k4d THEN report their cou
 
 ## Output Format — select run
 
-Same entry fields as the book format in `book.md`, all copied verbatim from the pool (R0r2). Differences:
+Same entry fields as the book format in `book.md`, all copied verbatim from the pool (R0r2). The
+Format 2 rules F1–F7 in `book.md` apply identically to a select run. Differences:
 
-- Frontmatter: `kind: select`, `source:` lists textbook SLICES not class files (R24h1), adds `pool:` (R24h2), `coverage_source:` (R24h3), and `model:`/`effort:` (R24h4).
+- Frontmatter: `kind: select`, `format: 2`, `source:` lists textbook SLICES not class files (R24h1), adds `pool:` (R24h2), `coverage_source:` (R24h3), and `model:`/`effort:` (R24h4).
 - Each entry adds `Origin: chapter<N> Q<n>`, `Origin generated: <date>`, and an `Origin fingerprint: <SHA-256>` after `Concept:` (R0r4). An orphaned entry reads `Origin: chapter<N> Q<n> — ORPHANED` (R0s4).
-- Units = one per origin chapter that contributed entries, in ascending chapter order (R0r). Entries renumbered within each unit (R0r5).
+- Units = one per origin chapter that contributed entries, in ascending chapter order (R0r). Entries numbered by ABSOLUTE position across the whole file per F4 — numbering does NOT restart at a unit boundary (R0r5).
+- `Origin:` is the only record of which pool question an entry came from. The heading carries the absolute position and nothing else (F5).
 
 ## Notes
 
