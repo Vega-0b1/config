@@ -1,6 +1,6 @@
 ---
 name: generate_questions
-description: Build and audit quiz questions for use by /learn. The textbook is the only question source. A BOOK run (chapter1, ch1) reads the chapter slice at extracted/textbook/chapters/chapter<N>/chapter<N>.md, generates audited questions, and writes them next to it — this is the question POOL. A SELECT run (week1, wk1) generates nothing: it reads the week's ### Teaching material only to learn which topics the professor covered, then copies the matching questions out of the pool into extracted/class/week<N>/questions_week<N>.md. Re-running a BOOK file warns before overwriting. Re-running a SELECT file offers resync (refresh copies from their origin) or reselect (rebuild the selection).
+description: Build and audit quiz questions for use by /learn. The textbook is the only question source. A BOOK run (chapter1, ch1) reads the chapter slice at extracted/textbook/chapters/chapter<N>/chapter<N>.md, generates audited questions, and writes them next to it — this is the question POOL. A SELECT run (week1, wk1) generates nothing: it reads the week's ### Teaching material only to learn which topics the professor covered, then copies the matching questions out of the pool into extracted/class/week<N>/questions_week<N>.md, capped at 50 questions (override with cap<N>) — every covered topic gets one question before any topic gets a second. Re-running a BOOK file warns before overwriting. Re-running a SELECT file offers resync (refresh copies from their origin) or reselect (rebuild the selection).
 ---
 
 Build a question pool from the textbook; select this week's practice set out of it.
@@ -37,6 +37,9 @@ unique across all three files; a rule cited by number lives in whichever file it
 R0k. IF the argument normalizes to a week — `week<N>` or `wk<N>`, case-insensitively — THEN this is a SELECT run. Apply R0m–R0t3 and SKIP R1–R4b6.
 R0l. IF the argument does not normalize to a week THEN this is a BOOK run. Apply R1–R4b6.
 R0k1. `week<N>` and `wk<N>` are reserved forms.
+R0k1a. IF the argument carries a `cap<N>` token — `cap40`, case-insensitively — THEN strip it before normalizing the run type and pass N to R0q7 as the CAP. IF no `cap<N>` token is present THEN CAP stays at its R0q7 default.
+R0k1b. IF a `cap<N>` token appears on a BOOK run THEN ignore it and report that the cap applies to select runs only.
+R0k1c. IF `cap<N>` carries a non-positive or non-integer N THEN stop and ask the user for a valid cap.
 R0k2. IF the run type is resolved under R0k or R0l THEN Read the matching rule file from this skill's directory BEFORE applying any rule below: book run → `book.md`, select run → `select.md`.
 R0k2a. IF the matching rule file has not been read THEN no source may be loaded, no question may be generated or copied, and no file may be saved. This file alone is not sufficient to run the skill.
 R0k3. IF this is a SELECT run THEN R9a–R23a do NOT run. Do NOT build a concept inventory, do NOT classify exercises, do NOT adopt curated questions, do NOT generate a candidate, and do NOT audit anything.
@@ -113,6 +116,8 @@ R25b. Report IF applicable — errors and warnings:
      - every RESTATEMENT UNIT identified under R13d1
      - every concept excluded under R12g1 as already covered by an earlier unit
      - on a regenerate, which select files now need a resync per R5a2
+     - on a SELECT run: whether the cap bound the selection (R0q9) — matched entries, CAP, entries written
+     - on a SELECT run: every DROPPED TOPIC under R0q13, with its locator and the count of entries it lost
      - on a SELECT run: every UNCOVERED TOPIC under R0q2, with the locator that raised it and whether R0q3 identified a missing chapter questions file
      - on a SELECT run: any registered file that could not be opened (R0m4), any entry with no week (R0m3), any topic excluded under R0n5
      - on a resync: entries REFRESHED, entries byte-identical, entries ORPHANED — with counts and names
@@ -131,6 +136,7 @@ R26. IF any condition not covered by R0–R25 (including lettered sub-rules, in 
 ## Usage
 
 ```
+/generate_questions week1 cap30 ← select run capped at 30 questions instead of the default 50
 /generate_questions chapter2     ← book run: reads extracted/textbook/chapters/chapter2/chapter2.md
                                    GENERATES audited questions, writes them next to the slice
 /generate_questions week1        ← select run: reads ### Teaching entries for week 1 for coverage,

@@ -53,7 +53,19 @@ R0q1. Matching is on the IDEA, judged by R12g's same-idea test — not on the st
 R0q2. IF a profile topic matches no pool entry THEN record it as an UNCOVERED TOPIC and report it. Generate nothing for it and write nothing to the file.
 R0q3. IF an uncovered topic plausibly belongs to a chapter that has no questions file (R0o4) THEN say so by name in the report and name the command that would fix it.
      // Example: "Uncovered: 'distance-vector routing' (week3 deck, slide 14). Chapter 5 has a slice but no questions file — run `/generate_questions chapter5`, then re-run `/generate_questions week3`."
-R0q4. IF one profile topic matches several pool entries THEN select ALL of them. Do NOT pick one and do NOT cap the count.
+R0q4. IF one profile topic matches several pool entries THEN mark ALL of them as MATCHED. Do NOT pick one at match time. R0q7–R0q13 decide how many matched entries are written.
+
+// The cap — spanning first, competition second
+R0q7. CAP = 50 unless the argument carries a `cap<N>` token (R0k1a), in which case CAP = N.
+R0q8. IF the MATCHED set holds CAP entries or fewer THEN write all of them. Run no competition.
+R0q9. IF the MATCHED set holds more than CAP entries THEN fill the file in two phases: SPANNING, then COMPETITION.
+R0q10. SPANNING: take exactly one entry for each matched profile topic — its top-ranked entry under R0q12. Every topic the week covered that the pool can answer gets a question before any topic gets a second one.
+R0q11. COMPETITION: IF slots remain after SPANNING THEN fill them from the unselected MATCHED entries, ordered by (a) topic weight descending — the number of distinct profile locators (R0n6) that recorded the topic — then (b) the entry's rank under R0q12, then (c) ascending origin chapter, then (d) original order in the origin file. Stop at CAP.
+R0q12. Rank entries within one topic by: (a) an entry matched on `Concept:` or `Tests:` under R0q outranks one matched only by the R5k1 fallback; (b) then ascending origin chapter; (c) then original order in the origin file.
+R0q13. IF the number of matched topics EXCEEDS CAP THEN SPANNING cannot span. Keep one entry for the CAP topics with the highest topic weight (ties broken by first locator order in the profile), record every remaining matched topic as a DROPPED TOPIC, and report each by name with its locator and the count of entries it lost.
+R0q14. Cutting an entry under R0q11 or R0q13 is a selection decision only. Do NOT rewrite, merge, condense, or combine entries to fit more of them under the cap.
+R0q15. R0q13 overrides R0q10 when both apply.
+R0q16. A DROPPED TOPIC (R0q13) is not an UNCOVERED TOPIC (R0q2). Report them under separate headings: uncovered means the pool has no question, dropped means the pool has one and the cap excluded it.
 R0q6. Selection is per-run and stateless. A pool entry selected into week 2 is fully eligible for week 5 as well. Do NOT deduplicate across weeks.
 
 // Unit structure and copying
@@ -98,6 +110,7 @@ R24a3. A select file's Contents description MUST say it is a selection and name 
 R24h1. On a SELECT run the frontmatter `source:` field lists the textbook chapter SLICES the selected entries were originally generated from. It does NOT list the registered class files.
      // Commentary: verify_quotes.py resolves this field and searches it for every `Source quote:`. Listing the slide decks here would make R24k fail every quote in the file.
 R24h2. On a SELECT run additionally write `pool:` — one line per origin chapter questions file, each with the `generated:` date this run read from it.
+R24h5. On a SELECT run additionally write `cap: <CAP>` and `capped: yes|no` — `yes` IF the MATCHED set exceeded CAP (R0q9).
 R24h3. On a SELECT run additionally write `coverage_source:` — every registered `### Teaching` file read to build the coverage profile, comma-separated. Documentation only, never resolved.
 R24i1. On a SELECT run R24i is satisfied by COPYING, not by writing: R0r2 carries `Concept:` and `Source quote:` over unchanged from the pool entry. R5k6 governs an entry that has no quote to copy.
 R24i2. On a SELECT run every entry additionally carries `Origin:`, `Origin generated:`, and `Origin fingerprint:` per R0r4.
@@ -131,6 +144,12 @@ A select run reads the `### Teaching` entries registered to that week — slide 
 code, images alike — for one purpose only: to learn which topics the professor covered. It generates
 nothing from them. It then copies the pool questions matching those topics into the week file, which
 is the study list.
+
+Selection is capped at 50 questions (override with `cap<N>`). The cap never costs the week a topic
+if it can be helped: every covered topic the pool can answer gets one question first, and only then
+do the leftover entries compete for the remaining slots, weighted by how much of the week's material
+addressed each topic. If the week covered more than 50 distinct topics, the lowest-weight ones are
+dropped and named in the report.
 
 Because it selects rather than generates, a terse slide costs nothing: a slide reading only
 "Nagle's algorithm" is a perfect coverage signal, and the book supplies the depth — R0n2 imposes no
