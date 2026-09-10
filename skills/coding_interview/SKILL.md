@@ -1,9 +1,31 @@
 ---
 name: coding_interview
-description: Practice essential CS problems in Python, with review selection weighted by how much help each problem needed, and a post-completion debrief on data structures, algorithms, and complexity.
+description: Practice essential CS problems in any language, with review selection weighted by how much help each problem needed, and a post-completion debrief on data structures, algorithms, and complexity.
 ---
 
-Run coding interview practice. Problems are stored in `CLAUDE.md` in the current working directory. The user solves each problem in Python. After Python is complete, a four-question debrief runs.
+Run coding interview practice. Problems are stored in `CLAUDE.md` in the current working directory. The user solves each problem in the ACTIVE LANGUAGE (see Language section). After the solution is correct, a four-question debrief runs.
+
+## Language
+
+R1. IF the user names a programming language THEN set the ACTIVE LANGUAGE to that language for the remainder of the session.
+     // Example: "I'm doing this in C", "switch to C", "let's use Rust" all set the active language.
+R2. IF no active language has been set in this session THEN the active language is Python.
+R3. IF the active language changes while a problem is open THEN keep that problem active and apply the new language from that point forward. Do not reset the attempt flag and do not re-present the problem.
+R4. IF resolving the active language to a file extension and run command THEN use this table:
+
+| Language | Extension | Run command (from the scratchpad copy) |
+|---|---|---|
+| Python | `.py` | `python3 FILE` |
+| C | `.c` | `gcc -std=c11 -Wall -o prog FILE && ./prog` |
+| C++ | `.cpp` | `g++ -std=c++17 -Wall -o prog FILE && ./prog` |
+| Rust | `.rs` | `rustc -o prog FILE && ./prog` |
+| Go | `.go` | `go run FILE` |
+| Java | `.java` | `javac FILE && java CLASSNAME` |
+| JavaScript | `.js` | `node FILE` |
+
+R5. IF the active language is not in the R4 table THEN ask the user for the file extension and the run command before proceeding. Do not guess.
+R6. IF the user asks which language is active THEN state it in one line.
+R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Problem Selection
 
@@ -29,7 +51,7 @@ D = the date of the most recent completion, `YYYY-MM-DD`, or `unknown`.
 W measures how well the problem is known. D measures how long there has been to
 forget it. The draw (R9–R13) multiplies them.
 
-R1.  IF a problem is completed (Python → debrief done) THEN immediately increment its `(sets: N)` count in CLAUDE.md — do not defer to the next problem request.
+R1.  IF a problem is completed (solution correct → debrief done) THEN immediately increment its `(sets: N)` count in CLAUDE.md — do not defer to the next problem request.
 R2.  IF R1 fires AND the attempt is UNASSISTED THEN increment `streak: K`.
 R3.  IF R2 brings `streak: K` to 3 THEN subtract 1 from `weight: W` AND reset `streak: K` to 0.
 R4.  IF R3 would take `weight: W` below 1 THEN hold it at 1 AND still reset `streak: K` to 0. R4 overrides R3.
@@ -71,7 +93,7 @@ R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situa
 
 ## Workflow
 
-R1. IF the user solves the problem in Python correctly THEN run the debrief (see Debrief section); after the debrief completes, mark the problem done and apply Set Tracking R1–R7.
+R1. IF the user solves the problem in the active language correctly THEN run the debrief (see Debrief section); after the debrief completes, mark the problem done and apply Set Tracking R1–R7.
 R2. IF "correct" is ambiguous THEN a solution is correct when it fulfills the problem requirements OR the user requests to move on / says "next one."
 R3. IF the user requests help THEN apply the Help section.
 R4. IF the user says "check" THEN apply the Check section.
@@ -97,9 +119,11 @@ R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situa
 
 ## Problem File
 
-R1. IF this skill needs the user's current work THEN read the most recently modified `.py` file under the working directory. That file is "the problem file".
-R2. IF two or more `.py` files under the working directory were modified within the last 10 minutes THEN ask which one is the problem file before answering. R2 overrides R1.
-R3. IF no `.py` file exists under the working directory THEN ask the user what they have so far and wait for the answer. R3 fires only when R1 cannot.
+R1. IF this skill needs the user's current work THEN read the most recently modified file under the working directory whose extension matches the active language per Language R4. That file is "the problem file".
+R2. IF two or more files with that extension under the working directory were modified within the last 10 minutes THEN ask which one is the problem file before answering. R2 overrides R1.
+R3. IF no file with that extension exists under the working directory THEN ask the user what they have so far and wait for the answer. R3 fires only when R1 cannot.
+R3a. IF a file with the active language's extension exists THEN ignore files of every other extension, including a previous problem's file in a different language. R3a overrides R1 only as to which files are candidates.
+     // Commentary: switching from Python to C leaves `fun.py` on disk and newer than `fun.c` at first. Matching on extension keeps hints aimed at the file the user is actually editing.
 R4. IF answering a help or check request THEN re-read the problem file from disk at that moment, before composing the answer. Never answer from a previously read copy, including one read earlier in the same session.
      // Commentary: the user edits between requests; a stale copy produces hints for code that no longer exists.
 R5. IF the problem file contradicts what the user states in chat THEN say so, quote the relevant lines, and ask which is current before answering.
@@ -140,7 +164,8 @@ R2. IF the solution fulfills the problem requirements THEN say "correct" and sta
 R3. IF the solution does not fulfill the requirements THEN state the failure as one concrete case: the input, the expected output, and what the code produces. Name the line it fails on.
 R4. IF R3 fires THEN do not give the fix, the corrected line, or pseudocode for it. The user must ask for help to get that.
      // Commentary: "check" is a verdict, not a hint tier. Fixing on a failed check collapses the help ladder.
-R5. IF verifying behavior requires running the code THEN copy the problem file to the scratchpad directory and run the copy. Never run or modify the problem file itself.
+R5. IF verifying behavior requires running the code THEN copy the problem file to the scratchpad directory and run the copy with the active language's run command per Language R4. Never run, compile, or modify the problem file itself, and never write build output into the working directory.
+R5a. IF the active language's run command includes a compile step AND that step fails THEN report the compiler error as the verdict per R3 and give no further grading.
 R6. IF the problem file has no implementation for the current problem THEN say so and give no verdict.
 R7. IF the solution produces correct output but violates a stated requirement of the problem (in-place, return value, no extra allocation) THEN grade it incorrect and name the violated requirement. R7 overrides R2.
 R8. IF "check" arrives AND no problem is active THEN say no problem is active and give no verdict.
@@ -148,10 +173,10 @@ R9. IF any condition not covered by R1–R8 arises THEN stop, describe the situa
 
 ## Debrief
 
-Fires after the Python solution is correct. One question at a time.
+Fires after the solution is correct. One question at a time.
 
-R1. IF the Python solution is graded correct THEN start the debrief immediately before marking the problem done.
-R2. IF starting the debrief THEN ask only the first question: "Looking at your Python solution — what data structure(s) did you use, and why?"
+R1. IF the solution is graded correct THEN start the debrief immediately before marking the problem done.
+R2. IF starting the debrief THEN ask only the first question: "Looking at your solution — what data structure(s) did you use, and why?"
 R3. IF the user answers a debrief question THEN grade it (correct or incorrect, plus a one-sentence explanation), then ask the next question.
 R4. The four debrief questions, asked in order:
      1. What data structure(s) did you use, and why?
@@ -160,6 +185,10 @@ R4. The four debrief questions, asked in order:
      4. What is the space complexity?
 R5. IF grading debrief answers THEN read the expected answer key from the problem's inline `| DS: ... | Algo: ... | Time: ... | Space: ...` fields in CLAUDE.md.
 R6. IF grading complexity answers THEN accept conceptual answers — do not require Big-O notation.
+R6a. IF the answer key names a data structure THEN accept the active language's equivalent of it as correct.
+     // Example: key says `HashMap`. Python `dict`, C++ `unordered_map`, and a hand-rolled C hash table all pass. A C solution that linear-scans an array instead does not.
+R6b. IF the answer key's `Time:` or `Space:` field does not hold for the user's implementation in the active language THEN grade against the user's actual code, not the key, and say which one you graded against.
+     // Commentary: the key is written from the canonical solution. A C implementation that allocates its own table has the same complexity; one that swaps the approach does not.
 R7. IF the problem has no answer key yet (first completion of a new problem) THEN derive the correct answers from the problem itself, grade the user's responses against them, then write the answer key inline to the problem's line in CLAUDE.md before proceeding.
 R8. IF all four questions are answered and graded THEN mark the problem done and apply Set Tracking R1–R7 immediately.
 R9. IF any condition not covered by R1–R8 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
