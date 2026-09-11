@@ -1,11 +1,9 @@
 ---
 name: learn
-model: haiku
-effort: low
-description: 'Deliver course material concept by concept — teach, ask, then serve the stored answers on request. `/learn week1` drills the textbook questions covering what the professor taught that week — the study list; `/learn chapter1` drills the whole textbook chapter — the reference bank. By default both deliver every question in their file; pass start<N> to begin at absolute question position N. Every question comes from the textbook. Questions arrive one at a time; nothing is graded and no score is kept: type "next" to see the stored answer and move on. Pass batch<N> for several questions per turn. Requires a pre-generated questions file from /generate_questions. Week files live in extracted/class/week<N>/, chapter files in extracted/textbook/chapters/chapter<N>/.'
+description: 'Deliver course material concept by concept — teach, ask, then serve the stored answers on request. `/learn week1` drills the textbook questions covering what the professor taught that week — the study list; `/learn chapter1` drills the whole textbook chapter — the reference bank. By default both deliver every question in their file; pass start<N> to begin at absolute question position N. Every question comes from the textbook. Questions arrive one at a time; nothing is graded and no score is kept: type "next" to see the stored answer and move on. Pass batch<N> for several questions per turn. Requires a pre-generated questions file from /generate-questions. Week files live in extracted/class/week<N>/, chapter files in extracted/textbook/chapters/chapter<N>/.'
 ---
 
-Deliver course material question by question using a pre-generated questions file. `/learn` is a delivery engine — it does not generate content or questions, and it does not grade. Content comes from `/generate_questions`; the verdict comes from you.
+Deliver course material question by question using a pre-generated questions file. `/learn` is a delivery engine — it does not generate content or questions, and it does not grade. Content comes from `/generate-questions`; the verdict comes from you.
 
 Two topics, two files, both delivered from the selected starting position through the end:
 
@@ -13,7 +11,7 @@ Two topics, two files, both delivered from the selected starting position throug
 - `/learn chapter1` — the whole textbook chapter. This is the reference bank: everything the book explains, whether the course reached it or not.
 
 Every question in both files was generated from the textbook. The difference is scope, not source:
-`/generate_questions chapter<N>` writes the pool, and `/generate_questions week<N>` copies the subset
+`/generate-questions chapter<N>` writes the pool, and `/generate-questions week<N>` copies the subset
 of that pool matching what the professor covered. A week file is therefore a strict subset of the
 chapter files it draws from, and each of its entries records where it came from.
 
@@ -54,7 +52,7 @@ R3.  IF <arg> normalizes to a week — `week<N>` or `wk<N>` — THEN look for `e
 R3a. IF <arg> normalizes to a chapter — `chapter<N>` or `capitulo<N>` — THEN look for `extracted/textbook/chapters/chapter<N>/questions_chapter<N>.md` (or `capitulo<N>/questions_capitulo<N>.md` for Spanish-language classes).
 R3b. IF <arg> does not match either pattern THEN look for `extracted/questions_<arg>.md` as a fallback.
 R4. IF the file exists THEN set QUESTION_COUNT to the output of `grep -c '^#### Q' <file>`.
-R4a. IF QUESTION_COUNT = 0 THEN stop and tell the user: "Questions file is empty — re-run /generate_questions <arg>."
+R4a. IF QUESTION_COUNT = 0 THEN stop and tell the user: "Questions file is empty — re-run /generate-questions <arg>."
 R4a1. IF QUESTION_COUNT is greater than zero THEN load the file per R4b–R4d, print the R7b opener, print any R6a scope notice, and begin delivery per R12.
 
 // Windowed loading — never read the whole questions file
@@ -74,7 +72,7 @@ R4e. IF a question outside the loaded window is needed for any reason THEN load 
 R4f. The index from R4c step 2 is internal metadata. Do NOT display it, and do NOT display line numbers or window boundaries to the user.
 R4g. Window boundaries are invisible to the user. Do NOT announce loading, do NOT say "loading the next 10", and do NOT pause at a window edge.
 R4h. IF WINDOW or fewer questions remain at or after the initial position THEN the initial window contains every remaining question and R4d never fires.
-R5.  IF the file does not exist THEN stop and tell the user: "Run /generate_questions <arg> first."
+R5.  IF the file does not exist THEN stop and tell the user: "Run /generate-questions <arg> first."
 R6.  IF no <arg> is given THEN list all `questions_*.md` files under `extracted/textbook/chapters/` and `extracted/class/` and ask the user to pick one. STOP until user responds.
 R6c. IF R6 applies AND no class root was resolved under R2a THEN list the files per class across `~/edu/`, labelling each by its course directory, so two courses' `week2` are distinguishable.
 
@@ -93,7 +91,7 @@ R8.  IF about to display a question THEN first display that question's `Teach:` 
 R8d. IF R8 displays Teach AND the entry has a `Legend:` field THEN append Legend inside the same blockquote.
 R8a. The `> ` blockquote prefix in R8 is display framing, not content. R10 does not prohibit it.
 R8b. IF R8 displays Teach THEN after the Teach blockquote and before the Question, output a blank line, a `---` horizontal rule, and a blank line.
-R8c. R8b overrides the global CLAUDE.md response-style ban on `---` horizontal rules, for the Teach/Question separator only.
+R8c. R8b overrides the global AGENT.md response-style ban on `---` horizontal rules, for the Teach/Question separator only.
 R10. Do NOT rewrite, summarize, or add to the Teach field.
 R11. Do NOT display `Concept`, `Source quote`, `Tests`, `Audit`, `Origin`, `Origin generated`, `Origin fingerprint`, `Teach_EN`, or `Question_EN` at any point.
 R11b. R11d is the governing rule and it is a WHITELIST: an entry field not named there is never displayed, whether or not R11 enumerates it.
@@ -147,7 +145,7 @@ R28a1. IF START > 1 THEN the completion line names the topic, M - START + 1 ques
      // Example: `**Complete — 24 questions delivered** (chapter1 — positions 10–33 of 33.)`
 R28b. Do NOT display a score, a correct/total ratio, a list of missed questions, or a summary of weak areas. Nothing was graded.
 R28c. IF the topic was a chapter AND `extracted/class/` contains any `week<N>/questions_week<N>.md` files THEN, after the completion line, print one line naming the week files as the course-scoped subset.
-R28d. IF the topic was a week AND any delivered entry's `Origin` field records `ORPHANED` THEN, after the completion line, print one line naming the count and the fix: re-run `/generate_questions week<N>` and choose `reselect`.
+R28d. IF the topic was a week AND any delivered entry's `Origin` field records `ORPHANED` THEN, after the completion line, print one line naming the count and the fix: re-run `/generate-questions week<N>` and choose `reselect`.
 
 // Catch-all
 R29. IF any condition not covered by R1–R28 (including all lettered sub-rules) arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
@@ -155,8 +153,8 @@ R29. IF any condition not covered by R1–R28 (including all lettered sub-rules)
 ## Usage
 
 ```
-/generate_questions chapter2      ← build the pool first — this is where questions are made
-/generate_questions week1         ← then select week 1's subset out of it
+/generate-questions chapter2      ← build the pool first — this is where questions are made
+/generate-questions week1         ← then select week 1's subset out of it
 /learn week1                      ← first pass over week 1's study list: teach then ask
 
 /learn chapter2                   ← first pass over the whole chapter — the reference bank
@@ -193,7 +191,7 @@ their headings per unit instead — several `Q1`s in one file — and for those 
 rather than read.
 
 The questions file still groups entries under `## Unit` headings recording which chapter each came
-from. That is provenance for `/generate_questions resync`; `/learn` never displays it.
+from. That is provenance for `/generate-questions resync`; `/learn` never displays it.
 
 The course is resolved from the current directory when you are inside a class, and otherwise by
 searching `~/edu/` for the topic file. Several courses have a `week2`, so when the search matches

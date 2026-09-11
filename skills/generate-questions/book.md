@@ -1,4 +1,4 @@
-# generate_questions — BOOK run rules
+# generate-questions — BOOK run rules
 
 Loaded under R0k2 when the argument does not normalize to a week. These rules GENERATE audited
 questions from a textbook chapter and write them next to the chapter slice. The resulting file is
@@ -55,7 +55,7 @@ R4b6. IF the Source Profile does NOT describe the source as scanned or character
 
 // Existing-file handling — book branch of R5
 R5a1. IF this is a BOOK run THEN warn the user that the file already exists and ask whether to `regenerate` or `cancel`. STOP until user responds.
-R5a2. IF a BOOK run regenerates a chapter file THEN say in the report that every select file copying from it is now stale, and name the command that fixes each: `/generate_questions week<N>` → `resync`.
+R5a2. IF a BOOK run regenerates a chapter file THEN say in the report that every select file copying from it is now stale, and name the command that fixes each: `/generate-questions week<N>` → `resync`.
 
 // Unit segmentation
 R7.  Count the headings matching the Source Profile's unit heading pattern inside the selected chapter. This count is N.

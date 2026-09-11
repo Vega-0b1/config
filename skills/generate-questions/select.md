@@ -1,4 +1,4 @@
-# generate_questions — SELECT run rules
+# generate-questions — SELECT run rules
 
 Loaded under R0k2 when the argument normalizes to a week. These rules GENERATE NOTHING. They read
 the week's registered class material for one purpose — to learn which topics the professor covered —
@@ -40,7 +40,7 @@ R0p. Strip repeated per-locator chrome before building the profile. In an extrac
 
 // The question pool
 R0o. The POOL = every `questions_chapter<N>.md` under `extracted/textbook/chapters/` that exists, or `questions_capitulo<N>.md` under the non-English convention (R1a). Read all of them. Do NOT read the textbook notes — only the questions files.
-R0o1. IF the pool is empty — no chapter questions file exists anywhere — THEN stop, say so, and tell the user to run `/generate_questions chapter<N>` first.
+R0o1. IF the pool is empty — no chapter questions file exists anywhere — THEN stop, say so, and tell the user to run `/generate-questions chapter<N>` first.
 R0o2. Selection is by TOPIC, not by chapter number. A week may draw from any chapter, in any combination, and is never restricted to the chapters a syllabus maps to that week.
 R0o3. A select run NEVER writes a question that did not already exist in the pool, in any circumstance, for any reason.
 R0o4. IF a chapter slice exists but its questions file does not THEN that chapter contributes nothing to the pool. Note it, because R0q3 will need it.
@@ -52,7 +52,7 @@ R0q1. Matching is on the IDEA, judged by R12g's same-idea test — not on the st
      // FAILS R0q1: profile topic "congestion control" does NOT match pool concept "flow control" — adjacent, distinct mechanisms.
 R0q2. IF a profile topic matches no pool entry THEN record it as an UNCOVERED TOPIC and report it. Generate nothing for it and write nothing to the file.
 R0q3. IF an uncovered topic plausibly belongs to a chapter that has no questions file (R0o4) THEN say so by name in the report and name the command that would fix it.
-     // Example: "Uncovered: 'distance-vector routing' (week3 deck, slide 14). Chapter 5 has a slice but no questions file — run `/generate_questions chapter5`, then re-run `/generate_questions week3`."
+     // Example: "Uncovered: 'distance-vector routing' (week3 deck, slide 14). Chapter 5 has a slice but no questions file — run `/generate-questions chapter5`, then re-run `/generate-questions week3`."
 R0q4. IF one profile topic matches several pool entries THEN mark ALL of them as MATCHED. Do NOT pick one at match time. R0q7–R0q13 decide how many matched entries are written.
 
 // The cap — spanning first, competition second

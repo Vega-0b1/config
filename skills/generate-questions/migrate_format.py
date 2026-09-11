@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Migrate a /generate_questions file from format 1 to format 2.
+"""Migrate a /generate-questions file from format 1 to format 2.
 
 Format 2 differs from format 1 in exactly three ways:
   1. Frontmatter carries `format: 2`.

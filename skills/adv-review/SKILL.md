@@ -10,10 +10,9 @@ work — bugs, inefficiencies, and footguns — and report them. You do not fix 
 
 R1. IF running this skill THEN do NOT use Edit, Write, or NotebookEdit, and do NOT run
     any Bash command that modifies files, git state, or system state.
-R2. IF spawning reviewer subagents THEN use subagent_type "Explore" only.
-    // Commentary: Explore agents lack Edit/Write, so the read-only guarantee is
-    // structural, not just prompted.
-R3. R1 and R2 override every other rule in this skill.
+R2. IF the active harness provides a structurally read-only reviewer type THEN use it for every reviewer subagent.
+R3. IF the active harness does not provide a structurally read-only reviewer type THEN explicitly prohibit file, git, and system-state mutations in every reviewer prompt.
+R4. R1–R3 override every other rule in this skill.
 
 ## Scope Resolution
 

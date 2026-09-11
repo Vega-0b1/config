@@ -1,6 +1,6 @@
 ---
 name: extract
-description: Extract all content from PDFs/DOCX/EPUB/PPTX files into a markdown notes file. Accepts an optional output directory (defaults to extracted/). PDFs gain a `## Page N` heading per page and PPTX decks a `## Slide N` heading per slide, so extracted content can be cited and grepped by location. Scanned and oversized PDFs go through `pdftotext -layout` + `pdf_layout.py`, which strips repeated running heads and rebuilds chapter/section/subsection headings from the book's own numbering, tolerating OCR damage and rejecting table-of-contents lines. When extracting a textbook to extracted/textbook/, also splits into per-chapter slices at extracted/textbook/chapters/chapter<N>/chapter<N>.md using the chapter heading pattern from the Source Profile. After extracting, moves the source files into source/.
+description: Extract all content from PDFs/DOCX/EPUB/PPTX files into a markdown notes file. Accepts an optional output directory (defaults to extracted/). PDFs gain a `## Page N` heading per page and PPTX decks a `## Slide N` heading per slide, so extracted content can be cited and grepped by location. Scanned and oversized PDFs go through `pdftotext -layout` + `pdf_layout.py`, which strips repeated running heads and rebuilds chapter/section/subsection headings from the book's own numbering, tolerating OCR damage and rejecting table-of-contents lines. When extracting a textbook to extracted/textbook/, also splits it into per-chapter slices using the chapter heading pattern from the Source Profile. After extracting, moves the source files into source/.
 ---
 
 Scan files and extract all content into a single markdown file. Output directory is caller-specified or defaults to `extracted/`.
@@ -108,7 +108,7 @@ R14d. IF a slide's `<a:t>` nodes were consumed by R14c to supply the title THEN 
 R14e. Emit `# <deck name>` once at the top of the output, where `<deck name>` is the sanitized source filename per the Sanitization block.
 
 // Locator headings
-R14f. `## Page <N>` (R11b) and `## Slide <N> — <title>` (R14b) are locator headings: they record where content sits in its source document. They do NOT assert structural sections. /generate_questions excludes them when segmenting.
+R14f. `## Page <N>` (R11b) and `## Slide <N> — <title>` (R14b) are locator headings: they record where content sits in its source document. They do NOT assert structural sections. /generate-questions excludes them when segmenting.
 
 // Writing
 R15. Write all extracted text verbatim to the output file. Preserve structure (headings, lists, tables, code blocks) where possible.
@@ -124,9 +124,9 @@ R16h1. Run R16h BEFORE `rejoin_ocr.py`, never after. `rejoin_ocr.py` rewrites li
 R16a. IF OUTDIR is `extracted/textbook/` AND the class root contains a `CLAUDE.md` with a `## Source Profile` section that declares a chapter heading pattern THEN split the output into per-chapter slices.
 R16a1. BEFORE writing any slice, scan the existing slices for a `<!-- visual-repair: done -->` marker on their first line.
 R16a2. IF any existing slice carries that marker THEN stop, list every marked chapter by number, state that re-splitting discards their visual repair, and ask whether to `overwrite` or `cancel`. STOP until user responds.
-     // Commentary: `/generate_questions` R4b repairs a chapter by reading its page images one at a time. That work is expensive, lives only in the slice, and a re-extraction overwrites it with no error. The loss is silent — the new slice looks correct.
+     // Commentary: `/generate-questions` R4b repairs a chapter by reading its page images one at a time. That work is expensive, lives only in the slice, and a re-extraction overwrites it with no error. The loss is silent — the new slice looks correct.
 R16a3. IF the user answers `cancel` THEN write the full notes file but do NOT split. Report which chapters were preserved.
-R16a4. IF the user answers `overwrite` THEN split normally and report how many repaired chapters were discarded and that they need re-repair on their next `/generate_questions` run.
+R16a4. IF the user answers `overwrite` THEN split normally and report how many repaired chapters were discarded and that they need re-repair on their next `/generate-questions` run.
 R16a5. R16a1's scan is a precondition of R16a, not of R16b. Run it once before the first slice is written, never per slice.
 R16b. IF R16a applies THEN for each chapter found by the heading pattern: create `OUTDIR/chapters/chapter<N>/` and write that chapter's content (from its heading to the line before the next chapter heading) to `OUTDIR/chapters/chapter<N>/chapter<N>.md`.
 R16b1. IF a slice has no `<!-- visual-repair: done -->` marker THEN its chapter heading line IS its first line.
@@ -160,7 +160,7 @@ R24. IF updating the Contents section THEN do not modify any other part of `CLAU
 // Confirm
 R25. Report: what was written and its path, OUTDIR used, any legacy file converted and what it became, any extension/magic mismatch, figures present but not extracted, SCANNED/BORN-DIGITAL classification of every PDF and which test decided it, `rejoin_ocr.py` merge count for scanned sources, `## Page`/`## Slide` anchor counts, empty page counts, slides with no title placeholder, heading reconstruction count when R13g applied, chapter slices written and R16b4 verification result, what was moved to `source/`, whether `CLAUDE.md` Contents was updated.
 R25a. IF a PDF was extracted under R11a1 THEN also report: running heads removed (R11n4), chapter/section/subsection counts and R11o6 rejections (R11o7), the R11o8 total-vs-unique check per level, and the R16h no-invented-lines check.
-R25b. IF R16a1 found repaired slices THEN report which chapters were discarded or preserved, and that a discarded chapter re-repairs on its next `/generate_questions` run.
+R25b. IF R16a1 found repaired slices THEN report which chapters were discarded or preserved, and that a discarded chapter re-repairs on its next `/generate-questions` run.
 
 // Catch-all
 R26. IF any condition not covered by R0–R25 (including lettered sub-rules) arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.

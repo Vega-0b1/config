@@ -56,7 +56,7 @@ R18a1. Every Contents entry MUST begin with the file's literal name in backticks
 R18a2. IF one entry covers several files THEN name each of them in backticks on that line.
      // PASSES R18a2: - `udp_client.py`, `udp_server.py` — UDP socket programming exercises
 R18b. IF a directory received no files THEN omit its group header from the Contents section.
-R18c. IF no files were sorted at all THEN keep the `## Contents` section with the single line: `Nothing here yet — /extract and /generate_questions add entries as they create files.`
+R18c. IF no files were sorted at all THEN keep the `## Contents` section with the single line: `Nothing here yet — /extract and /generate-questions add entries as they create files.`
      // Commentary: the section must exist so those skills grow it instead of skipping it.
 
 // Confirm
@@ -99,7 +99,7 @@ Always read `extracted/` first. Only open `source/` if the extracted notes don't
 ```
 
 // Commentary: the Contents section is a living inventory — /extract and
-// /generate_questions append entries to it as they create files, so every fresh
+// /generate-questions append entries to it as they create files, so every fresh
 // session knows what exists without exploring.
 
 ## Usage

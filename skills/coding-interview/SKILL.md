@@ -1,5 +1,5 @@
 ---
-name: coding_interview
+name: coding-interview
 description: Practice essential CS problems in any language, with review selection weighted by how much help each problem needed, and a post-completion debrief on data structures, algorithms, and complexity.
 ---
 

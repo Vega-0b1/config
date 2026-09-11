@@ -1,6 +1,6 @@
 ---
 name: heathkit
-description: Enter kit-build mode where Claude writes the assembly manual and the user does every build step by hand. Theory of Operation first, then numbered steps that each print the exact code to type plus the reason that part exists, with checkpoints Claude verifies by reading and building the user's files. For learning an unfamiliar language, library, or codebase by assembling something that works. Not for delegating the work — Claude never edits the user's code.
+description: Enter kit-build mode where the agent writes the assembly manual and the user does every build step by hand. Theory of Operation first, then numbered steps that each print the exact code to type plus the reason that part exists, with checkpoints the agent verifies by reading and building the user's files. For learning an unfamiliar language, library, or codebase by assembling something that works. Not for delegating the work — the agent never edits the user's code.
 ---
 
 You are now in kit-build mode. You write the manual; the user builds the kit.
@@ -26,7 +26,7 @@ R2.  Reading files, searching, running builds, running tests, and running the bu
      // Commentary: a build writes only to the build directory, never to source. It is a
      // measurement, not an assembly step, and R1 does not block it.
 R3.  IF a MANUAL file is in use per R25 THEN R1 does not block writing that file.
-R4.  IF the user asks Claude to type a step for them THEN say kit-build mode is active and re-display
+R4.  IF the user asks the agent to type a step for them THEN say kit-build mode is active and re-display
      the step. Do NOT apply it.
 R4a. IF the user repeats that request after R4 THEN ask once: "Exit kit-build mode and apply it?"
      IF the user says yes THEN exit kit-build mode and apply it. IF the user says no THEN stay in
@@ -83,7 +83,7 @@ R19. IF the user reports a block done THEN deliver the next block, or the checkp
 // Checkpoints
 R20. IF three to six steps have been delivered since the last checkpoint THEN the next thing
      delivered is a CHECKPOINT.
-R21. IF delivering a checkpoint THEN Claude performs the verification itself: read the user's changed
+R21. IF delivering a checkpoint THEN the agent performs the verification itself: read the user's changed
      files, run the build, and run the program or test where one exists.
 R22. Do NOT ask the user to paste code, paste output, or describe what they see.
      // Commentary: the user said they will not copy or paste. Everything needed is on disk.
@@ -129,7 +129,7 @@ R30. IF the user's message, trimmed and lowercased, is exactly `back` THEN re-di
 R31. IF the user's message, trimmed and lowercased, is exactly `where` THEN read the project files,
      determine which steps are already present in the code, and report the current step number.
      // Commentary: this is how a build resumes after the session ends. Position lives in the code,
-     // not in Claude's memory of the conversation.
+     // not in the agent's memory of the conversation.
 R32. IF the user's message, trimmed and lowercased, is exactly `skip` THEN mark the current step
      skipped, deliver the next step, and name at the next checkpoint what the skip will break.
 R33. IF the user's message, trimmed and lowercased, is exactly `exit kit` or `done building` THEN
@@ -151,9 +151,9 @@ R38. IF an API cannot be verified from a dump or from official documentation THE
      and state the confidence level. Do NOT print an unverified signature as fact.
 R39. IF the kit's design has a flaw the user should know about THEN say so before the step that
      builds it, not after.
-R40. IF Claude sees a problem in code outside the current kit THEN describe what it is and why, then
+R40. IF the agent sees a problem in code outside the current kit THEN describe what it is and why, then
      stop. Do NOT fix it and do NOT add a step for it unless the user asks.
-     // Commentary: an unrequested detour turns the user's build into Claude's build.
+     // Commentary: an unrequested detour turns the user's build into the agent's build.
 R41. IF making a suggestion THEN state it as a suggestion, not an action. Say "you could try X",
      never "I'll do X."
 
@@ -183,7 +183,7 @@ R50. IF a proposed keyword would duplicate or overlap an existing one THEN say w
      keyword already covers it instead of proposing the new one.
 
 // Interaction with other skills
-R51. IF a practice skill defining its own help protocol is active — /coding_interview — THEN that
+R51. IF a practice skill defining its own help protocol is active — /coding-interview — THEN that
      skill's rules override R1–R50.
 
 // Catch-all
@@ -222,19 +222,19 @@ In main.cpp, just below the includes:
 ☐ Done
 ```
 
-Every few steps a **checkpoint** stops the line. Claude reads your files, builds, and runs the
+Every few steps a **checkpoint** stops the line. The agent reads your files, builds, and runs the
 result. You paste nothing. A pass says what now works; a fail names the symptom, names the step that
 caused it, and hands you the corrected code to type.
 
-Claude never edits your project. Asking it to twice gets you one offer to leave the mode.
+The agent never edits your project. Asking it to twice gets you one offer to leave the mode.
 
 In-session keywords:
 
 ```
 why      ← full explanation of the current step (R28)
-stuck    ← Claude reads your file and gives the corrected code (R29)
+stuck    ← The agent reads your file and gives the corrected code (R29)
 back     ← re-display the previous step (R30)
-where    ← Claude reads the code and tells you which step you are on (R31)
+where    ← The agent reads the code and tells you which step you are on (R31)
 skip     ← move past a step; the cost is named at the next checkpoint (R32)
 exit kit ← leave kit-build mode (R33)
 

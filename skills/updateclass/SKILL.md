@@ -1,7 +1,6 @@
 ---
 name: updateclass
-description: Bring an already-scaffolded class directory up to date with material added since it was created. Detects new files and asks, per file, whether it is teaching material (y), textbook (t), course scope (c), or misc class material (m). Extracts documents via /extract, places them in the correct subdirectory (extracted/class/week<N>/, extracted/textbook/, extracted/, or extracted/class/misc/), and records teaching files against the WEEK they were taught. The week is what makes the file reachable: /generate_questions week<N> reads the material registered to that week to see which topics it covered, then selects the matching questions out of the textbook chapter files, and /learn week<N> drills them. Run this whenever slides, handouts, labs, exams, textbooks, or a syllabus land in a class folder.
----
+description: "Bring an already-scaffolded class directory up to date with material added since it was created. Detects new files and asks, per file, whether it is teaching material (y), textbook (t), course scope (c), or misc class material (m). Extracts documents via /extract, places them in the correct subdirectory (extracted/class/week<N>/, extracted/textbook/, extracted/, or extracted/class/misc/), and records teaching files against the WEEK they were taught. The week is what makes the file reachable: /generate-questions week<N> reads the material registered to that week to see which topics it covered, then selects the matching questions out of the textbook chapter files, and /learn week<N> drills them. Run this whenever slides, handouts, labs, exams, textbooks, or a syllabus land in a class folder."---
 
 Update an existing class directory with newly added material.
 
@@ -9,10 +8,10 @@ Update an existing class directory with newly added material.
 
 Every file that lands in a class directory is one of four things:
 
-- **Teaching material (`y`)** — slides, handouts, labs the professor gave. Goes to `extracted/class/week<N>/`. Registered under `### Teaching` so `/generate_questions week<N>` can read it for coverage. It is never a question source — it decides which textbook questions that week gets.
-- **Textbook (`t`)** — the course textbook or reference book. Goes to `extracted/textbook/`. Not registered — `/generate_questions chapter<N>` finds it via `## Source Profile`. This is the only thing questions are ever made from.
+- **Teaching material (`y`)** — slides, handouts, labs the professor gave. Goes to `extracted/class/week<N>/`. Registered under `### Teaching` so `/generate-questions week<N>` can read it for coverage. It is never a question source — it decides which textbook questions that week gets.
+- **Textbook (`t`)** — the course textbook or reference book. Goes to `extracted/textbook/`. Not registered — `/generate-questions chapter<N>` finds it via `## Source Profile`. This is the only thing questions are ever made from.
 - **Course scope (`c`)** — syllabus, schedule. Goes to `extracted/`. Registered under `### Course Scope` so `/learn` can tell you which chapters are out of scope.
-- **Misc (`m`)** — setup docs, install guides, VM manuals, tool instructions. Goes to `extracted/class/misc/`. Extracted and searchable but never fed to `/generate_questions`.
+- **Misc (`m`)** — setup docs, install guides, VM manuals, tool instructions. Goes to `extracted/class/misc/`. Extracted and searchable but never fed to `/generate-questions`.
 
 ## Rules
 
@@ -43,13 +42,13 @@ R11b. Ask about exactly one candidate per turn, in list order.
 R11c. IF a candidate has been answered THEN ask about the next one immediately. Do NOT ask whether to continue.
 R12. Accept a single `y`, `t`, `c`, or `m` case-insensitively, and nothing else. IF the reply is any other token THEN re-ask about the same candidate.
 R13. `y` = teaching material. `t` = textbook. `c` = course scope. `m` = misc class material.
-R13a. `y` and `c` are different kinds of instructor material and are NOT interchangeable. A syllabus names the topic of an entire TERM without teaching any of it. Registering it as `y` would feed it to /generate_questions R0m as coverage, and R0n2 admits a topic on the strength of it being NAMED — so a single syllabus registered to week 1 would claim the whole course as week 1's coverage and pull the entire question pool into one study list.
+R13a. `y` and `c` are different kinds of instructor material and are NOT interchangeable. A syllabus names the topic of an entire TERM without teaching any of it. Registering it as `y` would feed it to /generate-questions R0m as coverage, and R0n2 admits a topic on the strength of it being NAMED — so a single syllabus registered to week 1 would claim the whole course as week 1's coverage and pull the entire question pool into one study list.
 
 // Week prompt — asked per `y` candidate, immediately after its classification
 R13b. IF a candidate was answered `y` THEN ask which week of the course it is from, before moving to the next candidate. STOP until the user responds.
 R13b1. Accept a positive integer, or `n` meaning the week does not matter. IF the reply is anything else THEN re-ask.
 R13b2. The week prompt carries no hint. Ask it plainly: `Which week is this from? — number, or n`.
-R13b3. IF the answer is `n` THEN the file goes to `extracted/class/unassigned/` and gets no `week:` value in the registry. An entry with no week is reachable by NO `/generate_questions` run. Report it as unreachable.
+R13b3. IF the answer is `n` THEN the file goes to `extracted/class/unassigned/` and gets no `week:` value in the registry. An entry with no week is reachable by NO `/generate-questions` run. Report it as unreachable.
 R13b4. Do NOT ask the week for candidates answered `t`, `c`, or `m`.
 R13b5. Do NOT infer the week from a filename, a lecture number, or a file's mtime.
 
@@ -102,10 +101,10 @@ R32a. IF answered `t` AND `CLAUDE.md` has no `Notes file:` in its `## Source Pro
 R32b. IF answered `t` AND `CLAUDE.md` already has a `Notes file:` pointing at a different file THEN report the conflict and ask. STOP until the user responds.
 // Stale questions detection
 R33a. IF a WEEK gained a `### Teaching` entry in this run AND `extracted/class/week<N>/questions_week<N>.md` already exists THEN mark that questions file STALE.
-R33b. IF a questions file is marked STALE THEN name it in the report and say `/generate_questions week<N>` with `reselect` will fix it.
-R33c. Do NOT invoke `/generate_questions` automatically. Report the staleness and let the user choose when to run it.
-R33d. IF a week gained its FIRST `### Teaching` entry AND no questions file exists for it THEN say so in the report and name `/generate_questions week<N>` as the command.
-R33e. IF a week is named under R33b or R33d AND the class has NO chapter questions file under `extracted/textbook/chapters/` THEN additionally say the pool is empty and `/generate_questions chapter<N>` must run first.
+R33b. IF a questions file is marked STALE THEN name it in the report and say `/generate-questions week<N>` with `reselect` will fix it.
+R33c. Do NOT invoke `/generate-questions` automatically. Report the staleness and let the user choose when to run it.
+R33d. IF a week gained its FIRST `### Teaching` entry AND no questions file exists for it THEN say so in the report and name `/generate-questions week<N>` as the command.
+R33e. IF a week is named under R33b or R33d AND the class has NO chapter questions file under `extracted/textbook/chapters/` THEN additionally say the pool is empty and `/generate-questions chapter<N>` must run first.
 
 // Confirm
 R35. Report: candidates found and which were NEW, the y/t/c/m answer per candidate, the week recorded per `y` candidate or that it was declined, any legacy file converted by `/extract`, what was extracted and to where, what was sorted and to where, the confirmed chapter mapping per `### Teaching` entry, any entry left with no week and therefore unreachable, the confirmed in-scope and out-of-scope chapter sets per `### Course Scope` entry, any `/extract` stop, any Contents entry repaired under R30a, any questions file marked STALE, whether `## Instructor Material` and `## Contents` were updated, any Notes file conflict.
@@ -145,11 +144,11 @@ Typical session: drop `lec1_intro.ppt`, `syllabus.pdf`, and `textbook.epub` into
 run `/updateclass`. Answer `y` for the lecture deck (→ `extracted/class/week1/`), `c` for the
 syllabus (→ `extracted/`), and `t` for the textbook (→ `extracted/textbook/`). The deck is
 converted to `.pptx`, extracted with per-slide anchors, and recorded against week 1 — so
-`/generate_questions week1` can read it for coverage and select the matching textbook questions,
+`/generate-questions week1` can read it for coverage and select the matching textbook questions,
 and `/learn week1` can drill them. The syllabus is read for its schedule, producing the course's
 chapter scope. The textbook is extracted and the `Notes file:` field is set in `## Source Profile`.
 
-Order matters after this: run `/generate_questions chapter<N>` on the textbook chapters before
+Order matters after this: run `/generate-questions chapter<N>` on the textbook chapters before
 running any week. The week selects from those files and stops if none exist.
 
 The four classifications and their destinations:
