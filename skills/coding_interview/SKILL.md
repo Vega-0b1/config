@@ -191,4 +191,5 @@ R6b. IF the answer key's `Time:` or `Space:` field does not hold for the user's 
      // Commentary: the key is written from the canonical solution. A C implementation that allocates its own table has the same complexity; one that swaps the approach does not.
 R7. IF the problem has no answer key yet (first completion of a new problem) THEN derive the correct answers from the problem itself, grade the user's responses against them, then write the answer key inline to the problem's line in CLAUDE.md before proceeding.
 R8. IF all four questions are answered and graded THEN mark the problem done and apply Set Tracking R1–R7 immediately.
-R9. IF any condition not covered by R1–R8 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R9. IF R8 fires THEN immediately draw and present the next problem at the same difficulty using Problem Selection R3. Do not ask "Want another problem?" or wait for confirmation.
+R10. IF any condition not covered by R1–R9 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
