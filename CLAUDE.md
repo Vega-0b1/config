@@ -26,7 +26,10 @@ R2. IF a file must stay editable in place rather than be regenerated THEN link i
      // Example: `~/.claude/skills` and `~/.claude/CLAUDE.md` point at the live `~/repos/config` working tree this way, so a skill edit takes effect without an activation.
 R3. IF this file or a skill under `~/repos/config/skills/` is edited THEN the change is live immediately; no activation is needed.
 R4. IF installing a system package THEN use `apt`. IF adding to the user environment THEN add it to the flake.
-R5. IF any condition not covered by R1–R4 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R5. IF the user has authorized a privileged command AND sudo cannot read from an interactive terminal AND `/usr/bin/ksshaskpass` exists THEN invoke the command with `SUDO_ASKPASS=/usr/bin/ksshaskpass sudo -A`.
+     // Commentary: `sudo -A` sends the authentication request through KDE's system dialog instead of terminal or chat input.
+R6. IF sudo authentication is required THEN never ask the user to paste or disclose the password in chat or command text.
+R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Response Style
 
