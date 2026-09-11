@@ -6,8 +6,25 @@ description: Maintain the offline documentation dumps in ~/edu/scrapes — add a
 Maintain the dumps in `~/edu/scrapes`. Every dump is build output produced from
 `sources.toml` by `scrapes.py`; nothing there is hand-written.
 
-`~/CLAUDE.md` (Uncertainty & Verification) already governs **when** to consult the
+`~/.claude/CLAUDE.md` (Uncertainty & Verification) already governs **when** to consult the
 dumps. This skill governs **how to maintain** them, and is not a substitute for it.
+
+## Status — toolchain absent (verified 2026-09-10)
+
+`sources.toml`, `scrapes.py`, `audit_dumps.py`, `index_dumps.py` and
+`~/edu/scrapes/README.md` are **not present on this host**. Only the `.txt` dumps and a
+stale `__pycache__/` (holding `audit_dumps` and `index_dumps` bytecode) survived the
+NixOS-to-Debian migration. `~/edu` is Nextcloud-synced and deliberately untracked by
+R26, so there is no git history to restore them from.
+
+R0.  IF the task requires any tool in the Tools section THEN report that the toolchain is absent and stop. R0 overrides every rule below.
+     // Commentary: reading dumps still works and is governed by `~/.claude/CLAUDE.md`. Only maintenance is blocked.
+R0a. IF asked to work around the absence THEN do NOT hand-write, hand-edit, or hand-index a `.txt` dump.
+     // Commentary: a dump is build output whose CONTENTS header is generated. Hand-editing desynchronizes the index from the body, R3's page counts stop meaning anything, and the next real scrape discards the work.
+R0b. IF the toolchain is restored THEN delete this section and drop R0–R0b.
+
+The rules below describe the intended workflow and stay authoritative for what to
+rebuild. Treat them as a specification until R0b fires.
 
 ## Tools
 
@@ -31,9 +48,9 @@ R4.  IF adding a source THEN add a `sources.toml` entry with `kind`, its source 
 R5.  IF choosing sentinels THEN pick strings that would vanish first if extraction regressed, not strings that appear everywhere.
      // Example: `useGrimAdapter` sits inside a code template — it disappears the moment template parsing breaks. "NixOS" does not.
 R6.  IF a source is reachable both locally and over the network THEN prefer local.
-     // Commentary: nixos_options, home_manager_options, openocd_manual and stm32f4_hal are all generated from what is installed. They match the running system and need no network.
-R7.  IF a flake package is the source THEN reference it through `builtins.getFlake "/etc/nixos"`, never a bare `github:owner/repo/branch` ref.
-     // Commentary: a branch ref resolves to that branch's HEAD, which drifts ahead of flake.lock and documents a version this system does not have.
+     // Commentary: home_manager_options, openocd_manual and stm32f4_hal are generated from what is installed, so they match the running system and need no network. nixos_options was too, on the former NixOS host; it no longer describes this one.
+R7.  IF a flake package is the source THEN reference it through `builtins.getFlake "/home/jcvega/repos/debian-config"`, never a bare `github:owner/repo/branch` ref.
+     // Commentary: a branch ref resolves to that branch's HEAD, which drifts ahead of flake.lock and documents a version this system does not have. The flake moved here from /etc/nixos when the host became Debian — there is no system flake now, only this Home Manager one.
 R8.  IF a new source is added THEN run `scrape NAME --dry-run` first and inspect the candidate before promoting.
 
 // PDFs
@@ -67,13 +84,13 @@ R22. IF `audit_dumps.py options` reports slightly fewer options than the source 
      // Commentary: the pattern requires a dotted lowercase name, so `lib`, `specialisation`, `uninstall` and `_module.args` are present but uncounted.
 
 // Housekeeping
-R23. IF a dump is retired THEN remove its manifest entry, delete the `.txt`, and clear references in `~/CLAUDE.md` and `~/edu/scrapes/README.md`.
-R24. IF a dump is added or retired THEN update the file table in `~/edu/scrapes/README.md` and the dump index in `~/CLAUDE.md`.
-     // Commentary: `~/CLAUDE.md` R1 routes lookups by filename. A stale entry sends the next session to a file that does not exist.
+R23. IF a dump is retired THEN remove its manifest entry, delete the `.txt`, and clear references in `~/.claude/CLAUDE.md` and `~/edu/scrapes/README.md`.
+R24. IF a dump is added or retired THEN update the file table in `~/edu/scrapes/README.md` and the dump index in `~/.claude/CLAUDE.md`.
+     // Commentary: `~/.claude/CLAUDE.md` R1 routes lookups by filename. A stale entry sends the next session to a file that does not exist.
 R25. IF deleting any dump THEN first verify what is uniquely in it, and report that before deleting.
      // Commentary: a redundancy call in this directory was wrong once. Title overlap is not content overlap.
-R26. IF `sources.toml` or a script changes THEN do NOT stage or commit it. Nothing under `~/edu` is tracked by the home repo.
+R26. IF `sources.toml` or a script changes THEN do NOT stage or commit it. Nothing under `~/edu` is tracked by `~/repos/config`.
      // Commentary: the Nextcloud client syncs ~/edu, so this directory is backed up but not versioned. These files were tracked for one day (2026-08-17 to 2026-08-18) and untracked deliberately. Editing them is still correct; reaching for git afterwards is not.
 
 // Catch-all
-R27. IF any condition not covered by R1–R26 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R27. IF any condition not covered by R0–R26 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
