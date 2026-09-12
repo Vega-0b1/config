@@ -1,9 +1,9 @@
 ---
 name: scrapes
-description: Maintain the offline documentation dumps in ~/edu/scrapes — add a source, refresh stale dumps, extract a PDF (datasheets, manuals) into a greppable dump, audit, and diagnose a blocked promotion. Use when adding or refreshing reference material, not when merely reading it.
+description: Maintain the offline documentation dumps in ~/edu/zStore/scrapes — add a source, refresh stale dumps, extract a PDF (datasheets, manuals) into a greppable dump, audit, and diagnose a blocked promotion. Use when adding or refreshing reference material, not when merely reading it.
 ---
 
-Maintain the dumps in `~/edu/scrapes`. Every dump is build output produced from
+Maintain the dumps in `~/edu/zStore/scrapes`. Every dump is build output produced from
 `sources.toml` by `scrapes.py`; nothing there is hand-written.
 
 `~/repos/config/AGENT.md` (Uncertainty & Verification) already governs **when** to consult the
@@ -12,7 +12,7 @@ dumps. This skill governs **how to maintain** them, and is not a substitute for 
 ## Status — toolchain absent (verified 2026-09-10)
 
 `sources.toml`, `scrapes.py`, `audit_dumps.py`, `index_dumps.py` and
-`~/edu/scrapes/README.md` are **not present on this host**. Only the `.txt` dumps and a
+`~/edu/zStore/scrapes/README.md` are **not present on this host**. Only the `.txt` dumps and a
 stale `__pycache__/` (holding `audit_dumps` and `index_dumps` bytecode) survived the
 NixOS-to-Debian migration. `~/edu` is Nextcloud-synced and is not a git repository, so
 there is no git history to restore them from.
@@ -84,8 +84,8 @@ R22. IF `audit_dumps.py options` reports slightly fewer options than the source 
      // Commentary: the pattern requires a dotted lowercase name, so `lib`, `specialisation`, `uninstall` and `_module.args` are present but uncounted.
 
 // Housekeeping
-R23. IF a dump is retired THEN remove its manifest entry, delete the `.txt`, and clear references in `~/repos/config/AGENT.md` and `~/edu/scrapes/README.md`.
-R24. IF a dump is added or retired THEN update the file table in `~/edu/scrapes/README.md` and the dump index in `~/repos/config/AGENT.md`.
+R23. IF a dump is retired THEN remove its manifest entry, delete the `.txt`, and clear references in `~/repos/config/AGENT.md` and `~/edu/zStore/scrapes/README.md`.
+R24. IF a dump is added or retired THEN update the file table in `~/edu/zStore/scrapes/README.md` and the dump index in `~/repos/config/AGENT.md`.
      // Commentary: `~/repos/config/AGENT.md` R1 routes lookups by filename. A stale entry sends the next session to a file that does not exist.
 R25. IF deleting any dump THEN first verify what is uniquely in it, and report that before deleting.
      // Commentary: a redundancy call in this directory was wrong once. Title overlap is not content overlap.

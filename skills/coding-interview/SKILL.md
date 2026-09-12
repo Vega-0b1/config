@@ -1,16 +1,26 @@
 ---
 name: coding-interview
-description: Practice essential CS problems in any language, with review selection weighted by how much help each problem needed, and a post-completion debrief on data structures, algorithms, and complexity.
+description: Practice essential CS problems in normal or low-energy mode, with personal difficulty ratings, spaced review, progressive help, and a technical debrief in normal mode.
 ---
 
-Run coding interview practice. Problems are stored in `CLAUDE.md` in the current working directory. The user solves each problem in the ACTIVE LANGUAGE (see Language section). After the solution is correct, a four-question debrief runs.
+Problems are stored in `CLAUDE.md` in the current working directory. The user solves each problem in the ACTIVE LANGUAGE.
+
+## Mode
+
+R1. IF the skill is invoked as `/coding_interview easy` THEN set the ACTIVE MODE to EASY.
+R2. IF the skill is invoked as `/coding_interview` without `easy` THEN set the ACTIVE MODE to NORMAL.
+R3. IF either invocation occurs while a problem is active THEN keep that problem active and apply the new mode from that point forward.
+R4. IF either invocation occurs while no problem is active THEN treat the invocation as a request for the next problem in the selected mode.
+R5. IF no active mode has been set in the session THEN set the ACTIVE MODE to NORMAL.
+R6. IF the user asks which mode is active THEN state it in one line.
+R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Language
 
 R1. IF the user names a programming language THEN set the ACTIVE LANGUAGE to that language for the remainder of the session.
      // Example: "I'm doing this in C", "switch to C", "let's use Rust" all set the active language.
 R2. IF no active language has been set in this session THEN the active language is Python.
-R3. IF the active language changes while a problem is open THEN keep that problem active and apply the new language from that point forward. Do not reset the attempt flag and do not re-present the problem.
+R3. IF the active language changes while a problem is open THEN keep that problem active and apply the new language from that point forward. Do not re-present the problem.
 R4. IF resolving the active language to a file extension and run command THEN use this table:
 
 | Language | Extension | Run command (from the scratchpad copy) |
@@ -29,55 +39,45 @@ R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situa
 
 ## Problem Selection
 
-R1. IF the user says "give me a [difficulty] problem" THEN pick a completed problem at that difficulty using the weighted draw in Set Tracking R9.
-R2. IF the user says "give me a new [difficulty] problem" THEN pick an uncompleted problem at that difficulty; mark it `[x]` and initialize it to `(sets: 0, streak: 0, weight: 3, last: unknown)` upon first completion, before Set Tracking R1–R6 apply.
-R3. IF the user says "next problem" or "next question" THEN apply R1 using the difficulty of the current/last problem.
-R4. IF the user says "next new problem" or "give me a new problem" THEN apply R2 using the difficulty of the current/last problem.
-R5. IF no problem has been given yet in this session AND no difficulty is specified THEN ask the user for a difficulty before proceeding. Do not pick a problem.
-R6. IF picking any problem THEN read the problem list from `CLAUDE.md` in the current working directory. Every heading in that file — LeetCode-style and CLRS alike — feeds one pool per difficulty.
-     // Commentary: the CLRS headings are not a separate track. A request for an easy problem draws from all Easy entries in the file regardless of which section they sit under.
-R7. IF selecting a problem THEN exclude the 3 most recently presented problems. R7 overrides R1–R4 when both apply.
-     // Commentary: weight only falls after 3 clean solves, so a just-completed problem still carries its full weight. Without this exclusion the draw would serve it straight back.
-R8. IF R7 leaves no candidate at the requested difficulty THEN apply R2 instead.
-R9. IF any condition not covered by R1–R8 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+The review intervals are 3 days for rating 3, 10 days for rating 2, and 30 days for rating 1.
 
-## Set Tracking
+R1. IF selecting any problem THEN read the problem list and tracking fields from `CLAUDE.md` in the current working directory.
+R2. IF the ACTIVE MODE is EASY THEN select only completed problems whose current rating is 1.
+R3. IF the ACTIVE MODE is EASY AND no completed rating-1 problem exists THEN state that the easy deck is empty and present no problem.
+R4. IF the ACTIVE MODE is EASY AND one or more eligible problems exist THEN select the eligible problem with the oldest `last:` date.
+R5. IF the ACTIVE MODE is NORMAL AND the user asks for a new problem or next new problem THEN select the earliest uncompleted problem in the curriculum order. R5 overrides R6.
+R6. IF the ACTIVE MODE is NORMAL AND the user asks for the next problem or next question THEN select the most overdue completed problem.
+R7. IF R6 fires AND no completed problem is due THEN select the earliest uncompleted problem in the curriculum order.
+R8. IF R6 fires AND no completed problem is due AND no uncompleted problem exists THEN select the completed problem with the oldest `last:` date.
+R9. IF computing whether a problem is due THEN compare its age in days with the review interval for its rating.
+R9a. IF a problem's `last:` value is `unknown` THEN treat it as due and older than every dated completion.
+R10. IF two or more due problems are candidates THEN select the problem with the greatest `age / interval` value.
+R11. IF two or more candidates remain tied after R10 THEN select the earliest one in the curriculum order.
+R12. IF ranking uncompleted problems into curriculum order THEN place prerequisite problems before problems that build on them.
+R13. IF two uncompleted problems have no prerequisite relationship THEN place the problem with the lower stated Easy, Medium, or Hard difficulty first.
+R14. IF two uncompleted problems remain tied after R12–R13 THEN place the problem requiring fewer distinct concepts or state variables first.
+R15. IF two uncompleted problems remain tied after R12–R14 THEN preserve their order in `CLAUDE.md`.
+R16. IF selecting any problem THEN exclude the three most recently presented problems when another eligible candidate exists. R16 overrides R4 and R10–R11.
+R17. IF the user asks why a problem was selected THEN state the active mode, whether the problem is new or due, and its rating, age, and interval when those fields exist.
+R18. IF the user names an Easy, Medium, or Hard difficulty while requesting a problem outside the exact `/coding_interview easy` invocation THEN ignore that filter and state that NORMAL mode follows the personalized curriculum while EASY mode means the rating-1 deck.
+R19. IF any condition not covered by R1–R18 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
-Each completed problem carries four fields: `(sets: N, streak: K, weight: W, last: D)`.
-N = total completions. K = consecutive clean completions since the last weight change.
-W = mastery weight, an integer 1–3. New problems start at 3.
-D = the date of the most recent completion, `YYYY-MM-DD`, or `unknown`.
+## Completion Tracking
 
-W measures how well the problem is known. D measures how long there has been to
-forget it. The draw (R9–R13) multiplies them.
+Each introduced problem carries `(sets: N, rating: R, last: D)`.
+`sets` is the total number of completions. `rating` is the user's current personal difficulty rating. `last` is the most recent completion date in `YYYY-MM-DD` form or `unknown`.
 
-R1.  IF a problem is completed (solution correct → debrief done) THEN immediately increment its `(sets: N)` count in CLAUDE.md — do not defer to the next problem request.
-R2.  IF R1 fires AND the attempt is UNASSISTED THEN increment `streak: K`.
-R3.  IF R2 brings `streak: K` to 3 THEN subtract 1 from `weight: W` AND reset `streak: K` to 0.
-R4.  IF R3 would take `weight: W` below 1 THEN hold it at 1 AND still reset `streak: K` to 0. R4 overrides R3.
-R5.  IF R1 fires AND the attempt is ASSISTED THEN add 1 to `weight: W` AND reset `streak: K` to 0.
-R6.  IF R5 would take `weight: W` above 3 THEN hold it at 3 AND still reset `streak: K` to 0. R6 overrides R5.
-R7.  IF any of R2–R6 fire THEN state the outcome to the user in one line naming the new weight:
-       "Clean solve — streak 2 of 3 toward weight 2."
-       "Clean solve — weight 3 → 2, streak reset."
-       "Assisted solve — weight 1 → 2, streak reset."
-R8.  IF a problem entry lacks `streak:` or `weight:` THEN treat `streak:` as 0 and `weight:` as 3, and write the full four-field form on the next completion.
-R8a. IF R1 fires THEN set `last: D` to today's date in `YYYY-MM-DD` form.
-R9.  IF picking a completed problem for review THEN draw one at random with probability proportional to its EFFECTIVE WEIGHT, computed by R10–R12. Candidates are the problems remaining after Problem Selection R7 filters the pool.
-R10. IF computing effective weight THEN read the problem's review interval from `weight: W`:
-       W=3 (shaky) → 3 days.  W=2 → 10 days.  W=1 (solid) → 30 days.
-     // Commentary: a shakier problem is due sooner. Mastery buys a longer gap, never exemption.
-R11. IF computing effective weight THEN let `age` = days from `last: D` to today, and set the overdue multiplier:
-       age < interval          → 0.25
-       interval ≤ age < 2×interval → 1.0
-       age ≥ 2×interval        → 2.0
-R12. Effective weight = `weight: W` × the R11 multiplier.
-R13. IF a problem's `last:` is `unknown` or absent THEN treat its multiplier as 2.0. R13 overrides R11.
-     // Commentary: no date means no evidence it is fresh. Treat it as overdue and let the next
-     // completion write a real date.
-R14. IF the user asks why a problem was drawn THEN state its weight, days since last seen, interval, and effective weight in one line.
-     // Example: "Move Zeroes — weight 2, 12 days since last, 10-day interval → due, effective 2.0."
-R15. IF any condition not covered by R1–R14 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R1. IF an uncompleted problem is presented for the first time THEN add `(sets: 0, rating: 3, last: unknown)` to its entry without marking it `[x]`.
+R2. IF a problem is completed THEN increment `sets:` and set `last:` to today's date.
+R3. IF a problem is completed for the first time THEN mark it `[x]` and keep its automatic rating of 3.
+R4. IF a problem is completed in NORMAL mode after its first completion THEN update `rating:` with the user's answer to the rating question in the Debrief section.
+R5. IF a problem is completed in EASY mode THEN keep its rating at 1.
+R6. IF a completed problem lacks `sets:`, `rating:`, or `last:` THEN stop and repair its entry before selecting or completing it. Do not infer a missing personal rating.
+R7. IF the user rates a problem 1 THEN interpret it as "Easy peasy; no assistance needed."
+R8. IF the user rates a problem 2 THEN interpret it as "Starting to get it; light assistance still helps."
+R9. IF the user rates a problem 3 THEN interpret it as "I need assistance."
+R10. IF the user gives a rating other than 1, 2, or 3 THEN ask for 1, 2, or 3 before updating the tracker.
+R11. IF any condition not covered by R1–R10 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Problem Presentation
 
@@ -93,29 +93,14 @@ R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situa
 
 ## Workflow
 
-R1. IF the user solves the problem in the active language correctly THEN run the debrief (see Debrief section); after the debrief completes, mark the problem done and apply Set Tracking R1–R7.
-R2. IF "correct" is ambiguous THEN a solution is correct when it fulfills the problem requirements OR the user requests to move on / says "next one."
-R3. IF the user requests help THEN apply the Help section.
-R4. IF the user says "check" THEN apply the Check section.
-R5. IF the user has not said "check", asked for a grade, or asked to move on THEN do not grade, review, or comment on their code. Wait.
-     // Commentary: unsolicited review is the same failure as unsolicited hints — it removes the work.
-R6. IF any condition not covered by R1–R5 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
-
-## Attempt Tracking
-
-Determines whether a completion counts as clean. One flag per attempt.
-
-R1. IF a problem is presented THEN start the attempt UNASSISTED.
-R2. IF "help", "help+", "help++", "stuck", or "list" fires on the active problem THEN mark the attempt ASSISTED for the remainder of that attempt. This is one-way — no later action restores UNASSISTED.
-R3. IF "check" fires THEN do not change the attempt flag, regardless of verdict.
-     // Commentary: a failed check means the user found and fixed their own logic flaw. That is still a clean solve.
-R4. IF the user answers a debrief question incorrectly THEN do not change the attempt flag.
-     // Commentary: clean measures the solve, not the post-mortem.
-R5. IF the user asks a clarifying question that is not one of the R2 keywords THEN do not change the flag.
-     // Example: "do I have to declare the type?" is a clarifying question, not a help call — the attempt stays UNASSISTED.
-R6. IF the attempt flag cannot be determined at completion time THEN treat the attempt as ASSISTED. R6 overrides R1.
-     // Commentary: the flag is conversation state and does not survive a compaction or restart. Under-crediting a clean solve is recoverable — the user says so and the count is corrected. Over-crediting silently corrupts the one signal this feature exists to produce.
-R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R1. IF the user says `check` THEN apply the Check section.
+R2. IF the user requests help THEN apply the Help section.
+R3. IF the user has not said `check`, asked for a grade, or asked to move on THEN do not grade, review, or comment on the code. Wait.
+R4. IF the user asks to move on from an active problem THEN treat the problem as completed and apply the completion path for the ACTIVE MODE.
+R5. IF a problem is completed in NORMAL mode THEN apply the Debrief section and let that section perform the required Completion Tracking update.
+R6. IF a problem is completed in EASY mode THEN skip the Debrief section and immediately apply Completion Tracking R2 and R5.
+R7. IF completion bookkeeping finishes in either mode THEN immediately treat that event as a `next problem` request and present the selected problem. Do not ask whether the user wants another problem.
+R8. IF any condition not covered by R1–R7 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Problem File
 
@@ -128,7 +113,7 @@ R4. IF answering a help or check request THEN re-read the problem file from disk
      // Commentary: the user edits between requests; a stale copy produces hints for code that no longer exists.
 R5. IF the problem file contradicts what the user states in chat THEN say so, quote the relevant lines, and ask which is current before answering.
 R6. IF answering a help or check request THEN output in chat only. Do not edit, create, or run the problem file unless the user explicitly asks.
-R7. R6 does not restrict CLAUDE.md bookkeeping required by Set Tracking R1–R7 or Debrief R7.
+R7. R6 does not restrict `CLAUDE.md` bookkeeping required by Completion Tracking or Debrief R11.
 R8. IF any condition not covered by R1–R7 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Help
@@ -149,18 +134,18 @@ R10. IF the user says "help++" THEN give the complete code for the locked-in sec
 R11. IF "help+" or "help++" is used AND no section is locked in THEN list the sections (R1) and ask which one. Do not give code.
 R12. IF the user says "list" THEN clear the locked-in section and re-list the sections per R1.
 R13. IF the user says "stuck" THEN treat it as "help".
-R14. IF a help request arrives AND no problem is active THEN say no problem is active and apply Problem Selection R5. Do not list sections or give hints.
+R14. IF a help request arrives AND no problem is active THEN say no problem is active and present no hints or problems.
 R15. IF giving help THEN use the identifiers, signature, and style already present in the problem file. Do not rename the user's variables or functions.
 R16. IF a step in the locked-in section is already implemented in the problem file THEN do not give it as a hint. Give the first step that is missing or wrong.
 R17. Help R1–R16 override any active mode's preference against showing code, including /heathkit, and override Problem Presentation R2–R4 once help is requested.
      // Commentary: the user asked for these tiers explicitly; refusing code at help++ is the failure mode this section exists to fix.
-R18. IF any request in this section fires ("help", "help+", "help++", "stuck", "list") THEN apply Attempt Tracking R2. This includes the bare "help" that only lists sections.
+R18. IF help is used in either mode THEN do not change the problem's rating automatically.
 R19. IF any condition not covered by R1–R18 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Check
 
 R1. IF the user says "check" THEN resolve and read the problem file per the Problem File section and grade it against the problem requirements.
-R2. IF the solution fulfills the problem requirements THEN say "correct" and start the debrief immediately (Debrief R1).
+R2. IF the solution fulfills the problem requirements THEN say "correct" and apply the completion path for the ACTIVE MODE.
 R3. IF the solution does not fulfill the requirements THEN state the failure as one concrete case: the input, the expected output, and what the code produces. Name the line it fails on.
 R4. IF R3 fires THEN do not give the fix, the corrected line, or pseudocode for it. The user must ask for help to get that.
      // Commentary: "check" is a verdict, not a hint tier. Fixing on a failed check collapses the help ladder.
@@ -173,23 +158,27 @@ R9. IF any condition not covered by R1–R8 arises THEN stop, describe the situa
 
 ## Debrief
 
-Fires after the solution is correct. One question at a time.
+The NORMAL-mode technical debrief contains four questions asked one at a time:
 
-R1. IF the solution is graded correct THEN start the debrief immediately before marking the problem done.
-R2. IF starting the debrief THEN ask only the first question: "Looking at your solution — what data structure(s) did you use, and why?"
-R3. IF the user answers a debrief question THEN grade it (correct or incorrect, plus a one-sentence explanation), then ask the next question.
-R4. The four debrief questions, asked in order:
-     1. What data structure(s) did you use, and why?
-     2. What algorithm or technique did you use?
-     3. What is the time complexity?
-     4. What is the space complexity?
-R5. IF grading debrief answers THEN read the expected answer key from the problem's inline `| DS: ... | Algo: ... | Time: ... | Space: ...` fields in CLAUDE.md.
-R6. IF grading complexity answers THEN accept conceptual answers — do not require Big-O notation.
-R6a. IF the answer key names a data structure THEN accept the active language's equivalent of it as correct.
-     // Example: key says `HashMap`. Python `dict`, C++ `unordered_map`, and a hand-rolled C hash table all pass. A C solution that linear-scans an array instead does not.
-R6b. IF the answer key's `Time:` or `Space:` field does not hold for the user's implementation in the active language THEN grade against the user's actual code, not the key, and say which one you graded against.
-     // Commentary: the key is written from the canonical solution. A C implementation that allocates its own table has the same complexity; one that swaps the approach does not.
-R7. IF the problem has no answer key yet (first completion of a new problem) THEN derive the correct answers from the problem itself, grade the user's responses against them, then write the answer key inline to the problem's line in CLAUDE.md before proceeding.
-R8. IF all four questions are answered and graded THEN mark the problem done and apply Set Tracking R1–R7 immediately.
-R9. IF R8 fires THEN immediately draw and present the next problem at the same difficulty using Problem Selection R3. Do not ask "Want another problem?" or wait for confirmation.
-R10. IF any condition not covered by R1–R9 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+1. What data structures does your solution receive or operate on, and what additional data structures does it create?
+2. What algorithm or technique did you use?
+3. What is the time complexity?
+4. What is the auxiliary space complexity?
+
+R1. IF a solution is completed in NORMAL mode THEN start the technical debrief before marking the problem complete.
+R2. IF a solution is completed in EASY mode THEN do not run any debrief or rating question.
+R3. IF starting the technical debrief THEN ask only question 1.
+R4. IF the user answers a technical debrief question THEN grade it as correct or incorrect with one sentence of explanation and ask the next question.
+R5. IF grading a technical debrief answer THEN read the expected answer from the problem's inline `| DS: ... | Algo: ... | Time: ... | Space: ...` fields in `CLAUDE.md`.
+R6. IF grading question 1 THEN identify input data structures from the problem and implementation, identify additional data structures from the answer key and implementation, and accept an answer that distinguishes the two.
+R7. IF grading question 4 THEN exclude storage belonging to the input and count only auxiliary space created or consumed by the solution.
+R8. IF grading complexity answers THEN accept conceptual answers without requiring Big-O notation.
+R9. IF the answer key names a data structure THEN accept the active language's equivalent data structure.
+     // Example: a `HashMap` key accepts Python `dict`, C++ `unordered_map`, or a hand-rolled C hash table.
+R10. IF an answer-key complexity does not hold for the user's implementation THEN grade against the user's actual code and state that basis.
+R11. IF the problem lacks an answer key on its first completion THEN derive the answers from the problem and implementation and write the answer key inline before proceeding.
+R12. IF all four technical questions are graded AND `sets:` is 0 THEN keep `rating: 3`, apply Completion Tracking R2–R3, and ask no rating question.
+R13. IF all four technical questions are graded AND `sets:` is greater than 0 THEN ask: `Rate this attempt: 1 = easy peasy, 2 = starting to get it with light assistance, 3 = I need assistance.`
+R14. IF the user answers the rating question with 1, 2, or 3 THEN apply Completion Tracking R2 and R4.
+R15. IF the technical debrief and required rating step are complete THEN apply Workflow R7 immediately.
+R16. IF any condition not covered by R1–R15 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.

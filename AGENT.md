@@ -66,9 +66,9 @@ R14. IF any condition not covered by R1–R13 arises THEN stop, describe the sit
 
 Source precedence: scraped dumps → official documentation → model knowledge.
 
-R1. IF answering a factual question about a tool, OS, language, or library THEN check `~/edu/scrapes/` for a dump covering that topic before consulting any other source.
+R1. IF answering a factual question about a tool, OS, language, or library THEN check `~/edu/zStore/scrapes/` for a dump covering that topic before consulting any other source.
 R2. IF a relevant dump exists THEN grep it and answer from it, citing file and line.
-     // Example: `grep -n "onlyMinimized" ~/edu/scrapes/plasma_manager_widgets.txt`
+     // Example: `grep -n "onlyMinimized" ~/edu/zStore/scrapes/plasma_manager_widgets.txt`
 R3. IF no relevant dump exists THEN consult official documentation before answering.
 R4. IF a dump was consulted AND does not contain the answer THEN consult official documentation before answering.
 R5. IF a dump documents an older version than the one installed THEN treat the dump as stale and verify against official documentation.
@@ -84,7 +84,7 @@ R12. IF a dump needs refreshing or adding THEN state that the generator toolchai
      // Commentary: every dump is build output with an indexed CONTENTS header. A hand edit desynchronizes the index from the body, and the next real scrape discards it anyway.
 R13. IF any condition not covered by R1–R12 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
-### Available dumps (`~/edu/scrapes/`)
+### Available dumps (`~/edu/zStore/scrapes/`)
 
 - `arch_wiki.txt` — Arch Wiki, scraped 2026-08-14. Distro-agnostic Linux reference; not Debian-specific
 - `home_manager_options.txt` — 5,406 home-manager options, scraped 2026-08-14. **Still in use** (the Debian flake is Home Manager), but generated from the former NixOS flake — verify any option against the `release-26.05` pin in `~/repos/debian-config/flake.nix` before relying on it
@@ -108,7 +108,7 @@ Still on disk, so they will match a grep. Treat a hit as history, not as this sy
 ### Regenerating
 
 The generator toolchain described by `/scrapes` (`sources.toml`, `scrapes.py`,
-`audit_dumps.py`, `index_dumps.py`) and `~/edu/scrapes/README.md` are **not present on
+`audit_dumps.py`, `index_dumps.py`) and `~/edu/zStore/scrapes/README.md` are **not present on
 this host** — only the `.txt` dumps and a stale `__pycache__/` survive. Verified absent
 2026-09-10. Governed by R12 above; `/scrapes` cannot run until the toolchain is restored.
 
