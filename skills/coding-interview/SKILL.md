@@ -60,7 +60,9 @@ R15. IF two uncompleted problems remain tied after R12–R14 THEN preserve their
 R16. IF selecting any problem THEN exclude the three most recently presented problems when another eligible candidate exists. R16 overrides R4 and R10–R11.
 R17. IF the user asks why a problem was selected THEN state the active mode, whether the problem is new or due, and its rating, age, and interval when those fields exist.
 R18. IF the user names an Easy, Medium, or Hard difficulty while requesting a problem outside the exact `/coding_interview easy` invocation THEN ignore that filter and state that NORMAL mode follows the personalized curriculum while EASY mode means the rating-1 deck.
-R19. IF any condition not covered by R1–R18 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R19. IF the ACTIVE MODE is EASY AND a problem is about to be presented THEN show a table of all eligible rating-1 problems with their Problem name and Last date before presenting the selected problem.
+R20. IF the ACTIVE MODE is NORMAL AND a problem is about to be presented THEN show a table of all due completed problems with their Problem name, Rating, Last date, and Days overdue before presenting the selected problem. IF no completed problem is due THEN skip the table.
+R21. IF any condition not covered by R1–R20 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Completion Tracking
 
@@ -140,7 +142,9 @@ R16. IF a step in the locked-in section is already implemented in the problem fi
 R17. Help R1–R16 override any active mode's preference against showing code, including /heathkit, and override Problem Presentation R2–R4 once help is requested.
      // Commentary: the user asked for these tiers explicitly; refusing code at help++ is the failure mode this section exists to fix.
 R18. IF help is used in either mode THEN do not change the problem's rating automatically.
-R19. IF any condition not covered by R1–R18 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R19. IF the ACTIVE MODE is EASY AND a problem is about to be presented THEN show a table of all eligible rating-1 problems with their Problem name and Last date before presenting the selected problem.
+R20. IF the ACTIVE MODE is NORMAL AND a problem is about to be presented THEN show a table of all due completed problems with their Problem name, Rating, Last date, and Days overdue before presenting the selected problem. IF no completed problem is due THEN skip the table.
+R21. IF any condition not covered by R1–R20 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Check
 
