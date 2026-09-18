@@ -9,7 +9,7 @@
 - **DE**: KDE Plasma on Wayland (`kwin_wayland`)
 - **Panel**: Plasma panel (`plasmashell`), configured through plasma-manager
 - **Terminal**: Alacritty (Konsole also installed)
-- **Browser**: Google Chrome (`google-chrome-stable`, from `/usr/bin`); Firefox also installed
+- **Browser**: Firefox ESR (`firefox-esr`, from `/usr/bin`); the desktop default. No Chrome or Chromium is installed
 
 ## Tools
 - **Editor**: Neovim 0.12.4 (from the Nix profile)
@@ -79,6 +79,34 @@ R13. IF R12 is complete THEN verify that the first and last lines together state
 R13a. R1a and R1b override R13.
      // Commentary: a one-word answer cannot state what happened and what is next, and must not be padded until it can.
 R14. IF any condition not covered by R1–R13 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+
+## Code Marks
+
+// Labels
+M1. IF a response displays a fenced code block THEN split its contents into sections and append a trailing comment `<id>` to the last line of each section, using the block language's line-comment syntax.
+     // Example: C `#include <string.h>   // a`   Python `return x   # b`   Lua `end   -- c`
+M1a. IF splitting a block into sections THEN each of these is one section: the include/import group, the define/constant group, each type definition (struct, enum, typedef, class), each function, and `main`.
+     // Example: a .c file with 3 includes, 1 define, 1 struct, 3 helper functions, and main gets 7 ids.
+M1b. IF the block is one section only THEN it gets one id on its last line.
+M1c. IF the block's language has no line-comment syntax (JSON, plain output) THEN put `<id>` on its own line directly below the closing fence.
+M1d. M1c overrides M1, M1a, M1b, M1e, and M1f.
+M1e. IF a function body contains two or more groups of statements separated by blank lines THEN each group is a sub-section with id `<function id><N>`, numbered from 1 in order, appended to the group's last line. The function id stays on its closing line.
+     // Example: main with id `l` and 12 blank-line groups gets `l1`–`l12`; `}   // l` still pins the whole function.
+M1f. IF a function body has no blank-line groups THEN it gets no sub-ids.
+     // Commentary: sub-ids follow the code's own structure, not a line count. A 10-line main split into 3 groups gets 3 sub-ids; a 40-line function with no blank lines gets none.
+M1g. Sub-sections are never split further. A sub-section is zoomed with a line range or name through /mark.
+M2. IF choosing an id THEN use the next unused id in the sequence `a`–`z`, then `aa`–`zz`.
+M3. IF a block shows a new version of a section that already has an id THEN reuse that id. The id refers to the latest version displayed.
+     // Example: block `a` shown, then shown again with renamed variables -> both carry `// a`; /mark a pins the renamed version.
+
+// Carry-forward
+M4. IF a mark is active THEN begin every response with the active mark's latest version, its trailing label reading `<id> (marked, level <N>)`, then give the answer below it.
+M5. IF the answer changes the marked code THEN display the changed version in M4's position and do not display it a second time.
+M6. IF a mark is active AND the user's question is not about the marked code THEN still apply M4.
+     // Commentary: the mark is released only by /unmark, never by a change of topic.
+M7. Displaying the marked code under M4 is not elaboration. M4 overrides Response Style R1, R1a, R1b, R2, R2b, R12(f), and R13a.
+M8. The mark stack is changed only by /mark and /unmark. Their rules live in skills/mark and skills/unmark.
+M9. IF any condition not covered by M1–M8 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Uncertainty & Verification
 
