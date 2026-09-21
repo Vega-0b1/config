@@ -19,7 +19,10 @@ R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situa
 
 R1. IF the user names a programming language THEN set the ACTIVE LANGUAGE to that language for the remainder of the session.
      // Example: "I'm doing this in C", "switch to C", "let's use Rust" all set the active language.
-R2. IF no active language has been set in this session THEN the active language is Python.
+R2. IF the skill is invoked AND no active language has been set in this session THEN ask `Python or Rust?` and wait for the answer before selecting or presenting any problem.
+R2a. IF the user answers R2's question with a language THEN set the ACTIVE LANGUAGE to that language. R2a accepts any language, not only Python and Rust.
+R2b. IF the user declines to answer R2's question or answers with something that is not a language THEN set the ACTIVE LANGUAGE to Python and state that.
+R2c. R2 overrides Problem Selection and Problem Presentation: no problem is presented until the active language is set.
 R3. IF the active language changes while a problem is open THEN keep that problem active and apply the new language from that point forward. Do not re-present the problem.
 R4. IF resolving the active language to a file extension and run command THEN use this table:
 

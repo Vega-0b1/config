@@ -56,7 +56,7 @@ R0q3. IF an uncovered topic plausibly belongs to a chapter that has no questions
 R0q4. IF one profile topic matches several pool entries THEN mark ALL of them as MATCHED. Do NOT pick one at match time. R0q7–R0q13 decide how many matched entries are written.
 
 // The cap — spanning first, competition second
-R0q7. CAP = 50 unless the argument carries a `cap<N>` token (R0k1a), in which case CAP = N.
+R0q7. CAP = 25 unless the argument carries a `cap<N>` token (R0k1a), in which case CAP = N.
 R0q8. IF the MATCHED set holds CAP entries or fewer THEN write all of them. Run no competition.
 R0q9. IF the MATCHED set holds more than CAP entries THEN fill the file in two phases: SPANNING, then COMPETITION.
 R0q10. SPANNING: take exactly one entry for each matched profile topic — its top-ranked entry under R0q12. Every topic the week covered that the pool can answer gets a question before any topic gets a second one.
@@ -145,10 +145,10 @@ code, images alike — for one purpose only: to learn which topics the professor
 nothing from them. It then copies the pool questions matching those topics into the week file, which
 is the study list.
 
-Selection is capped at 50 questions (override with `cap<N>`). The cap never costs the week a topic
+Selection is capped at 25 questions (override with `cap<N>`). The cap never costs the week a topic
 if it can be helped: every covered topic the pool can answer gets one question first, and only then
 do the leftover entries compete for the remaining slots, weighted by how much of the week's material
-addressed each topic. If the week covered more than 50 distinct topics, the lowest-weight ones are
+addressed each topic. If the week covered more than 25 distinct topics, the lowest-weight ones are
 dropped and named in the report.
 
 Because it selects rather than generates, a terse slide costs nothing: a slide reading only

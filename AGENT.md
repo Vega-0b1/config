@@ -158,6 +158,34 @@ The generator toolchain described by `/scrapes` (`sources.toml`, `scrapes.py`,
 this host** — only the `.txt` dumps and a stale `__pycache__/` survive. Verified absent
 2026-09-10. Governed by R12 above; `/scrapes` cannot run until the toolchain is restored.
 
+## Python Style — Rust Discipline
+
+R1. IF writing, showing, generating, suggesting, or grading Python code THEN apply R2–R12.
+     // Commentary: covers examples in explanations, generated files, hints, and grading. The goal is Python written as if a borrow checker and a strict type checker were enforcing it.
+R2. IF a function parameter is only read THEN annotate it with the read-only abstract type: `Sequence`, `Mapping`, `AbstractSet`, or `Iterable` from `collections.abc`. Do not use `list`, `dict`, or `set` for it.
+     // Example: `def dup_check(nums: Sequence[int]) -> bool:` — not `nums: list[int]`.
+R3. IF a function parameter is mutated THEN annotate it with the concrete or `Mutable*` type AND name the mutation in the function name.
+     // Example: `def sort_in_place(nums: list[int]) -> None:`
+R4. IF a function needs a modified version of an argument THEN build a new object from it (`sorted(x)`, `list(x)`, `dict(d)`). Do not mutate the argument. R3 overrides R4 when both conditions are true.
+     // Commentary: the Python counterpart of `.to_vec()` on a `&[T]`. `nums.sort()` on a parameter is the aliasing bug Rust's E0596 refuses to compile.
+R5. IF defining any function THEN annotate every parameter and the return type, including `-> None`.
+     // Commentary: mypy skips the body of a fully unannotated function; `-> None` on a no-argument function is what opts it into checking.
+R6. IF a local variable is initialized to an empty container THEN annotate its type.
+     // Example: `seen: set[int] = set()`
+R7. IF a local variable's type is evident from its initializer THEN do not annotate it.
+     // Example: `max_profit = 0` needs no annotation.
+R8. IF a value may be absent THEN type it `X | None` and handle `None` before use. Do not use a sentinel of a different type than the variable holds.
+     // Example: `min_price = float("inf")` in an `int` computation FAILS R8 — it turns the result into `int | float`.
+R9. IF an input admitted by the parameter type would crash the code (empty sequence, missing key) THEN handle that input explicitly.
+     // Example: `prices[0]` requires an `if not prices:` guard before it.
+R10. IF a type checker reports a mismatch THEN fix the types. Do not silence it with `cast()`, `int(...)`, or `# type: ignore`.
+R11. IF a file is run as a script THEN define `def main() -> None:` and call it under `if __name__ == "__main__":`.
+R12. IF grading Python code THEN report violations of R2–R11 as style findings, separate from the correctness verdict. A style violation alone does not make a solution incorrect.
+     // Commentary: /coding_interview Check R7 still fails a solution that breaks a requirement stated in the problem (in-place, return value). R12 only keeps discipline findings from being counted as such requirements.
+R13. IF a skill rule requires reusing the signature or identifiers already in the user's file THEN that rule overrides R2–R3 and R5 for that signature. Name the discipline deviation in one line instead of changing it.
+     // Commentary: /coding_interview Help R15 forbids renaming or re-signing the user's code during hints.
+R14. IF any condition not covered by R1–R13 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+
 ## Skill Authoring — Black-Letter Rule Method
 
 When writing or auditing any file that contains behavioral instructions (skill files, AGENT.md sections, config files, etc.), convert all instructions to deterministic IF/THEN rules using this method:

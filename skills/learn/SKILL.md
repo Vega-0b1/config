@@ -1,6 +1,6 @@
 ---
 name: learn
-description: 'Deliver course material concept by concept — teach, ask, then serve the stored answers on request. `/learn week1` drills the textbook questions covering what the professor taught that week — the study list; `/learn chapter1` drills the whole textbook chapter — the reference bank. By default both deliver every question in their file; pass start<N> to begin at absolute question position N. Every question comes from the textbook. Questions arrive one at a time; nothing is graded and no score is kept: type "next" to see the stored answer and move on. Pass batch<N> for several questions per turn. Requires a pre-generated questions file from /generate-questions. Week files live in extracted/class/week<N>/, chapter files in extracted/textbook/chapters/chapter<N>/.'
+description: 'Deliver pre-generated textbook questions for `/learn week1` or `/learn chapter1`. Questions arrive five at a time with a Teach block paired to each question; `next` reveals the stored answers and advances. Supports start and batch arguments. Does not generate or grade questions.'
 ---
 
 Deliver course material question by question using a pre-generated questions file. `/learn` is a delivery engine — it does not generate content or questions, and it does not grade. Content comes from `/generate-questions`; the verdict comes from you.
@@ -17,7 +17,7 @@ chapter files it draws from, and each of its entries records where it came from.
 
 The topic argument selects the file. The optional `start<N>` argument selects the first absolute question position to deliver; without it, delivery begins at position 1.
 
-**The loop:** teach material, ask the question, wait. You answer however you like — out loud, on paper, in your head. Type `next` and the stored answer appears. Compare it yourself, then the next question follows. Nothing you type is judged, and no score is kept.
+**The loop:** teach material, ask the current batch of questions, wait. You answer however you like — out loud, on paper, in your head. Type `next` and the stored answers appear. Compare them yourself, then the next batch follows. Nothing you type is judged, and no score is kept.
 
 
 ## Rules
@@ -87,23 +87,25 @@ R7.  Delivery is FLAT. Do NOT display unit headings, unit numbers, unit titles, 
 R7a. IF the file holds several units THEN deliver its questions as one continuous sequence across them. A unit boundary is invisible to the user and is never announced.
 R7b. Before the first question of a session, display ONE line naming the resolved course, the topic, and the delivery range — e.g. `software_engineering — week2, 120 questions.` IF START > 1 THEN the range reads `positions <START>–<M> of <M>`. This is the whole session opener; do NOT add a title, a rule, a summary, or a unit heading.
 R7c. R7b fires exactly once per session, before the first question only. Do NOT repeat it at a window edge, at a unit boundary, or when re-displaying a pending batch under R13c/R14/R17/R20.
-R8.  IF about to display a question THEN first display that question's `Teach:` field verbatim as a markdown blockquote and prefix every line with `> `.
-R8d. IF R8 displays Teach AND the entry has a `Legend:` field THEN append Legend inside the same blockquote.
-R8a. The `> ` blockquote prefix in R8 is display framing, not content. R10 does not prohibit it.
-R8b. IF R8 displays Teach THEN after the Teach blockquote and before the Question, output a blank line, a `---` horizontal rule, and a blank line.
+R8.  IF about to display a question THEN first display the level-3 markdown heading `### 📘 Teach`.
+     // Example: Display `### 📘 Teach`, then its blockquote, then `### ❓ Q6 — <question text>`.
+R8e. IF R8 applies THEN display that question's `Teach:` field verbatim as a markdown blockquote and prefix every line with `> `.
+R8d. IF R8e displays Teach AND the entry has a `Legend:` field THEN append Legend inside the same blockquote.
+R8a. IF R8 or R8e adds a heading or `> ` prefix THEN treat it as display framing rather than content. R10 does not prohibit it.
+R8b. IF R8e displays Teach THEN after the Teach blockquote and before the Question, output a blank line, a `---` horizontal rule, and a blank line.
 R8c. R8b overrides the global AGENT.md response-style ban on `---` horizontal rules, for the Teach/Question separator only.
 R10. Do NOT rewrite, summarize, or add to the Teach field.
 R11. Do NOT display `Concept`, `Source quote`, `Tests`, `Audit`, `Origin`, `Origin generated`, `Origin fingerprint`, `Teach_EN`, or `Question_EN` at any point.
 R11b. R11d is the governing rule and it is a WHITELIST: an entry field not named there is never displayed, whether or not R11 enumerates it.
-R11d. IF delivering a question THEN display only `Teach`, optional `Legend`, and `Question` per R8 and R12k.
+R11d. IF delivering a question THEN display only the Teach label, `Teach`, optional `Legend`, and `Question` per R8–R8e and R12k.
 R11d1. IF releasing an answer THEN display only `Answer key` and optional `Elaboration` per R13a.
 R11a. Do NOT display the `Answer key` or `Elaboration` field when delivering a question. They are released only under R13a.
 R11a2. IF an entry's `Origin` field records `ORPHANED` THEN still deliver the question normally. Report it once in the R28 wrap-up per R28d.
 
 // Batch delivery
-R12. BATCH = 1. Deliver BATCH questions per turn, then STOP and wait for the user.
+R12. BATCH = 5. Deliver BATCH questions per turn, then STOP and wait for the user.
 R12i. IF ORIGINAL_ARGUMENTS contains exactly one token matching `batch<N>` where N is an integer greater than zero THEN BATCH = N and remove that token from the working arguments. R12i overrides R12.
-R12i1. IF ORIGINAL_ARGUMENTS contains no token beginning with `batch` THEN BATCH = 1.
+R12i1. IF ORIGINAL_ARGUMENTS contains no token beginning with `batch` THEN BATCH = 5.
 R12i2. IF ORIGINAL_ARGUMENTS contains more than one token beginning with `batch` THEN stop and tell the user: "Use exactly one batch<N> argument."
 R12i3. IF an ORIGINAL_ARGUMENTS token begins with `batch` but does not match `batch<N>` where N is an integer greater than zero THEN stop and tell the user: "Invalid batch size — use batch<N> with N greater than zero."
 R12i4. IF R12i2 and R12i3 both apply THEN R12i2 overrides R12i3.
@@ -159,12 +161,14 @@ R29. IF any condition not covered by R1–R28 (including all lettered sub-rules)
 
 /learn chapter2                   ← first pass over the whole chapter — the reference bank
 /learn chapter2 start10           ← begin at absolute question position 10
-/learn chapter2 batch3            ← three questions per turn instead of one
+/learn chapter2 batch3            ← three questions per turn instead of the default five
 ```
 
-Questions arrive **one at a time** by default: read it, answer out loud, type `next` to see the
-stored answer and move on. Pass `batch<N>` to get several per turn instead — fewer round trips,
-lower cost, but you hold several questions in your head at once.
+Questions arrive **five at a time** by default: read them, answer out loud, then type `next` once to
+see all five stored answers and move to the next batch. Pass `batch<N>` to choose a different batch
+size, including `batch1` for one question per turn.
+
+Every Teach block is headed `📘 Teach` immediately before its matching `❓ Q<N>` question.
 
 Without `start<N>`, every run delivers the entire file. With `start<N>`, the run delivers every
 question from absolute position N through the end. Questions load ten at a time behind the scenes —
@@ -174,7 +178,7 @@ from the book that this week's lectures actually reached.
 In-session keywords, typed in reply to a pending question:
 
 ```
-next      ← show the stored answer, then deliver the next question (R13)
+next      ← show the stored answers, then deliver the next batch (R13)
 exit      ← end the learn session without revealing an answer (R12o)
 ```
 

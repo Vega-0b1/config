@@ -1,6 +1,6 @@
 ---
 name: generate-questions
-description: "Build and audit quiz questions for use by /learn. The textbook is the only question source. A BOOK run (chapter1, ch1) reads the chapter slice at extracted/textbook/chapters/chapter<N>/chapter<N>.md, generates audited questions, and writes them next to it — this is the question POOL. A SELECT run (week1, wk1) generates nothing: it reads the week's ### Teaching material only to learn which topics the professor covered, then copies the matching questions out of the pool into extracted/class/week<N>/questions_week<N>.md, capped at 50 questions (override with cap<N>) — every covered topic gets one question before any topic gets a second. Re-running a BOOK file warns before overwriting. Re-running a SELECT file offers resync (refresh copies from their origin) or reselect (rebuild the selection)."
+description: "Build and audit quiz questions for use by /learn. The textbook is the only question source. A BOOK run (chapter1, ch1) reads the chapter slice at extracted/textbook/chapters/chapter<N>/chapter<N>.md, generates audited questions, and writes them next to it — this is the question POOL. A SELECT run (week1, wk1) generates nothing: it reads the week's ### Teaching material only to learn which topics the professor covered, then copies the matching questions out of the pool into extracted/class/week<N>/questions_week<N>.md, capped at 25 questions (override with cap<N>) — every covered topic gets one question before any topic gets a second. Re-running a BOOK file warns before overwriting. Re-running a SELECT file offers resync (refresh copies from their origin) or reselect (rebuild the selection)."
 ---
 
 Build a question pool from the textbook; select this week's practice set out of it.
@@ -136,7 +136,7 @@ R26. IF any condition not covered by R0–R25 (including lettered sub-rules, in 
 ## Usage
 
 ```
-/generate-questions week1 cap30 ← select run capped at 30 questions instead of the default 50
+/generate-questions week1 cap30 ← select run capped at 30 questions instead of the default 25
 /generate-questions chapter2     ← book run: reads extracted/textbook/chapters/chapter2/chapter2.md
                                    GENERATES audited questions, writes them next to the slice
 /generate-questions week1        ← select run: reads ### Teaching entries for week 1 for coverage,
