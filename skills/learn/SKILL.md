@@ -1,6 +1,6 @@
 ---
 name: learn
-description: 'Deliver pre-generated textbook questions for `/learn week1` or `/learn chapter1`. Questions arrive five at a time with a Teach block paired to each question; `next` reveals the stored answers and advances. Supports start and batch arguments. Does not generate or grade questions.'
+description: 'Deliver pre-generated textbook questions for `/learn week1` or `/learn chapter1`. Questions arrive one at a time with a Teach block paired to each question; `next` reveals the stored answer and advances. Supports a start argument. Does not generate or grade questions.'
 ---
 
 Deliver course material question by question using a pre-generated questions file. `/learn` is a delivery engine — it does not generate content or questions, and it does not grade. Content comes from `/generate-questions`; the verdict comes from you.
@@ -17,14 +17,14 @@ chapter files it draws from, and each of its entries records where it came from.
 
 The topic argument selects the file. The optional `start<N>` argument selects the first absolute question position to deliver; without it, delivery begins at position 1.
 
-**The loop:** teach material, ask the current batch of questions, wait. You answer however you like — out loud, on paper, in your head. Type `next` and the stored answers appear. Compare them yourself, then the next batch follows. Nothing you type is judged, and no score is kept.
+**The loop:** teach material, ask the current question, wait. You answer however you like — out loud, on paper, in your head. Type `next` and the stored answer appears. Compare it yourself, then the next question follows. Nothing you type is judged, and no score is kept.
 
 
 ## Rules
 
 // Argument parsing and loading
 R1. IF a `/learn` invocation begins THEN preserve its unmodified argument tokens as ORIGINAL_ARGUMENTS.
-R1a. IF more than one argument remains after removing the option tokens under R1b and R12i THEN stop and ask the user which one is the topic. STOP until user responds.
+R1a. IF more than one argument remains after removing the option token under R1b THEN stop and ask the user which one is the topic. STOP until user responds.
 R1b. IF ORIGINAL_ARGUMENTS contains exactly one token matching `start<N>` where N is an integer greater than zero THEN START = N; remove that token from the working arguments.
 R1b1. IF ORIGINAL_ARGUMENTS contains no token beginning with `start` THEN START = 1.
 R1b2. IF ORIGINAL_ARGUMENTS contains more than one token beginning with `start` THEN stop and tell the user: "Use exactly one start<N> argument."
@@ -48,8 +48,8 @@ R2e. IF R2b finds NO class holding that file THEN R5 applies.
 R2f. IF the class root was resolved under R2c or R2d THEN name that course in the R7b opener, so the user can see which one loaded.
 
 // File lookup
-R3.  IF <arg> normalizes to a week — `week<N>` or `wk<N>` — THEN look for `extracted/class/week<N>/questions_week<N>.md`.
-R3a. IF <arg> normalizes to a chapter — `chapter<N>` or `capitulo<N>` — THEN look for `extracted/textbook/chapters/chapter<N>/questions_chapter<N>.md` (or `capitulo<N>/questions_capitulo<N>.md` for Spanish-language classes).
+R3.  IF <arg> matches `week<N>` THEN look for `extracted/class/week<N>/questions_week<N>.md`.
+R3a. IF <arg> matches `chapter<N>` THEN look for `extracted/textbook/chapters/chapter<N>/questions_chapter<N>.md`, regardless of the textbook's language.
 R3b. IF <arg> does not match either pattern THEN look for `extracted/questions_<arg>.md` as a fallback.
 R4. IF the file exists THEN set QUESTION_COUNT to the output of `grep -c '^#### Q' <file>`.
 R4a. IF QUESTION_COUNT = 0 THEN stop and tell the user: "Questions file is empty — re-run /generate-questions <arg>."
@@ -73,8 +73,7 @@ R4f. The index from R4c step 2 is internal metadata. Do NOT display it, and do N
 R4g. Window boundaries are invisible to the user. Do NOT announce loading, do NOT say "loading the next 10", and do NOT pause at a window edge.
 R4h. IF WINDOW or fewer questions remain at or after the initial position THEN the initial window contains every remaining question and R4d never fires.
 R5.  IF the file does not exist THEN stop and tell the user: "Run /generate-questions <arg> first."
-R6.  IF no <arg> is given THEN list all `questions_*.md` files under `extracted/textbook/chapters/` and `extracted/class/` and ask the user to pick one. STOP until user responds.
-R6c. IF R6 applies AND no class root was resolved under R2a THEN list the files per class across `~/edu/`, labelling each by its course directory, so two courses' `week2` are distinguishable.
+R6.  IF no <arg> is given THEN display the `/learn` usage examples from the Usage section and stop.
 
 // Course scope notice
 R6a. After loading the file per R3–R4 and before the first question: IF the topic is a chapter AND the class `CLAUDE.md` holds a `### Course Scope` entry listing that chapter as not covered THEN print one line saying the course does not cover it. Then proceed normally.
@@ -86,7 +85,7 @@ R6d. IF a `### Course Scope` entry exists but carries no derivable chapter list 
 R7.  Delivery is FLAT. Do NOT display unit headings, unit numbers, unit titles, or unit boundaries at any point. The `## Unit X of Y` headings in the questions file are provenance metadata, not display structure.
 R7a. IF the file holds several units THEN deliver its questions as one continuous sequence across them. A unit boundary is invisible to the user and is never announced.
 R7b. Before the first question of a session, display ONE line naming the resolved course, the topic, and the delivery range — e.g. `software_engineering — week2, 120 questions.` IF START > 1 THEN the range reads `positions <START>–<M> of <M>`. This is the whole session opener; do NOT add a title, a rule, a summary, or a unit heading.
-R7c. R7b fires exactly once per session, before the first question only. Do NOT repeat it at a window edge, at a unit boundary, or when re-displaying a pending batch under R13c/R14/R17/R20.
+R7c. R7b fires exactly once per session, before the first question only. Do NOT repeat it at a window edge, at a unit boundary, or when re-displaying a pending question under R13c/R14/R17/R20.
 R8.  IF about to display a question THEN first display the level-3 markdown heading `### 📘 Teach`.
      // Example: Display `### 📘 Teach`, then its blockquote, then `### ❓ Q6 — <question text>`.
 R8e. IF R8 applies THEN display that question's `Teach:` field verbatim as a markdown blockquote and prefix every line with `> `.
@@ -102,43 +101,33 @@ R11d1. IF releasing an answer THEN display only `Answer key` and optional `Elabo
 R11a. Do NOT display the `Answer key` or `Elaboration` field when delivering a question. They are released only under R13a.
 R11a2. IF an entry's `Origin` field records `ORPHANED` THEN still deliver the question normally. Report it once in the R28 wrap-up per R28d.
 
-// Batch delivery
-R12. BATCH = 5. Deliver BATCH questions per turn, then STOP and wait for the user.
-R12i. IF ORIGINAL_ARGUMENTS contains exactly one token matching `batch<N>` where N is an integer greater than zero THEN BATCH = N and remove that token from the working arguments. R12i overrides R12.
-R12i1. IF ORIGINAL_ARGUMENTS contains no token beginning with `batch` THEN BATCH = 5.
-R12i2. IF ORIGINAL_ARGUMENTS contains more than one token beginning with `batch` THEN stop and tell the user: "Use exactly one batch<N> argument."
-R12i3. IF an ORIGINAL_ARGUMENTS token begins with `batch` but does not match `batch<N>` where N is an integer greater than zero THEN stop and tell the user: "Invalid batch size — use batch<N> with N greater than zero."
-R12i4. IF R12i2 and R12i3 both apply THEN R12i2 overrides R12i3.
-R12j. IF fewer than BATCH questions remain undelivered THEN the final batch is however many remain.
+// Question delivery loop
+R12. IF a question is delivered THEN STOP and wait for the user.
 R12k. Displaying one question = its `Question` field rendered as a level-3 markdown heading with a `❓` anchor and its ABSOLUTE POSITION as the label: `### ❓ Q<p> — <question text>`, where `<p>` is the question's absolute position from the R4c step-2 index. R8 and R8b precede it.
 R12k1. IF the file is format 1 per R4c1b THEN IGNORE the heading's `Q<n>` label for display; it restarts at Q1 in every unit and is not unique. Do NOT display it and do NOT combine it with a unit prefix.
 R12k2. IF the file is format 2 per R4c1a THEN the heading label and the absolute position are the same number, and displaying either is correct.
-R12l. Display the batch's questions in ascending position order, one after another in a single turn, each per R12k. Do NOT reveal any answer.
-R12m. After the last question of the batch, STOP. Do NOT display the next batch until the current batch's answers have been released under R13a.
-R12n. IF a unit boundary falls inside a batch THEN continue the batch across it with no heading, no separator, and no announcement.
-R12o. IF a batch is pending AND the user's message, after trimming whitespace and ignoring case, is exactly `exit` THEN clear the active in-chat batch, say "Learn session ended.", and stop. Do NOT release an answer, advance, or write session state. R12o overrides R13c, R14, R17, and R18.
+R12l. IF a question is due for delivery THEN display that one question per R12k. Do NOT reveal its answer.
+R12m. IF a question is pending THEN do NOT display the next question until the pending question's answer has been released under R13a.
+R12o. IF a question is pending AND the user's message, after trimming whitespace and ignoring case, is exactly `exit` THEN clear the active in-chat question, say "Learn session ended.", and stop. Do NOT release an answer, advance, or write session state. R12o overrides R13c, R14, R17, and R18.
 
-R13. IF a batch is pending AND the user's message, after trimming whitespace and ignoring case, is exactly `next` THEN display the answers per R13a and advance per R19.
-R13a. Displaying the answers = for EVERY question in the pending batch, in ascending position order, output the heading `**Answer — <label>**` using that question's R12k label, then its `Answer key` verbatim, then its `Elaboration` verbatim when it has one.
-R13a2. Label every answer with the same label its question carried under R12k.
-R13a4. IF BATCH = 1 THEN the `— <label>` suffix is optional; a bare `**Answer**` is sufficient.
+R13. IF a question is pending AND the user's message, after trimming whitespace and ignoring case, is exactly `next` THEN display the answer per R13a and advance per R19.
+R13a. Displaying the answer = output the heading `**Answer**`, then the pending question's `Answer key` verbatim, then its `Elaboration` verbatim when it has one.
 R13b. Do NOT rewrite, summarize, shorten, or expand `Answer key` or `Elaboration`. Display them as written.
-R13a1. One exact `next` releases the WHOLE batch. Do NOT release answers one at a time.
-R13c. IF a batch is pending AND the user requests an answer without sending exactly `next` AND the message is not a clarifying or follow-up question THEN tell the user: "Type `next` to reveal the stored answer and continue." Re-display the pending batch. Do NOT release an answer and do NOT advance.
-R14. IF a batch is pending AND the user's message is an attempted answer rather than a request THEN re-display the pending batch. Do NOT release an answer and do NOT advance.
-R15. Do NOT grade, score, judge, correct, or comment on anything the user types on a pending batch. Do NOT say correct, wrong, close, or partially right.
+R13c. IF a question is pending AND the user requests an answer without sending exactly `next` AND the message is not a clarifying or follow-up question THEN tell the user: "Type `next` to reveal the stored answer and continue." Re-display the pending question. Do NOT release the answer and do NOT advance.
+R14. IF a question is pending AND the user's message is an attempted answer rather than a request THEN re-display the pending question. Do NOT release the answer and do NOT advance.
+R15. Do NOT grade, score, judge, correct, or comment on anything the user types about a pending question. Do NOT say correct, wrong, close, or partially right.
 R16. There is no correct count, no wrong count, and no score.
-R17. IF a batch is pending AND the user's message is a clarifying or follow-up question about the material THEN R20 applies: answer it, re-display the pending batch, do NOT release any answer, and do NOT advance.
-R18. IF the user's message on a pending batch is ambiguous between R14 and R17 THEN treat it as R17: answer it and re-display the batch. Do NOT advance.
+R17. IF a question is pending AND the user's message is a clarifying or follow-up question about the material THEN R20 applies: answer it, re-display the pending question, do NOT release the answer, and do NOT advance.
+R18. IF the user's message on a pending question is ambiguous between R14 and R17 THEN treat it as R17: answer it and re-display the question. Do NOT advance.
      // Example: "wait, is dependability the same as reliability?" → R17. "something about it being an engineering discipline" → R14.
-R19. IF a batch's answers have been released under R13a AND the R4c index contains at least one undelivered position THEN advance: load the next window first if the current one is exhausted (R4d), then deliver the next BATCH questions per R12l.
+R19. IF a question's answer has been released under R13a AND the R4c index contains at least one undelivered position THEN advance: load the next window first if the current one is exhausted (R4d), then deliver the next question per R12l.
 
 // Pacing
-R20. IF the user sends a clarifying or follow-up question AND a batch is pending THEN answer it fully, then re-display the current pending batch in full. Do not ask "Ready to continue?"
-R20a. IF the user sends a clarifying or follow-up question AND no batch is pending THEN answer it fully. Do NOT re-display a batch.
+R20. IF the user sends a clarifying or follow-up question AND a question is pending THEN answer it fully, then re-display the current pending question. Do not ask "Ready to continue?"
+R20a. IF the user sends a clarifying or follow-up question AND no question is pending THEN answer it fully. Do NOT re-display a question.
 
 // Wrap up
-R28. IF the final batch's answers have been released under R13a AND the R4c index contains no undelivered position THEN display a completion line per R28a and stop.
+R28. IF the final question's answer has been released under R13a AND the R4c index contains no undelivered position THEN display a completion line per R28a and stop.
 R28f. Check the R4c index, not the loaded window, to decide whether questions remain.
 R28e. R28 overrides R19 when the R4c index contains no undelivered position.
 R28a. IF START = 1 THEN the completion line names the topic and the file's full size.
@@ -155,18 +144,17 @@ R29. IF any condition not covered by R1–R28 (including all lettered sub-rules)
 ## Usage
 
 ```
+/learn                            ← show these usage examples
 /generate-questions chapter2      ← build the pool first — this is where questions are made
 /generate-questions week1         ← then select week 1's subset out of it
 /learn week1                      ← first pass over week 1's study list: teach then ask
 
 /learn chapter2                   ← first pass over the whole chapter — the reference bank
 /learn chapter2 start10           ← begin at absolute question position 10
-/learn chapter2 batch3            ← three questions per turn instead of the default five
 ```
 
-Questions arrive **five at a time** by default: read them, answer out loud, then type `next` once to
-see all five stored answers and move to the next batch. Pass `batch<N>` to choose a different batch
-size, including `batch1` for one question per turn.
+Questions arrive **one at a time** by default: read it, answer out loud, then type `next` to see the
+stored answer and move to the next question.
 
 Every Teach block is headed `📘 Teach` immediately before its matching `❓ Q<N>` question.
 
@@ -178,11 +166,11 @@ from the book that this week's lectures actually reached.
 In-session keywords, typed in reply to a pending question:
 
 ```
-next      ← show the stored answers, then deliver the next batch (R13)
+next      ← show the pending stored answer, then continue (R13)
 exit      ← end the learn session without revealing an answer (R12o)
 ```
 
-Anything else you type leaves the pending batch in place. An attempted answer is not graded; an answer request prompts you to type `next`; a question about the material is answered and then the pending batch is re-displayed (R14, R13c, R17).
+Anything else you type leaves the pending question in place. An attempted answer is not graded; an answer request prompts you to type `next`; a question about the material is answered and then the pending question is re-displayed (R14, R13c, R17).
 
 Questions are numbered straight through the file — `Q1` to `Q<M>` — with no unit headings and no
 restart at a chapter boundary. A multi-chapter week reads as one continuous sequence. The number on
