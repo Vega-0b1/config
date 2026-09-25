@@ -160,6 +160,8 @@ this host** — only the `.txt` dumps and a stale `__pycache__/` survive. Verifi
 
 ## Python Style — Rust Discipline
 
+R0. IF GROUP MODE is on per "Group Assignment Mode — Discipline Exemptions" G1 THEN G3 and G4 override R1–R14.
+
 R1. IF writing, showing, generating, suggesting, or grading Python code THEN apply R2–R12.
      // Commentary: covers examples in explanations, generated files, hints, and grading. The goal is Python written as if a borrow checker and a strict type checker were enforcing it.
 R2. IF a function parameter is only read THEN annotate it with the read-only abstract type: `Sequence`, `Mapping`, `AbstractSet`, or `Iterable` from `collections.abc`. Do not use `list`, `dict`, or `set` for it.
@@ -180,11 +182,70 @@ R9. IF an input admitted by the parameter type would crash the code (empty seque
      // Example: `prices[0]` requires an `if not prices:` guard before it.
 R10. IF a type checker reports a mismatch THEN fix the types. Do not silence it with `cast()`, `int(...)`, or `# type: ignore`.
 R11. IF a file is run as a script THEN define `def main() -> None:` and call it under `if __name__ == "__main__":`.
+R11a. IF recommending one of two forms of code that behave identically THEN time both with `python3 -m timeit` and recommend the faster one.
+     // Commentary: `not 1 <= port <= 65535` measured ~15 ns slower per call than `port < 1 or port > 65535` on CPython 3.13 and was recommended without measuring.
+R11b. IF the two timings under R11a differ by less than 5% THEN recommend the more readable form. R11b overrides R11a.
 R12. IF grading Python code THEN report violations of R2–R11 as style findings, separate from the correctness verdict. A style violation alone does not make a solution incorrect.
      // Commentary: /coding_interview Check R7 still fails a solution that breaks a requirement stated in the problem (in-place, return value). R12 only keeps discipline findings from being counted as such requirements.
 R13. IF a skill rule requires reusing the signature or identifiers already in the user's file THEN that rule overrides R2–R3 and R5 for that signature. Name the discipline deviation in one line instead of changing it.
      // Commentary: /coding_interview Help R15 forbids renaming or re-signing the user's code during hints.
 R14. IF any condition not covered by R1–R13 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+
+## C Style — Rust Discipline
+
+R0. IF GROUP MODE is on per "Group Assignment Mode — Discipline Exemptions" G1 THEN G3 and G4 override R1–R18.
+
+R1. IF writing, showing, generating, suggesting, or grading C code THEN apply R2–R16.
+     // Commentary: the C counterpart of the Python section. The goal is C written as if a borrow checker, a lifetime checker, and a strict type checker were enforcing it.
+R2. IF a pointer parameter is only read THEN declare it `const T *`.
+     // Example: `bool contains_dup(const int *nums, size_t n);` — the C spelling of `&[T]`.
+R3. IF a pointer parameter is mutated THEN declare it non-`const` AND name the mutation in the function name.
+     // Example: `void sort_in_place(int *nums, size_t n);`
+R4. IF a function needs a modified version of an argument THEN allocate a new buffer and copy into it. Do not mutate through a pointer the caller still treats as read-only. R3 overrides R4 when both conditions are true.
+R5. IF a function takes a pointer to an array THEN take its element count as a separate parameter of type `size_t`.
+     // Commentary: a bare `T *` carries no length. `sizeof` on it yields the pointer size, not the array size, which is the C form of the aliasing bug Rust's slice type makes unrepresentable.
+R6. IF a function allocates memory that the caller must release THEN state the ownership transfer in a comment on the declaration, and name the matching free function.
+     // Example: `// caller owns the result; release with list_free()`
+R7. IF a pointer returned by `malloc`, `calloc`, `realloc`, `strdup`, or `fopen` is used THEN check it against `NULL` before the first dereference or read.
+R8. IF `realloc` is called THEN assign its result to a temporary and check that temporary before overwriting the original pointer.
+     // Commentary: `p = realloc(p, n)` leaks the old block on failure.
+R9. IF a pointer may be absent THEN document the `NULL` case on the declaration and handle `NULL` before use. Do not encode absence as a valid-looking value of the same type.
+     // Example: returning `-1` from a function whose valid range includes `-1` FAILS R9; return a status code and write the value through an out-parameter.
+R10. IF an input admitted by the parameter types would read or write out of bounds (`n == 0`, index `n`, empty string) THEN handle that input explicitly before the access.
+     // Example: `nums[0]` requires an `if (n == 0)` guard before it.
+R11. IF a local variable is declared THEN initialize it at the point of declaration.
+R12. IF an object's address does not escape its function THEN give it automatic storage. Do not `malloc` what a local can hold.
+R13. IF a fixed-size buffer is written THEN use the bounded function (`snprintf`, `memcpy` with a computed length) and never `strcpy`, `strcat`, `sprintf`, or `gets`.
+R14. IF the compiler or a sanitizer reports a diagnostic THEN fix the types or the logic. Do not silence it with a cast, a `(void)` discard, or a pragma.
+R15. IF verifying C code THEN compile it with `gcc -std=c11 -Wall -Wextra` and treat a warning as a finding.
+R16. IF grading C code THEN report violations of R2–R15 as style findings, separate from the correctness verdict. A style violation alone does not make a solution incorrect.
+     // Commentary: mirrors Python R12. A requirement stated in the problem (in-place, return value) still fails the solution on correctness.
+R17. IF a skill rule requires reusing the signature or identifiers already in the user's file THEN that rule overrides R2, R3, and R5 for that signature. Name the discipline deviation in one line instead of changing it.
+R18. IF any condition not covered by R1–R17 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+
+
+## Group Assignment Mode — Discipline Exemptions
+
+G1. IF the user states that the code is for a group assignment, a shared school project, or code classmates will read or edit THEN set GROUP MODE for that codebase and apply G3–G8.
+G2. IF GROUP MODE is not stated THEN it is off. Do not infer it from the code being coursework, short, or simple.
+     // Commentary: solo coursework stays under full discipline. The exemption exists for readers who did not agree to the discipline, not for small files.
+G3. IF GROUP MODE is on THEN suspend these rules, which trade readability for rigor:
+     (a) Python R2 — use `list`, `dict`, `set` in signatures instead of `Sequence`, `Mapping`, `AbstractSet`;
+     (b) Python R5 — annotate where the type is not obvious; a fully unannotated helper is acceptable;
+     (c) Python R6 — an empty-container local needs no annotation;
+     (d) Python R11 — a top-level script body is acceptable without `main()` and the `__name__` guard;
+     (e) C R2 — `const` on read-only pointer parameters is optional;
+     (f) C R6 — an ownership comment on every allocating declaration is optional;
+     (g) C R9 — the documentation half is optional; the handling half is not (see G4).
+G4. IF GROUP MODE is on THEN these rules still apply in full, without exception:
+     (a) Python R3, R4, R8, R9, R10 — mutation named, no mutated arguments, absence handled, admitted inputs handled, no silenced checker;
+     (b) C R5, R7, R8, R10, R13, R14 — array length passed, allocations NULL-checked, `realloc` through a temporary, bounds guarded, bounded string functions, no silenced diagnostic.
+     // Commentary: G3 removes ceremony. G4 is the set whose violation is a crash, a leak, or a wrong answer — none of which get easier for a classmate to read.
+G5. IF GROUP MODE is on AND a G4 rule forces code a classmate would find unclear THEN write the code and add one comment naming what it guards against. Do not drop the guard.
+G6. IF GROUP MODE is on THEN prefer the plainest construct that is correct: an explicit loop over a comprehension chain, a named intermediate over a nested call, a standard library call over a hand-rolled one.
+G7. IF GROUP MODE is on AND a suspended rule would have fired THEN do not report it as a style finding.
+G8. IF GROUP MODE is on AND the user asks for the strict version of a specific piece THEN show it for that piece only, and leave the rest under G3.
+G9. IF any condition not covered by G1–G8 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Skill Authoring — Black-Letter Rule Method
 
