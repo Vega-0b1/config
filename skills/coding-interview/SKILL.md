@@ -1,46 +1,50 @@
 ---
 name: coding-interview
-description: Practice essential CS problems in normal or low-energy mode, with a PREVIOUS/CURRENT/NEXT lane tracker, progressive help, and a technical debrief in normal mode.
+description: Practice essential CS problems in Python, Rust, or C, each with its own deck, in normal or low-energy (easy) mode, with a PREVIOUS/CURRENT/NEXT lane tracker, progressive help, and a technical debrief in normal mode.
 ---
 
-Problems are stored in `CLAUDE.md` in the current working directory. The user solves each problem in the ACTIVE LANGUAGE.
+Problems are stored in one deck file per language under `decks/` in the current working directory. The user solves each problem in the ACTIVE LANGUAGE, drawn from that language's deck (the ACTIVE DECK).
 
 ## Mode
 
-R1. IF the skill is invoked as `/coding_interview easy` THEN set the ACTIVE MODE to EASY.
-R2. IF the skill is invoked as `/coding_interview` without `easy` THEN set the ACTIVE MODE to NORMAL.
-R3. IF either invocation occurs while a problem is active THEN keep that problem active and apply the new mode from that point forward.
-R4. IF either invocation occurs while no problem is active THEN treat the invocation as a request for the next problem in the selected mode.
+R1. IF the skill is invoked with `easy` among its arguments, alone or joined to a language name (`c_easy`, `easy_rust`), THEN set the ACTIVE MODE to EASY.
+R2. IF the skill is invoked without `easy` among its arguments THEN set the ACTIVE MODE to NORMAL.
+R3. IF either invocation occurs while a problem is active AND the language chosen per Language R1–R2 is the ACTIVE LANGUAGE THEN keep that problem active and apply the new mode from that point forward.
+R4. IF either invocation occurs while no problem is active THEN treat the invocation as a request for the next problem in the selected mode and language.
+R4a. IF either invocation occurs while a problem is active AND the language chosen per Language R1–R2 differs from the ACTIVE LANGUAGE THEN apply Language R5.
 R5. IF no active mode has been set in the session THEN set the ACTIVE MODE to NORMAL.
 R6. IF the user asks which mode is active THEN state it in one line.
 R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Language
 
-The supported languages are Python and Rust. Each problem is solved twice: first in Python (the PYTHON PASS), then in Rust (the RUST PASS).
+The supported languages are Python, Rust, and C. Each language has its own deck with its own lanes, `last:` dates, answer keys, and curriculum order. A problem is solved once, in the ACTIVE LANGUAGE, and its completion is recorded only in the ACTIVE DECK.
 
-R1. IF a problem is presented THEN set the ACTIVE LANGUAGE to Python and start the PYTHON PASS. Do not ask which language to use.
-R2. IF Check returns correct during the PYTHON PASS THEN set the ACTIVE LANGUAGE to Rust, start the RUST PASS on the same problem, and state in one line that the Rust pass has begun. Do not re-present the problem and do not apply the completion path.
-R3. IF Check returns correct during the RUST PASS THEN apply the completion path for the ACTIVE MODE.
-R4. R2 overrides Check R2 during the PYTHON PASS.
-R5. IF the user names Python or Rust while a problem is active THEN switch to that language's pass on the same problem. Do not re-present the problem.
-     // Example: "skip to Rust" during the PYTHON PASS starts the RUST PASS; the problem still completes only on a correct Rust check.
-R5a. IF the user names any other language THEN state in one line that only Python and Rust are supported and leave the ACTIVE LANGUAGE unchanged.
-R6. IF the pass changes THEN clear any locked-in Help section.
-R7. IF the user asks to move on during either pass THEN apply Workflow R4. Moving on completes the problem and skips any remaining pass.
-R8. IF resolving the active language to a file extension and run command THEN use this table:
+R1. IF the skill is invoked AND its arguments name a supported language (`python`/`py`, `rust`/`rs`, `c`) THEN set the ACTIVE LANGUAGE to that language without asking.
+     // Example: `/coding_interview c` → NORMAL, C.  `/coding_interview easy rust` → EASY, Rust.  `/coding_interview c_easy` → EASY, C.
+R2. IF the skill is invoked AND its arguments name no supported language THEN ask in one line which language — Python, Rust, or C — and wait. Select no problem until the user answers.
+R3. IF the ACTIVE LANGUAGE is set THEN set the ACTIVE DECK to that language's deck file per R8, and read and write lane state only in the ACTIVE DECK.
+R4. IF Check returns correct THEN apply the completion path for the ACTIVE MODE.
+R5. IF the user names a different supported language while a problem is active THEN leave that problem's entry in its deck unchanged, set the ACTIVE LANGUAGE and ACTIVE DECK to the named language, state the switch in one line, and select a problem from the new deck per Problem Selection.
+     // Commentary: decks are independent. The old problem is neither completed nor recorded; if it was `[~]`, it stays `[~]` and is presented again the next time that deck is used.
+R5a. IF the user names an unsupported language THEN state in one line that only Python, Rust, and C are supported and leave the ACTIVE LANGUAGE unchanged.
+R6. IF the ACTIVE LANGUAGE changes THEN clear any locked-in Help section.
+R7. IF the user asks to move on THEN apply Workflow R4.
+R8. IF resolving the active language to a deck, file extension, or run command THEN use this table:
 
-| Language | Extension | Run command (from the scratchpad copy) |
-|---|---|---|
-| Python | `.py` | `python3 FILE` |
-| Rust | `.rs` | `rustc -o prog FILE && ./prog` |
+| Language | Deck | Extension | Run command (from the scratchpad copy) |
+|---|---|---|---|
+| Python | `decks/python.md` | `.py` | `python3 FILE` |
+| Rust | `decks/rust.md` | `.rs` | `rustc -o prog FILE && ./prog` |
+| C | `decks/c.md` | `.c` | `gcc -std=c11 -Wall -Wextra -o prog FILE && ./prog` |
 
-R9. IF the user asks which language is active THEN state the language and the pass in one line.
-R10. IF any condition not covered by R1–R9 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R9. IF the user asks which language is active THEN state the language and the ACTIVE DECK in one line.
+R10. IF the ACTIVE DECK file does not exist THEN stop, name the missing file, and ask how to proceed.
+R11. IF any condition not covered by R1–R10 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Problem Selection
 
-There are three lanes, identified by the entry's marker in `CLAUDE.md`:
+There are three lanes per deck, identified by the entry's marker in the ACTIVE DECK:
 
 | Lane | Marker | Meaning | Fields |
 |---|---|---|---|
@@ -50,7 +54,7 @@ There are three lanes, identified by the entry's marker in `CLAUDE.md`:
 
 EASY mode draws only from PREVIOUS. NORMAL mode draws from CURRENT, promoting from NEXT when CURRENT is empty.
 
-R1. IF selecting any problem THEN read the problem list and lane markers from `CLAUDE.md` in the current working directory.
+R1. IF selecting any problem THEN read the problem list and lane markers from the ACTIVE DECK only. Markers in other decks do not affect selection.
 R2. IF the ACTIVE MODE is NORMAL AND CURRENT holds one or more problems THEN select the earliest CURRENT problem in curriculum order.
 R3. IF the ACTIVE MODE is NORMAL AND CURRENT is empty THEN mark the earliest NEXT problem in curriculum order `[~]`, then select it.
 R4. IF R2 fires AND the problem presented most recently is still in CURRENT THEN select it again. Do not exclude it for having been presented.
@@ -61,21 +65,23 @@ R7. IF the ACTIVE MODE is EASY AND PREVIOUS is empty THEN state that PREVIOUS is
 R8. IF two or more PREVIOUS problems tie on `last:` THEN select the earliest one in curriculum order.
 R9. IF the ACTIVE MODE is EASY THEN exclude the three most recently presented problems when another PREVIOUS problem exists. R9 overrides R6 and R8.
 R10. IF ranking problems into curriculum order THEN place prerequisite problems before problems that build on them.
+R10a. IF the ACTIVE DECK has a `## Deferred` heading THEN rank every entry below that heading after every entry above it, and apply R10–R13 within each group separately. R10a overrides R10–R13.
+     // Commentary: this is how the C deck keeps hash-map and heap problems out of the way. Without R10a, R11 would rank Deferred Easy problems (Two Sum) ahead of every Medium in the main path.
 R11. IF two problems have no prerequisite relationship THEN place the problem with the lower stated Easy, Medium, or Hard difficulty first.
 R12. IF two problems remain tied after R10–R11 THEN place the problem requiring fewer distinct concepts or state variables first.
 R12a. IF counting distinct concepts under R12 THEN count only concepts the PREVIOUS lane does not already cover. A problem that reuses owned machinery counts as requiring none.
      // Commentary: this is what makes the order cumulative. Without R12a, a one-variable problem resting on an unsupported trick (Single Number's XOR cancellation) outranks a two-variable problem that is pure reuse of a PREVIOUS entry (First Unique Character over Valid Anagram's counter), which inverts the intent.
-R13. IF two problems remain tied after R10–R12a THEN preserve their order in `CLAUDE.md`.
-R14. IF the user asks why a problem was selected THEN state the active mode, the lane it came from, and its `last:` value when that field exists.
-R15. IF the user names an Easy, Medium, or Hard difficulty while requesting a problem outside the exact `/coding_interview easy` invocation THEN ignore that filter and state that NORMAL mode follows CURRENT then NEXT while EASY mode means PREVIOUS.
-R16. IF the user asks to add a named problem to CURRENT THEN mark that entry `[~]` regardless of curriculum order.
-R17. IF the ACTIVE MODE is EASY AND a problem is about to be presented THEN show a table of all PREVIOUS problems with their Problem name and Last date before presenting the selected problem.
+R13. IF two problems remain tied after R10–R12a THEN preserve their order in the ACTIVE DECK.
+R14. IF the user asks why a problem was selected THEN state the active mode, the ACTIVE DECK, the lane it came from, and its `last:` value when that field exists.
+R15. IF the user names an Easy, Medium, or Hard difficulty while requesting a problem outside an invocation carrying the `easy` argument THEN ignore that filter and state that NORMAL mode follows CURRENT then NEXT while EASY mode means PREVIOUS.
+R16. IF the user asks to add a named problem to CURRENT THEN mark that entry `[~]` in the ACTIVE DECK regardless of curriculum order.
+R17. IF the ACTIVE MODE is EASY AND a problem is about to be presented THEN show a table of all PREVIOUS problems in the ACTIVE DECK with their Problem name and Last date before presenting the selected problem.
 R18. IF the ACTIVE MODE is NORMAL AND a problem is about to be presented THEN show no table.
 R19. IF any condition not covered by R1–R18 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Completion Tracking
 
-Each PREVIOUS problem carries `(last: D)`.
+Each PREVIOUS problem carries `(last: D)`. Every update in this section is written to the ACTIVE DECK only.
 `last` is the most recent completion date in `YYYY-MM-DD` form. CURRENT and NEXT problems carry no tracking fields.
 
 R1. IF a problem moves from NEXT to CURRENT THEN change its marker to `[~]` and add no tracking fields.
@@ -97,7 +103,7 @@ R1. IF presenting a problem THEN state only: the problem title, a prose descript
 R2. IF presenting a problem THEN do not state a function name, parameter names, parameter types, type hints, or a return type.
 R3. IF presenting a problem THEN do not name a data structure, algorithm, or technique in the description.
 R4. IF presenting a problem THEN do not state a target time or space complexity.
-R5. IF the problem's entry in CLAUDE.md names an algorithm as the assignment itself THEN that name may appear in the title; R5 overrides R3 for the title only.
+R5. IF the problem's entry in the ACTIVE DECK names an algorithm as the assignment itself THEN that name may appear in the title; R5 overrides R3 for the title only.
      // Example: "Insertion sort" and "Kruskal's minimum spanning tree" are assignments to implement a named algorithm — the name is the problem, not a hint.
 R6. IF a requirement constrains the result (in-place modification, a specific return value, no extra allocation) THEN state it in prose in the task description.
      // Commentary: These are requirements, not hints. R6 does not license restating them as a signature.
@@ -120,12 +126,12 @@ R1. IF this skill needs the user's current work THEN read the most recently modi
 R2. IF two or more files with that extension under the working directory were modified within the last 10 minutes THEN ask which one is the problem file before answering. R2 overrides R1.
 R3. IF no file with that extension exists under the working directory THEN ask the user what they have so far and wait for the answer. R3 fires only when R1 cannot.
 R3a. IF a file with the active language's extension exists THEN ignore files of every other extension, including a previous problem's file in a different language. R3a overrides R1 only as to which files are candidates.
-     // Commentary: switching from Python to Rust leaves `fun.py` on disk and newer than `fun.rs` at first. Matching on extension keeps hints aimed at the file the user is actually editing.
+     // Commentary: switching from Python to C leaves `fun.py` on disk and newer than `fun.c` at first. Matching on extension keeps hints aimed at the file the user is actually editing.
 R4. IF answering a help or check request THEN re-read the problem file from disk at that moment, before composing the answer. Never answer from a previously read copy, including one read earlier in the same session.
      // Commentary: the user edits between requests; a stale copy produces hints for code that no longer exists.
 R5. IF the problem file contradicts what the user states in chat THEN say so, quote the relevant lines, and ask which is current before answering.
 R6. IF answering a help or check request THEN output in chat only. Do not edit, create, or run the problem file unless the user explicitly asks.
-R7. R6 does not restrict `CLAUDE.md` bookkeeping required by Completion Tracking or Debrief R11.
+R7. R6 does not restrict ACTIVE DECK bookkeeping required by Completion Tracking or Debrief R11.
 R8. IF any condition not covered by R1–R7 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Help
@@ -158,7 +164,7 @@ R20. IF any condition not covered by R1–R19 arises THEN stop, describe the sit
 ## Check
 
 R1. IF the user says "check" THEN resolve and read the problem file per the Problem File section and grade it against the problem requirements.
-R2. IF the solution fulfills the problem requirements THEN say "correct" and apply the completion path for the ACTIVE MODE. Language R2 overrides R2 during the PYTHON PASS.
+R2. IF the solution fulfills the problem requirements THEN say "correct" and apply the completion path for the ACTIVE MODE.
 R3. IF the solution does not fulfill the requirements THEN state the failure as one concrete case: the input, the expected output, and what the code produces. Name the line it fails on.
 R4. IF R3 fires THEN do not give the fix, the corrected line, or pseudocode for it. The user must ask for help to get that.
      // Commentary: "check" is a verdict, not a hint tier. Fixing on a failed check collapses the help ladder.
@@ -182,14 +188,14 @@ R1. IF a solution is completed in NORMAL mode THEN start the technical debrief b
 R2. IF a solution is completed in EASY mode THEN do not run any debrief or `easy`/`keep` question.
 R3. IF starting the technical debrief THEN ask only question 1.
 R4. IF the user answers a technical debrief question THEN grade it as correct or incorrect with one sentence of explanation and ask the next question.
-R5. IF grading a technical debrief answer THEN read the expected answer from the problem's inline `| DS: ... | Algo: ... | Time: ... | Space: ...` fields in `CLAUDE.md`.
+R5. IF grading a technical debrief answer THEN read the expected answer from the problem's inline `| DS: ... | Algo: ... | Time: ... | Space: ...` fields in the ACTIVE DECK.
 R6. IF grading question 1 THEN identify input data structures from the problem and implementation, identify additional data structures from the answer key and implementation, and accept an answer that distinguishes the two.
 R7. IF grading question 4 THEN exclude storage belonging to the input and count only auxiliary space created or consumed by the solution.
 R8. IF grading complexity answers THEN accept conceptual answers without requiring Big-O notation.
 R9. IF the answer key names a data structure THEN accept the active language's equivalent data structure.
-     // Example: a `HashMap` key accepts Python `dict` or Rust `std::collections::HashMap`.
+     // Example: a `HashMap` key accepts Python `dict`, Rust `std::collections::HashMap`, or a C lookup array or hand-written table serving the same role.
 R10. IF an answer-key complexity does not hold for the user's implementation THEN grade against the user's actual code and state that basis.
-R11. IF the problem lacks an answer key on its first completion THEN derive the answers from the problem and implementation and write the answer key inline before proceeding.
+R11. IF the problem lacks an answer key in the ACTIVE DECK on its first completion THEN derive the answers from the problem and implementation and write the answer key inline in the ACTIVE DECK before proceeding.
 R12. IF all four technical questions are graded THEN ask: `easy = move it to PREVIOUS, keep = leave it in CURRENT.`
 R13. IF the user answers R12's question THEN apply Completion Tracking R2–R5 and R7 as applicable.
 R14. IF the user answers `keep` THEN say so in one line and do not treat the problem as finished with. It stays in CURRENT and will be presented again.
