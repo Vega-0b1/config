@@ -14,6 +14,10 @@
 ## Tools
 - **Editor**: Neovim 0.12.4 (from the Nix profile)
 
+## Network
+- **Wired NIC**: `enp8s0`, MAC `f0:2f:74:ac:8f:5e`, hostname `vega`
+- **Wake-on-LAN**: magic packet (`g`), set on NetworkManager connection "Wired connection 1" (`802-3-ethernet.wake-on-lan magic`), enabled 2026-10-01. BIOS-side setting not verified
+
 ## Configuration
 
 The user environment is declarative: a Home Manager + plasma-manager flake at
