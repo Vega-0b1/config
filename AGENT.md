@@ -192,7 +192,7 @@ R11b. IF the two timings under R11a differ by less than 5% THEN recommend the mo
 R12. IF grading Python code THEN report violations of R2–R11 as style findings, separate from the correctness verdict. A style violation alone does not make a solution incorrect.
      // Commentary: /coding_interview Check R7 still fails a solution that breaks a requirement stated in the problem (in-place, return value). R12 only keeps discipline findings from being counted as such requirements.
 R13. IF a skill rule requires reusing the signature or identifiers already in the user's file THEN that rule overrides R2–R3 and R5 for that signature. Name the discipline deviation in one line instead of changing it.
-     // Commentary: /coding_interview Help R15 forbids renaming or re-signing the user's code during hints.
+     // Commentary: /coding_interview Workflow R2b forbids renaming or re-signing the user's code when answering questions.
 R14. IF any condition not covered by R1–R13 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## C Style — Rust Discipline
