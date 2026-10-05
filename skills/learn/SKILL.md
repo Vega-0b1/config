@@ -89,14 +89,21 @@ R7c. R7b fires exactly once per session, before the first question only. Do NOT 
 R8.  IF about to display a question THEN first display the level-3 markdown heading `### 📘 Teach`.
      // Example: Display `### 📘 Teach`, then its blockquote, then `### ❓ Q6 — <question text>`.
 R8e. IF R8 applies THEN display that question's `Teach:` field verbatim as a markdown blockquote and prefix every line with `> `.
-R8d. IF R8e displays Teach AND the entry has a `Legend:` field THEN append Legend inside the same blockquote.
-R8a. IF R8 or R8e adds a heading or `> ` prefix THEN treat it as display framing rather than content. R10 does not prohibit it.
-R8b. IF R8e displays Teach THEN after the Teach blockquote and before the Question, output a blank line, a `---` horizontal rule, and a blank line.
+R8d. IF R8e displays Teach AND the entry has a `Legend:` field AND R8f does not apply THEN append Legend inside the same blockquote.
+R8f. IF the entry's `Legend:` field is a GIVENS legend THEN display it after the Teach blockquote, under its own level-3 heading `### 📋 Given`, as a bulleted list, and NOT inside the Teach blockquote.
+R8f1. A Legend is a GIVENS legend IF its first non-blank line begins with neither `- **` (a symbol-definition list) nor `A)` (multiple-choice options).
+     // PASSES: `Host A → router → router → Host B (3 links). Packet = 1500 bytes.` → givens → own block.
+     // FAILS:  `- **L** — the length of the packet, in bits.` → symbol definitions → stays inside Teach per R8d.
+     // FAILS:  `A) d/s  B) R/L  C) L/R  D) L·R` → options → stays inside Teach per R8d.
+R8f2. IF R8f applies THEN make one bullet per Legend line, and split a line into further bullets at each `. ` and each ` · ` that falls outside backticks. Drop each item's trailing period. Do NOT change any other character.
+     // Example: `One link: 20,000 km, s = 2.5×10⁸ m/s, R = 10 Mbps. Packet = 1000 bytes.` → `- One link: 20,000 km, s = 2.5×10⁸ m/s, R = 10 Mbps` and `- Packet = 1000 bytes`.
+R8a. IF R8, R8e, or R8f adds a heading, a `> ` prefix, or a `- ` bullet THEN treat it as display framing rather than content. R10 does not prohibit it.
+R8b. IF R8e displays Teach THEN after the Teach blockquote (and after the R8f Given block, when present) and before the Question, output a blank line, a `---` horizontal rule, and a blank line.
 R8c. R8b overrides the global AGENT.md response-style ban on `---` horizontal rules, for the Teach/Question separator only.
 R10. Do NOT rewrite, summarize, or add to the Teach field.
 R11. Do NOT display `Concept`, `Source quote`, `Tests`, `Audit`, `Origin`, `Origin generated`, `Origin fingerprint`, `Teach_EN`, or `Question_EN` at any point.
 R11b. R11d is the governing rule and it is a WHITELIST: an entry field not named there is never displayed, whether or not R11 enumerates it.
-R11d. IF delivering a question THEN display only the Teach label, `Teach`, optional `Legend`, and `Question` per R8–R8e and R12k.
+R11d. IF delivering a question THEN display only the Teach label, `Teach`, optional `Legend` (inside Teach per R8d, or under the Given label per R8f), and `Question` per R8–R8f2 and R12k.
 R11d1. IF releasing an answer THEN display only `Answer key` and optional `Elaboration` per R13a.
 R11a. Do NOT display the `Answer key` or `Elaboration` field when delivering a question. They are released only under R13a.
 R11a2. IF an entry's `Origin` field records `ORPHANED` THEN still deliver the question normally. Report it once in the R28 wrap-up per R28d.
@@ -156,7 +163,9 @@ R29. IF any condition not covered by R1–R28 (including all lettered sub-rules)
 Questions arrive **one at a time** by default: read it, answer out loud, then type `next` to see the
 stored answer and move to the next question.
 
-Every Teach block is headed `📘 Teach` immediately before its matching `❓ Q<N>` question.
+Every Teach block is headed `📘 Teach` immediately before its matching `❓ Q<N>` question. A
+calculation question's scenario values sit between them under `📋 Given`, apart from the reference
+material.
 
 Without `start<N>`, every run delivers the entire file. With `start<N>`, the run delivers every
 question from absolute position N through the end. Questions load ten at a time behind the scenes —

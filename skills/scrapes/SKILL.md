@@ -9,22 +9,15 @@ Maintain the dumps in `~/edu/zStore/scrapes`. Every dump is build output produce
 `~/repos/config/AGENT.md` (Uncertainty & Verification) already governs **when** to consult the
 dumps. This skill governs **how to maintain** them, and is not a substitute for it.
 
-## Status — toolchain absent (verified 2026-09-10)
+## Toolchain location
 
-`sources.toml`, `scrapes.py`, `audit_dumps.py`, `index_dumps.py` and
-`~/edu/zStore/scrapes/README.md` are **not present on this host**. Only the `.txt` dumps and a
-stale `__pycache__/` (holding `audit_dumps` and `index_dumps` bytecode) survived the
-NixOS-to-Debian migration. `~/edu` is Nextcloud-synced and is not a git repository, so
-there is no git history to restore them from.
+The real files live in this skill's `tools/` directory (`~/repos/config/skills/scrapes/tools/`),
+which git tracks. `~/edu/zStore/scrapes/` holds symlinks to them plus the `.txt` dumps.
 
-R0.  IF the task requires any tool in the Tools section THEN report that the toolchain is absent and stop. R0 overrides every rule below.
-     // Commentary: reading dumps still works and is governed by `~/repos/config/AGENT.md`. Only maintenance is blocked.
-R0a. IF asked to work around the absence THEN do NOT hand-write, hand-edit, or hand-index a `.txt` dump.
-     // Commentary: a dump is build output whose CONTENTS header is generated. Hand-editing desynchronizes the index from the body, R3's page counts stop meaning anything, and the next real scrape discards the work.
-R0b. IF the toolchain is restored THEN delete this section and drop R0–R0b.
-
-The rules below describe the intended workflow and stay authoritative for what to
-rebuild. Treat them as a specification until R0b fires.
+R0.  IF a toolchain file in `~/edu/zStore/scrapes/` is missing or a broken symlink THEN recreate it with `ln -sfn ~/repos/config/skills/scrapes/tools/<file> ~/edu/zStore/scrapes/<file>`.
+     // Commentary: the scripts resolve the dump directory from the invoked path (`abspath`, not `realpath`), so they must be run through the symlinks in `~/edu/zStore/scrapes/`, never from `tools/`. Running from `tools/` writes dumps into the repo.
+R0a. IF a toolchain file is missing from `tools/` THEN restore it with `git -C ~/repos/config log --all -- 'skills/scrapes/tools/<file>'` and `git show`, before reporting it absent.
+R0b. IF `sources.toml` or a script changes THEN tell the user the change is uncommitted in `~/repos/config`.
 
 ## Tools
 
@@ -32,7 +25,8 @@ rebuild. Treat them as a specification until R0b fires.
     audit_dumps.py  pages | compare A B | options | stale | coverage | verify
     index_dumps.py  [FILE...] | --check | --strip | --scraped YYYY-MM-DD
 
-Source kinds: `nix-options`, `markdown`, `mediawiki`, `texinfo`, `doxygen`, `pdf`.
+Source kinds: `nix-options`, `markdown`, `mediawiki`, `texinfo`, `doxygen`, `pdf`, `pydoc`.
+`mediawiki` takes `categories` (+ `titles`) to scope a wiki too large to take whole.
 
 ## Rules
 
@@ -89,8 +83,8 @@ R24. IF a dump is added or retired THEN update the file table in `~/edu/zStore/s
      // Commentary: `~/repos/config/AGENT.md` R1 routes lookups by filename. A stale entry sends the next session to a file that does not exist.
 R25. IF deleting any dump THEN first verify what is uniquely in it, and report that before deleting.
      // Commentary: a redundancy call in this directory was wrong once. Title overlap is not content overlap.
-R26. IF `sources.toml` or a script changes THEN do NOT stage or commit it. Nothing under `~/edu` is tracked by `~/repos/config`.
-     // Commentary: the Nextcloud client syncs ~/edu, so this directory is backed up but not versioned. These files were tracked for one day (2026-08-17 to 2026-08-18) and untracked deliberately. Editing them is still correct; reaching for git afterwards is not.
+R26. IF a `.txt` dump changes THEN do NOT stage or commit it. Dumps live under `~/edu`, which `~/repos/config` does not track.
+     // Commentary: the Nextcloud client syncs ~/edu, so dumps are backed up but not versioned. They regenerate from `tools/sources.toml`. The toolchain itself moved into `tools/` on 2026-10-02 after being lost in the NixOS-to-Debian migration.
 
 // Catch-all
 R27. IF any condition not covered by R0–R26 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.

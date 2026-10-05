@@ -130,7 +130,7 @@ R8. IF an answer rests on inference or incomplete information THEN disclose a ro
 R9. R6 overrides R7: IF no source can be found THEN say so rather than answering from model knowledge and labeling it.
 R10. R5 overrides R2: IF a dump is stale on the point in question THEN the official documentation answer wins over the dump's.
 R11. IF a dump is listed under "Present but stale" below THEN treat a hit as history of the former NixOS/Hyprland host, not as a fact about this system.
-R12. IF a dump needs refreshing or adding THEN state that the generator toolchain is absent (see "Regenerating") and stop. Do NOT hand-edit a `.txt` dump.
+R12. IF a dump needs refreshing or adding THEN use `/scrapes`. Do NOT hand-edit a `.txt` dump.
      // Commentary: every dump is build output with an indexed CONTENTS header. A hand edit desynchronizes the index from the body, and the next real scrape discards it anyway.
 R13. IF any condition not covered by R1–R12 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
@@ -147,6 +147,8 @@ R13. IF any condition not covered by R1–R12 arises THEN stop, describe the sit
 - `stm32f4_hal.txt` — 2,468 HAL functions with `@param` valid-value lists, from the on-disk F4 firmware
 - `openocd_manual.txt` — OpenOCD User's Guide, generated from the installed 0.12.0
 - `stm32cube_getting_started.txt` — UM1730, extracted from the local PDF; one dump page per PDF page
+- `freecad_api.txt` — FreeCAD Python API, generated 2026-10-02 by `freecadcmd` from the installed 1.0.0: one page per class (`Part.Face`, `Sketcher.Constraint`) and one `type <TypeId>` page per document object listing its properties (`type PartDesign::Pad`). Authoritative for signatures
+- `freecad_wiki.txt` — FreeCAD wiki scripting tutorials and worked examples (89 pages). Its API pages self-declare outdated (2018–2019); use them for examples, not signatures
 
 ### Present but stale — describe the former NixOS/Hyprland host, not this one
 
@@ -157,10 +159,9 @@ Still on disk, so they will match a grep. Treat a hit as history, not as this sy
 
 ### Regenerating
 
-The generator toolchain described by `/scrapes` (`sources.toml`, `scrapes.py`,
-`audit_dumps.py`, `index_dumps.py`) and `~/edu/zStore/scrapes/README.md` are **not present on
-this host** — only the `.txt` dumps and a stale `__pycache__/` survive. Verified absent
-2026-09-10. Governed by R12 above; `/scrapes` cannot run until the toolchain is restored.
+The generator toolchain (`sources.toml`, `scrapes.py`, `audit_dumps.py`, `index_dumps.py`)
+lives in `~/repos/config/skills/scrapes/tools/` (git-tracked) and is symlinked into
+`~/edu/zStore/scrapes/`. Driven by `/scrapes`, which also restores missing links.
 
 ## Python Style — Rust Discipline
 
