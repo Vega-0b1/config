@@ -56,7 +56,7 @@ EASY mode draws only from PREVIOUS. NORMAL mode draws from CURRENT, promoting fr
 R1. IF selecting any problem THEN read the problem list and lane markers from the ACTIVE DECK only. Markers in other decks do not affect selection.
 R2. IF the ACTIVE MODE is NORMAL AND CURRENT holds one or more problems THEN select the earliest CURRENT problem in curriculum order.
 R3. IF the ACTIVE MODE is NORMAL AND CURRENT is empty THEN mark the earliest NEXT problem in curriculum order `[~]`, then select it.
-R3a. IF R3 fires AND PREVIOUS is not empty THEN consider only NEXT problems whose solution reuses at least one concept PREVIOUS covers AND adds at most one concept PREVIOUS does not cover, counted per R12a–R12b. R3a overrides R11.
+R3a. IF R3 fires AND PREVIOUS is not empty THEN consider only NEXT problems whose solution reuses at least one concept PREVIOUS covers AND adds at most one concept PREVIOUS does not cover, counted per R12a, R12b, and R12d. R3a overrides R11.
      // Commentary: each new problem must build on what is already owned and add one step. An Easy label measures difficulty for someone who already owns the concepts, not the size of the step from PREVIOUS; set/clear/toggle/test a bit is Easy and still introduces four operators at once.
 R3b. IF R3 fires AND no NEXT problem in the current R10a group satisfies R3a THEN present no problem. Name the closest candidate and the concepts it would add, propose one bridging problem that adds exactly one of them, and add that problem to the ACTIVE DECK only after the user says yes.
 R4. IF R2 fires AND the problem presented most recently is still in CURRENT THEN select it again. Do not exclude it for having been presented.
@@ -77,7 +77,10 @@ R12b. IF counting distinct concepts under R12 THEN count each language mechanic 
      // Example: with strlen, reverse a string, and memcpy in PREVIOUS: itoa counts four (digit extraction, `'0' + d`, sign, the most negative `int`); set/clear/toggle/test a bit counts four (shift, `|`, `&` with `~`, `^`); memmove counts one (copy direction when the regions overlap).
 R12c. IF ranking NEXT problems under R10–R13 THEN rank every NEXT entry in the same R10a group of the ACTIVE DECK against every other. Do not favor an entry for sitting in the same section as, or directly after, the problem completed last.
      // Commentary: itoa was once promoted for following memcpy in the deck while a one-concept problem earlier in the same section went unranked. Deck position is a tiebreaker under R13 only.
-R13. IF two problems remain tied after R10–R12c THEN preserve their order in the ACTIVE DECK.
+R12d. IF counting concepts under R3a or R12 THEN count the concepts of the problem's reference solution: the standard solution an interviewer expects for that problem in the ACTIVE LANGUAGE. Do not count a workaround that avoids the mechanics the problem exists to test.
+     // Example: Swap byte order of a 32-bit integer was once promoted as zero new concepts by counting a memcpy-and-reverse workaround, then shown with shifts, `&`, and `|`. Its reference solution is shift-and-mask, which adds three concepts and fails R3a.
+R12e. IF the user asks to see a solution THEN show the reference solution counted under R12d.
+R13. IF two problems remain tied after R10–R12e THEN preserve their order in the ACTIVE DECK.
 R14. IF the user asks why a problem was selected THEN state the active mode, the ACTIVE DECK, the lane it came from, and its `last:` value when that field exists.
 R15. IF the user names an Easy, Medium, or Hard difficulty while requesting a problem outside an invocation carrying the `easy` argument THEN ignore that filter and state that NORMAL mode follows CURRENT then NEXT while EASY mode means PREVIOUS.
 R16. IF the user asks to add a named problem to CURRENT THEN mark that entry `[~]` in the ACTIVE DECK regardless of curriculum order.
