@@ -30,8 +30,9 @@ from pathlib import Path
 VALID_QUESTION_HEADER_RE = re.compile(r"^#### Q\d+[ \t]*$", re.M)
 QUESTION_LIKE_HEADER_RE = re.compile(r"^#{1,6}[ \t]+Q\d+\b.*$", re.M)
 SOURCE_QUOTE_RE = re.compile(
-    r"^Source quote:[ \t]*(.*?)(?=^(?:Concept|Origin generated|Origin|Teach|Teach_EN|"
-    r"Question|Question_EN|Tests|Answer key|Elaboration|Audit):|\Z)",
+    r"^Source quote:[ \t]*(.*?)(?=^(?:Concept|Pool origin|Origin fingerprint|Origin generated|Origin|Teach|Teach_EN|"
+    r"Question|Question_EN|Tests|Answer key|Elaboration|Audit|"
+    r"Figure source|Figure quote|Diagram|Answer diagram|Type|Legend|Check):|\Z)",
     flags=re.M | re.S,
 )
 SOURCE_QUOTE_LIKE_RE = re.compile(
@@ -47,6 +48,9 @@ def normalize(text):
     quote that opens a sentence still matches mid-sentence usage.
     """
     text = unicodedata.normalize("NFKC", text)
+    # Soft hyphens and zero-width characters are invisible PDF-extraction residue.
+    text = re.sub(r"[­​-‍⁠﻿]", "", text)
+    text = re.sub(r"[\x00-\x08\x0e-\x1f\x7f]", "", text)
     text = text.replace("**", "").replace("*", "").replace("`", "")
     text = re.sub(r"[‘’‛]", "'", text)
     text = re.sub(r"[“”]", '"', text)
@@ -139,7 +143,7 @@ def resolve_sources(qpath, argv_sources):
                 if alt.exists():
                     cand = alt
                     break
-        # A select run's source is a chapter slice in a different subtree.
+        # Resolve legacy chapter-source paths outside the questions directory.
         # Search under extracted/textbook/chapters/ from the class root.
         if not cand.exists():
             for up in qpath.parents:

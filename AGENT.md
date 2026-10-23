@@ -9,7 +9,7 @@
 - **DE**: KDE Plasma on Wayland (`kwin_wayland`)
 - **Panel**: Plasma panel (`plasmashell`), configured through plasma-manager
 - **Terminal**: Alacritty (Konsole also installed)
-- **Browser**: Firefox ESR (`firefox-esr`, from `/usr/bin`); the desktop default. No Chrome or Chromium is installed
+- **Browser**: Chromium (`chromium`, from `/usr/bin`) is the main browser and desktop default; Firefox ESR (`firefox-esr`, from `/usr/bin`) is the backup browser.
 
 ## Tools
 - **Editor**: Neovim 0.12.4 (from the Nix profile)
@@ -34,6 +34,23 @@ R5. IF the user has authorized a privileged command AND sudo cannot read from an
      // Commentary: `sudo -A` sends the authentication request through KDE's system dialog instead of terminal or chat input.
 R6. IF sudo authentication is required THEN never ask the user to paste or disclose the password in chat or command text.
 R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+
+## Compute Offload
+
+- **Host**: TrueNAS SCALE 25.04, `truenas_admin@truenas-scale` (Tailscale); LAN address `192.168.1.104`. Key-based SSH from this machine
+- **Hardware**: AMD Ryzen 7 5800X (8 cores / 16 threads), 15 GB RAM with ~6 GB free, no GPU
+- **Jobs root**: `/mnt/Raid_1_Storage/jobs` — `venv/` (Python 3.11 + pip), `bin/` (`run-job`, `job-status`), `runs/<id>/` (`in/`, `out/`, `log.txt`, `pid`, `status`), `cache/` (pip cache)
+- **Not available**: Docker and sudo for `truenas_admin`; `/home`, `/tmp` and `/var/tmp` are mounted `noexec`
+
+O1. IF a task is CPU-bound AND is expected to run longer than 1 minute on this machine AND neither O2 nor O5 applies THEN run it on the NAS through the `offload` skill.
+     // Example: OCR over thousands of video frames, Whisper transcription of a feature-length film, batch image or video conversion.
+O2. IF a task needs a GPU, a display, or the user's files edited in place THEN run it locally. Do NOT offload it.
+O3. IF the user has not explicitly requested NAS execution AND (a task is not CPU-bound OR is expected to finish in 1 minute or less on this machine) THEN run it locally.
+O4. IF software must be installed for an offloaded job THEN install it into `/mnt/Raid_1_Storage/jobs/venv`. Do NOT install into `/home`, `/tmp`, `/var/tmp`, or the system.
+     // Commentary: the noexec mounts break compiled Python packages, and the boot pool is replaced on TrueNAS updates.
+O5. IF the job's inputs contain credentials, keys, or tokens THEN run it locally. Do NOT offload it.
+O5a. IF O2 or O5 conflicts with an instruction to offload a job THEN O2 and O5 override that instruction, including an explicit NAS request.
+O6. IF any condition not covered by O1–O5 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Response Style
 
@@ -84,38 +101,10 @@ R12. IF a response is ready to send THEN delete each of the following:
      (f) any section answering a question the user did not ask (R2b).
 R12a. A confidence level required by Uncertainty & Verification R7 or R8 is not a hedge. R12a overrides R12(d).
      // Commentary: deleting a hedge that carries real uncertainty manufactures confidence.
-R13. IF R12 is complete THEN verify that the first and last lines together state what to do next and what just happened. IF they do not THEN revise before sending.
+R13. IF R12 is complete THEN verify that the response directly answers the request; include a next action only when the user requested one or completion requires their action.
 R13a. R1a and R1b override R13.
      // Commentary: a one-word answer cannot state what happened and what is next, and must not be padded until it can.
 R14. IF any condition not covered by R1–R13 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
-
-## Code Marks
-
-// Labels
-M1. IF a response displays a fenced code block THEN split its contents into sections and append a trailing comment `<id>` to the last line of each section, using the block language's line-comment syntax.
-     // Example: C `#include <string.h>   // a`   Python `return x   # b`   Lua `end   -- c`
-M1a. IF splitting a block into sections THEN each of these is one section: the include/import group, the define/constant group, each type definition (struct, enum, typedef, class), each function, and `main`.
-     // Example: a .c file with 3 includes, 1 define, 1 struct, 3 helper functions, and main gets 7 ids.
-M1b. IF the block is one section only THEN it gets one id on its last line.
-M1c. IF the block's language has no line-comment syntax (JSON, plain output) THEN put `<id>` on its own line directly below the closing fence.
-M1d. M1c overrides M1, M1a, M1b, M1e, and M1f.
-M1e. IF a function body contains two or more groups of statements separated by blank lines THEN each group is a sub-section with id `<function id><N>`, numbered from 1 in order, appended to the group's last line. The function id stays on its closing line.
-     // Example: main with id `l` and 12 blank-line groups gets `l1`–`l12`; `}   // l` still pins the whole function.
-M1f. IF a function body has no blank-line groups THEN it gets no sub-ids.
-     // Commentary: sub-ids follow the code's own structure, not a line count. A 10-line main split into 3 groups gets 3 sub-ids; a 40-line function with no blank lines gets none.
-M1g. Sub-sections are never split further. A sub-section is zoomed with a line range or name through /mark.
-M2. IF choosing an id THEN use the next unused id in the sequence `a`–`z`, then `aa`–`zz`.
-M3. IF a block shows a new version of a section that already has an id THEN reuse that id. The id refers to the latest version displayed.
-     // Example: block `a` shown, then shown again with renamed variables -> both carry `// a`; /mark a pins the renamed version.
-
-// Carry-forward
-M4. IF a mark is active THEN begin every response with the active mark's latest version, its trailing label reading `<id> (marked, level <N>)`, then give the answer below it.
-M5. IF the answer changes the marked code THEN display the changed version in M4's position and do not display it a second time.
-M6. IF a mark is active AND the user's question is not about the marked code THEN still apply M4.
-     // Commentary: the mark is released only by /unmark, never by a change of topic.
-M7. Displaying the marked code under M4 is not elaboration. M4 overrides Response Style R1, R1a, R1b, R2, R2b, R12(f), and R13a.
-M8. The mark stack is changed only by /mark and /unmark. Their rules live in skills/mark and skills/unmark.
-M9. IF any condition not covered by M1–M8 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Uncertainty & Verification
 
@@ -131,18 +120,17 @@ R6. IF neither a dump nor official documentation yields the answer THEN say so e
 R7. IF answering from model knowledge THEN label it inline as unverified model knowledge AND state a rough confidence level.
      // Commentary: The dumps are static, local, and greppable. Model recall is a probability distribution over text that may never have existed. Prefer the file on disk.
 R8. IF an answer rests on inference or incomplete information THEN disclose a rough confidence level inline (e.g., "~60% confident").
-     // Example: "~60% confident — verify against the Debian or NixOS manual, whichever the question is about."
+     // Example: "~60% confident — verify against the relevant official documentation."
 R9. R6 overrides R7: IF no source can be found THEN say so rather than answering from model knowledge and labeling it.
 R10. R5 overrides R2: IF a dump is stale on the point in question THEN the official documentation answer wins over the dump's.
-R11. IF a dump is listed under "Present but stale" below THEN treat a hit as history of the former NixOS/Hyprland host, not as a fact about this system.
-R12. IF a dump needs refreshing or adding THEN use `/scrapes`. Do NOT hand-edit a `.txt` dump.
+R11. IF a dump needs refreshing or adding THEN use `/scrapes`. Do NOT hand-edit a `.txt` dump.
      // Commentary: every dump is build output with an indexed CONTENTS header. A hand edit desynchronizes the index from the body, and the next real scrape discards it anyway.
-R13. IF any condition not covered by R1–R12 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R12. IF any condition not covered by R1–R11 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ### Available dumps (`~/edu/zStore/scrapes/`)
 
 - `arch_wiki.txt` — Arch Wiki, scraped 2026-08-14. Distro-agnostic Linux reference; not Debian-specific
-- `home_manager_options.txt` — 5,406 home-manager options, scraped 2026-08-14. **Still in use** (the Debian flake is Home Manager), but generated from the former NixOS flake — verify any option against the `release-26.05` pin in `~/repos/debian-config/flake.nix` before relying on it
+- `home_manager_options.txt` — 5,406 home-manager options, scraped 2026-08-14. verify any option against the `release-26.05` Home Manager pin in `~/repos/debian-config/flake.nix` before relying on it
 - `plasma_manager_options.txt` — 669 `programs.plasma.*` options, generated the same way. **Stops at `panels.*.widgets`**; per-widget options are in the next file
 - `plasma_manager_widgets.txt` — the 17 plasma-manager widget modules, read from the pinned source. The only place per-widget options live (e.g. `iconTasks`' `onlyMinimized`)
 - `kde_config_keys.txt` — 47 KDE `.kcfg` schemas: the underlying KDE key, group, type and default, for `configFile` writes. **Absence of a key only means something if its group is declared in the dump** — an undeclared group means "not covered," not "does not exist," and grepping the package instead gives false positives
@@ -154,13 +142,24 @@ R13. IF any condition not covered by R1–R12 arises THEN stop, describe the sit
 - `stm32cube_getting_started.txt` — UM1730, extracted from the local PDF; one dump page per PDF page
 - `freecad_api.txt` — FreeCAD Python API, generated 2026-10-02 by `freecadcmd` from the installed 1.0.0: one page per class (`Part.Face`, `Sketcher.Constraint`) and one `type <TypeId>` page per document object listing its properties (`type PartDesign::Pad`). Authoritative for signatures
 - `freecad_wiki.txt` — FreeCAD wiki scripting tutorials and worked examples (89 pages). Its API pages self-declare outdated (2018–2019); use them for examples, not signatures
+- `cppreference_c.txt` — C language and standard library; offline snapshot 2025-02-09; 627 indexed pages
+- `cppreference_cpp.txt` — C++ language and standard library; offline snapshot 2025-02-09; 6,011 indexed pages
+- `gcc_manual.txt` — GCC 14.2.0 compiler and preprocessor manuals; 526 indexed pages
+- `linux_manpages.txt` — Installed Debian manpages/manpages-dev, sections 2, 3, and 7; 2,679 indexed pages
+- `cpp_core_guidelines.txt` — C++ Core Guidelines: design, interfaces, ownership, and concurrency; 1 indexed page
+- `python_library.txt` — Python 3.13 standard library and built-ins; 320 indexed pages
+- `python_language.txt` — Python 3.13 language reference; 11 indexed pages
+- `python_howtos.txt` — Python 3.13 HOWTOs; 28 indexed pages
 
-### Present but stale — describe the former NixOS/Hyprland host, not this one
-
-Still on disk, so they will match a grep. Treat a hit as history, not as this system.
-
-- `nixos_options.txt`, `nixos_wiki.txt` — NixOS system configuration. This host is Debian; there is no `/etc/nixos` and no `configuration.nix(5)` man page
-- `hypr_waybar_docs.txt` — Hyprland + Waybar. The desktop is now KDE Plasma
+- `rust_std.txt` — Rust 1.85.1 Rust standard library, core, and alloc; excludes bulk CPU intrinsics; 3,850 indexed pages
+- `rust_book.txt` — Rust 1.85.1 The Rust Programming Language; 111 indexed pages
+- `rust_reference.txt` — Rust 1.85.1 Rust language reference; 115 indexed pages
+- `rust_cargo.txt` — Rust 1.85.1 Cargo Book; 94 indexed pages
+- `rust_rustc.txt` — Rust 1.85.1 rustc compiler manual; 115 indexed pages
+- `rust_examples.txt` — Rust 1.85.1 Rust by Example (English); 196 indexed pages
+- `rust_nomicon.txt` — Rust 1.85.1 Rustonomicon: unsafe Rust; 64 indexed pages
+- `rust_editions.txt` — Rust 1.85.1 Rust Edition Guide; 55 indexed pages
+- `rust_errors.txt` — Rust 1.85.1 Rust compiler error-code explanations; 515 indexed pages
 
 ### Regenerating
 
@@ -168,94 +167,26 @@ The generator toolchain (`sources.toml`, `scrapes.py`, `audit_dumps.py`, `index_
 lives in `~/repos/config/skills/scrapes/tools/` (git-tracked) and is symlinked into
 `~/edu/zStore/scrapes/`. Driven by `/scrapes`, which also restores missing links.
 
-## Python Style — Rust Discipline
+## Code Discipline — All Languages
 
-R0. IF GROUP MODE is on per "Group Assignment Mode — Discipline Exemptions" G1 THEN G3 and G4 override R1–R14.
-
-R1. IF writing, showing, generating, suggesting, or grading Python code THEN apply R2–R12.
-     // Commentary: covers examples in explanations, generated files, hints, and grading. The goal is Python written as if a borrow checker and a strict type checker were enforcing it.
-R2. IF a function parameter is only read THEN annotate it with the read-only abstract type: `Sequence`, `Mapping`, `AbstractSet`, or `Iterable` from `collections.abc`. Do not use `list`, `dict`, or `set` for it.
-     // Example: `def dup_check(nums: Sequence[int]) -> bool:` — not `nums: list[int]`.
-R3. IF a function parameter is mutated THEN annotate it with the concrete or `Mutable*` type AND name the mutation in the function name.
-     // Example: `def sort_in_place(nums: list[int]) -> None:`
-R4. IF a function needs a modified version of an argument THEN build a new object from it (`sorted(x)`, `list(x)`, `dict(d)`). Do not mutate the argument. R3 overrides R4 when both conditions are true.
-     // Commentary: the Python counterpart of `.to_vec()` on a `&[T]`. `nums.sort()` on a parameter is the aliasing bug Rust's E0596 refuses to compile.
-R5. IF defining any function THEN annotate every parameter and the return type, including `-> None`.
-     // Commentary: mypy skips the body of a fully unannotated function; `-> None` on a no-argument function is what opts it into checking.
-R6. IF a local variable is initialized to an empty container THEN annotate its type.
-     // Example: `seen: set[int] = set()`
-R7. IF a local variable's type is evident from its initializer THEN do not annotate it.
-     // Example: `max_profit = 0` needs no annotation.
-R8. IF a value may be absent THEN type it `X | None` and handle `None` before use. Do not use a sentinel of a different type than the variable holds.
-     // Example: `min_price = float("inf")` in an `int` computation FAILS R8 — it turns the result into `int | float`.
-R9. IF an input admitted by the parameter type would crash the code (empty sequence, missing key) THEN handle that input explicitly.
-     // Example: `prices[0]` requires an `if not prices:` guard before it.
-R10. IF a type checker reports a mismatch THEN fix the types. Do not silence it with `cast()`, `int(...)`, or `# type: ignore`.
-R11. IF a file is run as a script THEN define `def main() -> None:` and call it under `if __name__ == "__main__":`.
-R11a. IF recommending one of two forms of code that behave identically THEN time both with `python3 -m timeit` and recommend the faster one.
-     // Commentary: `not 1 <= port <= 65535` measured ~15 ns slower per call than `port < 1 or port > 65535` on CPython 3.13 and was recommended without measuring.
-R11b. IF the two timings under R11a differ by less than 5% THEN recommend the more readable form. R11b overrides R11a.
-R12. IF grading Python code THEN report violations of R2–R11 as style findings, separate from the correctness verdict. A style violation alone does not make a solution incorrect.
-     // Commentary: /coding_interview Check R7 still fails a solution that breaks a requirement stated in the problem (in-place, return value). R12 only keeps discipline findings from being counted as such requirements.
-R13. IF a skill rule requires reusing the signature or identifiers already in the user's file THEN that rule overrides R2–R3 and R5 for that signature. Name the discipline deviation in one line instead of changing it.
-     // Commentary: /coding_interview Workflow R2b forbids renaming or re-signing the user's code when answering questions.
-R14. IF any condition not covered by R1–R13 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
-
-## C Style — Rust Discipline
-
-R0. IF GROUP MODE is on per "Group Assignment Mode — Discipline Exemptions" G1 THEN G3 and G4 override R1–R18.
-
-R1. IF writing, showing, generating, suggesting, or grading C code THEN apply R2–R16.
-     // Commentary: the C counterpart of the Python section. The goal is C written as if a borrow checker, a lifetime checker, and a strict type checker were enforcing it.
-R2. IF a pointer parameter is only read THEN declare it `const T *`.
-     // Example: `bool contains_dup(const int *nums, size_t n);` — the C spelling of `&[T]`.
-R3. IF a pointer parameter is mutated THEN declare it non-`const` AND name the mutation in the function name.
-     // Example: `void sort_in_place(int *nums, size_t n);`
-R4. IF a function needs a modified version of an argument THEN allocate a new buffer and copy into it. Do not mutate through a pointer the caller still treats as read-only. R3 overrides R4 when both conditions are true.
-R5. IF a function takes a pointer to an array THEN take its element count as a separate parameter of type `size_t`.
-     // Commentary: a bare `T *` carries no length. `sizeof` on it yields the pointer size, not the array size, which is the C form of the aliasing bug Rust's slice type makes unrepresentable.
-R6. IF a function allocates memory that the caller must release THEN state the ownership transfer in a comment on the declaration, and name the matching free function.
-     // Example: `// caller owns the result; release with list_free()`
-R7. IF a pointer returned by `malloc`, `calloc`, `realloc`, `strdup`, or `fopen` is used THEN check it against `NULL` before the first dereference or read.
-R8. IF `realloc` is called THEN assign its result to a temporary and check that temporary before overwriting the original pointer.
-     // Commentary: `p = realloc(p, n)` leaks the old block on failure.
-R9. IF a pointer may be absent THEN document the `NULL` case on the declaration and handle `NULL` before use. Do not encode absence as a valid-looking value of the same type.
-     // Example: returning `-1` from a function whose valid range includes `-1` FAILS R9; return a status code and write the value through an out-parameter.
-R10. IF an input admitted by the parameter types would read or write out of bounds (`n == 0`, index `n`, empty string) THEN handle that input explicitly before the access.
-     // Example: `nums[0]` requires an `if (n == 0)` guard before it.
-R11. IF a local variable is declared THEN initialize it at the point of declaration.
-R12. IF an object's address does not escape its function THEN give it automatic storage. Do not `malloc` what a local can hold.
-R13. IF a fixed-size buffer is written THEN use the bounded function (`snprintf`, `memcpy` with a computed length) and never `strcpy`, `strcat`, `sprintf`, or `gets`.
-R14. IF the compiler or a sanitizer reports a diagnostic THEN fix the types or the logic. Do not silence it with a cast, a `(void)` discard, or a pragma.
-R15. IF verifying C code THEN compile it with `gcc -std=c11 -Wall -Wextra` and treat a warning as a finding.
-R16. IF grading C code THEN report violations of R2–R15 as style findings, separate from the correctness verdict. A style violation alone does not make a solution incorrect.
-     // Commentary: mirrors Python R12. A requirement stated in the problem (in-place, return value) still fails the solution on correctness.
-R17. IF a skill rule requires reusing the signature or identifiers already in the user's file THEN that rule overrides R2, R3, and R5 for that signature. Name the discipline deviation in one line instead of changing it.
-R18. IF any condition not covered by R1–R17 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
-
-
-## Group Assignment Mode — Discipline Exemptions
-
-G1. IF the user states that the code is for a group assignment, a shared school project, or code classmates will read or edit THEN set GROUP MODE for that codebase and apply G3–G8.
-G2. IF GROUP MODE is not stated THEN it is off. Do not infer it from the code being coursework, short, or simple.
-     // Commentary: solo coursework stays under full discipline. The exemption exists for readers who did not agree to the discipline, not for small files.
-G3. IF GROUP MODE is on THEN suspend these rules, which trade readability for rigor:
-     (a) Python R2 — use `list`, `dict`, `set` in signatures instead of `Sequence`, `Mapping`, `AbstractSet`;
-     (b) Python R5 — annotate where the type is not obvious; a fully unannotated helper is acceptable;
-     (c) Python R6 — an empty-container local needs no annotation;
-     (d) Python R11 — a top-level script body is acceptable without `main()` and the `__name__` guard;
-     (e) C R2 — `const` on read-only pointer parameters is optional;
-     (f) C R6 — an ownership comment on every allocating declaration is optional;
-     (g) C R9 — the documentation half is optional; the handling half is not (see G4).
-G4. IF GROUP MODE is on THEN these rules still apply in full, without exception:
-     (a) Python R3, R4, R8, R9, R10 — mutation named, no mutated arguments, absence handled, admitted inputs handled, no silenced checker;
-     (b) C R5, R7, R8, R10, R13, R14 — array length passed, allocations NULL-checked, `realloc` through a temporary, bounds guarded, bounded string functions, no silenced diagnostic.
-     // Commentary: G3 removes ceremony. G4 is the set whose violation is a crash, a leak, or a wrong answer — none of which get easier for a classmate to read.
-G5. IF GROUP MODE is on AND a G4 rule forces code a classmate would find unclear THEN write the code and add one comment naming what it guards against. Do not drop the guard.
-G6. IF GROUP MODE is on THEN prefer the plainest construct that is correct: an explicit loop over a comprehension chain, a named intermediate over a nested call, a standard library call over a hand-rolled one.
-G7. IF GROUP MODE is on AND a suspended rule would have fired THEN do not report it as a style finding.
-G8. IF GROUP MODE is on AND the user asks for the strict version of a specific piece THEN show it for that piece only, and leave the rest under G3.
-G9. IF any condition not covered by G1–G8 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
+R1. IF writing, showing, generating, suggesting, or grading code in any language THEN apply R2–R12 using that language's supported features.
+R2. IF a parameter is only read THEN use the language's read-only type, abstract interface, or immutable view when one exists.
+R3. IF a function mutates a parameter THEN declare the parameter mutable where supported AND name the mutation in the function name.
+R4. IF a modified version of an input is needed AND mutation was not requested THEN build a new value without modifying the input.
+R5. IF the language supports parameter and return type annotations THEN annotate every function parameter and return type.
+R6. IF a variable's type cannot be inferred from its initializer THEN declare its type explicitly.
+R7. IF a value may be absent THEN represent absence explicitly in the type or return contract AND handle it before use.
+R8. IF an admitted input could cause an invalid access, failed allocation, or other runtime error THEN handle that case before the operation.
+R9. IF code owns a resource THEN make ownership and cleanup explicit using scoped ownership or automatic cleanup when supported.
+R10. IF writing into bounded storage THEN check capacity AND use bounded operations.
+R11. IF a compiler, type checker, linter, or sanitizer reports a diagnostic THEN fix the underlying issue without casts or suppression directives that hide it.
+R12. IF grading code THEN report discipline findings separately from correctness unless the finding also violates an explicit task requirement.
+R13. IF a skill requires preserving the user's signature or identifiers THEN preserve them AND name any resulting discipline deviation in one line; R13 overrides R2, R3, and R5 for those signatures or identifiers.
+R14. IF the user invokes `SIMPLE` as an instruction in chat THEN produce the plainest correct code for the current turn, omitting annotations, read-only declarations, mutation naming, or ownership commentary that only add ceremony; R14 overrides R2, R3, R5, and R6 for that turn only.
+     // Example: `SIMPLE explain this function` uses the simpler form for that turn; the next turn uses the default discipline unless SIMPLE is invoked again.
+R15. IF SIMPLE is active THEN retain input guards, correct mutation behavior, explicit absence handling, resource cleanup, bounded writes, and diagnostic fixes; R15 overrides R14 if simplification would remove these protections.
+R16. IF a new turn begins without a SIMPLE instruction THEN apply the default discipline without carrying SIMPLE forward from an earlier turn.
+R17. IF any condition not covered by R1–R16 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Skill Authoring — Black-Letter Rule Method
 

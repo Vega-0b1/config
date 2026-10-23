@@ -17,13 +17,6 @@
 # Built from the pinned flake, not fetched. Matches the version actually
 # installed, unlike a web scrape of whatever the site shows today.
 
-[nixos_options]
-kind        = "nix-options"
-attr        = "/etc/nixos#nixosConfigurations.vega.config.system.build.manual.optionsJSON"
-json_path   = "share/doc/nixos/options.json"
-min_options = 20000
-sentinels   = ["services.tailscale.enable", "boot.loader.systemd-boot.enable"]
-
 [home_manager_options]
 kind        = "nix-options"
 # Built through /etc/nixos/flake.lock, NOT as a bare
@@ -84,30 +77,6 @@ urls = [
   "https://raw.githubusercontent.com/Marus/cortex-debug/master/debug_attributes.md",
   "https://raw.githubusercontent.com/Marus/cortex-debug/master/README.md",
 ]
-
-[hypr_waybar_docs]
-kind      = "markdown"
-min_pages = 90
-sentinels = ["dispatch", "windowrule", "waybar"]
-# The 2026-06-08 scrape took the whole repo, wasting pages on README.md and
-# .github/pull_request_template.md. Restricted to content/ here.
-tree = [
-  { host = "github", repo = "hyprwm/hyprland-wiki", branch = "main", prefix = "content/", ext = ".md" },
-]
-urls = [
-  "https://raw.githubusercontent.com/Alexays/Waybar/master/README.md",
-  "https://raw.githubusercontent.com/wiki/Alexays/Waybar/Home.md",
-  "https://raw.githubusercontent.com/wiki/Alexays/Waybar/Writing-Modules.md",
-]
-
-[nixos_wiki]
-kind        = "mediawiki"
-api         = "https://wiki.nixos.org/w/api.php"
-namespace   = 0
-min_pages   = 1200
-# useGrimAdapter sits inside a {{File}} code template; if the template parser
-# regresses, it is the first thing to disappear.
-sentinels   = ["useGrimAdapter", "services.flameshot", "1Password"]
 
 [stm32f4_hal]
 kind      = "doxygen"
@@ -182,3 +151,214 @@ min_pages   = 70
 # addGeometry lives inside a {{Code|code=}} block: it vanishes first if
 # code-template expansion regresses.
 sentinels   = ["addGeometry", "Part.makeBox", "makeCylinder"]
+
+
+# C, C++, and Python references. Archive releases are explicit; local man-pages
+# follow the installed Debian manpages/manpages-dev package versions.
+[cppreference_c]
+kind = "archive"
+title = "cppreference C — offline release 2025-02-09"
+urls = ["https://github.com/PeterFeicht/cppreference-doc/releases/download/v20250209/html-book-20250209.tar.xz"]
+prefixes = ["reference/en/c/", "reference/en/c.html"]
+strip_root = "reference/en/"
+source_base = "https://en.cppreference.com/w/"
+content_id = "mw-content-text"
+source_remove_suffix = ".html"
+min_pages = 500
+sentinels = ["restrict", "realloc", "memory_order", "#include <stdio.h>"]
+
+[cppreference_cpp]
+kind = "archive"
+title = "cppreference C++ — offline release 2025-02-09"
+urls = ["https://github.com/PeterFeicht/cppreference-doc/releases/download/v20250209/html-book-20250209.tar.xz"]
+prefixes = ["reference/en/cpp/", "reference/en/cpp.html"]
+strip_root = "reference/en/"
+source_base = "https://en.cppreference.com/w/"
+content_id = "mw-content-text"
+source_remove_suffix = ".html"
+min_pages = 3000
+sentinels = ["std::unique_ptr", "std::vector", "constexpr", "#include <vector>"]
+
+[gcc_manual]
+kind = "archive"
+title = "GCC 14.2.0 compiler and preprocessor manuals"
+urls = ["https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc-html.tar.gz", "https://gcc.gnu.org/onlinedocs/gcc-14.2.0/cpp-html.tar.gz"]
+prefixes = ["gcc/", "cpp/"]
+source_base = "https://gcc.gnu.org/onlinedocs/gcc-14.2.0/"
+min_pages = 500
+sentinels = ["-fsanitize=address", "-Wconversion", "-std=c++17", "__VA_OPT__"]
+
+[linux_manpages]
+kind = "local-man"
+title = "Installed Linux man-pages — system calls, library functions, and conventions"
+packages = ["manpages", "manpages-dev"]
+sections = ["2", "3", "7"]
+min_pages = 1000
+sentinels = ["malloc", "EINTR", "pthread_create", "feature_test_macros"]
+
+[cpp_core_guidelines]
+kind = "markdown"
+urls = ["https://raw.githubusercontent.com/isocpp/CppCoreGuidelines/master/CppCoreGuidelines.md"]
+min_pages = 1
+sentinels = ["R.1:", "unique_ptr", "RAII", "F.16:"]
+
+[python_library]
+kind = "archive"
+title = "Python 3.13 library reference and built-ins — maintained 3.13 documentation"
+urls = ["https://docs.python.org/3.13/archives/python-3.13-docs-text.tar.bz2"]
+prefixes = ["python-3.13-docs-text/library/", "python-3.13-docs-text/builtins/"]
+strip_root = "python-3.13-docs-text/"
+source_base = "https://docs.python.org/3.13/"
+suffix = ".txt"
+min_pages = 180
+sentinels = ["collections.abc", "subprocess.run", "dataclass", "logging"]
+
+[python_language]
+kind = "archive"
+title = "Python 3.13 language reference — maintained 3.13 documentation"
+urls = ["https://docs.python.org/3.13/archives/python-3.13-docs-text.tar.bz2"]
+prefixes = ["python-3.13-docs-text/reference/"]
+strip_root = "python-3.13-docs-text/"
+source_base = "https://docs.python.org/3.13/"
+suffix = ".txt"
+min_pages = 10
+sentinels = ["__getattribute__", "nonlocal", "yield", "async"]
+
+[python_howtos]
+kind = "archive"
+title = "Python 3.13 HOWTOs — maintained 3.13 documentation"
+urls = ["https://docs.python.org/3.13/archives/python-3.13-docs-text.tar.bz2"]
+prefixes = ["python-3.13-docs-text/howto/"]
+strip_root = "python-3.13-docs-text/"
+source_base = "https://docs.python.org/3.13/"
+suffix = ".txt"
+min_pages = 15
+sentinels = ["argparse", "logging", "regular expression", "descriptor"]
+
+# Rust official offline documentation, matching the installed Rust 1.85.1.
+
+[rust_std]
+kind = "archive"
+title = "Rust 1.85.1 — Rust standard library, core, and alloc"
+urls = ["https://static.rust-lang.org/dist/rust-docs-1.85.1-x86_64-unknown-linux-gnu.tar.xz"]
+prefixes = ['rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/std/', 'rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/core/', 'rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/alloc/']
+exclude_prefixes = ['rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/core/arch/', 'rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/core/core_arch/']
+exclude_suffixes = ["/print.html", "/toc.html", "/404.html", "/all.html", "-redirect.html", "/choosing-your-guarantees.html"]
+skip_redirects = true
+strip_root = "rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/"
+source_base = "https://doc.rust-lang.org/1.85.1/"
+content_tag = "main"
+min_pages = 3000
+sentinels = ['pub struct Vec', 'Option', 'Result', 'String']
+
+[rust_book]
+kind = "archive"
+title = "Rust 1.85.1 — The Rust Programming Language"
+urls = ["https://static.rust-lang.org/dist/rust-docs-1.85.1-x86_64-unknown-linux-gnu.tar.xz"]
+prefixes = ['rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/book/ch', 'rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/book/appendix', 'rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/book/index.html', 'rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/book/foreword.html']
+exclude_prefixes = []
+exclude_suffixes = ["/print.html", "/toc.html", "/404.html", "/all.html", "-redirect.html", "/choosing-your-guarantees.html"]
+skip_redirects = true
+strip_root = "rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/"
+source_base = "https://doc.rust-lang.org/1.85.1/"
+content_tag = "main"
+min_pages = 75
+sentinels = ['borrowing', 'fn main()', 'ownership']
+
+[rust_reference]
+kind = "archive"
+title = "Rust 1.85.1 — Rust language reference"
+urls = ["https://static.rust-lang.org/dist/rust-docs-1.85.1-x86_64-unknown-linux-gnu.tar.xz"]
+prefixes = ['rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/reference/']
+exclude_prefixes = []
+exclude_suffixes = ["/print.html", "/toc.html", "/404.html", "/all.html", "-redirect.html", "/choosing-your-guarantees.html"]
+skip_redirects = true
+strip_root = "rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/"
+source_base = "https://doc.rust-lang.org/1.85.1/"
+content_tag = "main"
+min_pages = 100
+sentinels = ['lifetime', 'unsafe', 'trait']
+
+[rust_cargo]
+kind = "archive"
+title = "Rust 1.85.1 — Cargo Book"
+urls = ["https://static.rust-lang.org/dist/rust-docs-1.85.1-x86_64-unknown-linux-gnu.tar.xz"]
+prefixes = ['rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/cargo/']
+exclude_prefixes = []
+exclude_suffixes = ["/print.html", "/toc.html", "/404.html", "/all.html", "-redirect.html", "/choosing-your-guarantees.html"]
+skip_redirects = true
+strip_root = "rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/"
+source_base = "https://doc.rust-lang.org/1.85.1/"
+content_tag = "main"
+min_pages = 70
+sentinels = ['Cargo.toml', 'cargo build', '[dependencies]']
+
+[rust_rustc]
+kind = "archive"
+title = "Rust 1.85.1 — rustc compiler manual"
+urls = ["https://static.rust-lang.org/dist/rust-docs-1.85.1-x86_64-unknown-linux-gnu.tar.xz"]
+prefixes = ['rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/rustc/']
+exclude_prefixes = []
+exclude_suffixes = ["/print.html", "/toc.html", "/404.html", "/all.html", "-redirect.html", "/choosing-your-guarantees.html"]
+skip_redirects = true
+strip_root = "rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/"
+source_base = "https://doc.rust-lang.org/1.85.1/"
+content_tag = "main"
+min_pages = 80
+sentinels = ['-C', 'codegen-units', 'target-cpu']
+
+[rust_examples]
+kind = "archive"
+title = "Rust 1.85.1 — Rust by Example (English)"
+urls = ["https://static.rust-lang.org/dist/rust-docs-1.85.1-x86_64-unknown-linux-gnu.tar.xz"]
+prefixes = ['rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/rust-by-example/']
+exclude_prefixes = ['rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/rust-by-example/ja/', 'rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/rust-by-example/zh/']
+exclude_suffixes = ["/print.html", "/toc.html", "/404.html", "/all.html", "-redirect.html", "/choosing-your-guarantees.html"]
+skip_redirects = true
+strip_root = "rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/"
+source_base = "https://doc.rust-lang.org/1.85.1/"
+content_tag = "main"
+min_pages = 170
+sentinels = ['fn main()', 'move', 'impl']
+
+[rust_nomicon]
+kind = "archive"
+title = "Rust 1.85.1 — Rustonomicon: unsafe Rust"
+urls = ["https://static.rust-lang.org/dist/rust-docs-1.85.1-x86_64-unknown-linux-gnu.tar.xz"]
+prefixes = ['rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/nomicon/']
+exclude_prefixes = []
+exclude_suffixes = ["/print.html", "/toc.html", "/404.html", "/all.html", "-redirect.html", "/choosing-your-guarantees.html"]
+skip_redirects = true
+strip_root = "rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/"
+source_base = "https://doc.rust-lang.org/1.85.1/"
+content_tag = "main"
+min_pages = 60
+sentinels = ['unsafe', 'transmute', 'PhantomData']
+
+[rust_editions]
+kind = "archive"
+title = "Rust 1.85.1 — Rust Edition Guide"
+urls = ["https://static.rust-lang.org/dist/rust-docs-1.85.1-x86_64-unknown-linux-gnu.tar.xz"]
+prefixes = ['rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/edition-guide/']
+exclude_prefixes = []
+exclude_suffixes = ["/print.html", "/toc.html", "/404.html", "/all.html", "-redirect.html", "/choosing-your-guarantees.html"]
+skip_redirects = true
+strip_root = "rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/"
+source_base = "https://doc.rust-lang.org/1.85.1/"
+content_tag = "main"
+min_pages = 50
+sentinels = ['2024', 'cargo fix', 'edition']
+
+[rust_errors]
+kind = "archive"
+title = "Rust 1.85.1 — Rust compiler error-code explanations"
+urls = ["https://static.rust-lang.org/dist/rust-docs-1.85.1-x86_64-unknown-linux-gnu.tar.xz"]
+prefixes = ['rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/error_codes/']
+exclude_prefixes = []
+exclude_suffixes = ["/print.html", "/toc.html", "/404.html", "/all.html", "-redirect.html", "/choosing-your-guarantees.html"]
+skip_redirects = true
+strip_root = "rust-docs-1.85.1-x86_64-unknown-linux-gnu/rust-docs/share/doc/rust/html/"
+source_base = "https://doc.rust-lang.org/1.85.1/"
+content_tag = "main"
+min_pages = 450
+sentinels = ['E0382', 'E0597', 'E0502']

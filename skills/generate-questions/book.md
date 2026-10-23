@@ -1,16 +1,19 @@
 # generate-questions — BOOK run rules
 
-Loaded under R0k2 when the argument does not normalize to a week. These rules GENERATE audited
-questions from a textbook chapter and write them next to the chapter slice. The resulting file is
-the POOL — a reference bank covering everything the chapter explains, not a study list.
+Loaded under R0k2 on a BOOK run, and on a PROBLEMS run for the rules problems.md P1 and P1c name. On a
+BOOK run these rules GENERATE audited conceptual questions from a textbook chapter and write them
+next to the chapter slice. The resulting file is a study-sized set of at most 25 core-concept
+questions. A LECTURE run (lecture.md) borrows the generation and audit rules L1 names.
 
-Read this together with the shared core in `SKILL.md`. Rule IDs are global across both files.
+Read this together with the shared core in `SKILL.md`. Rule IDs are global across all rule files.
 
 ## Rules — book run
 
 // Source profile
 R0.  Before loading notes, look for a `## Source Profile` section in the class root's `CLAUDE.md`.
-R0a. IF a Source Profile exists THEN use it. Do NOT re-detect.
+R0a. IF a Source Profile exists THEN preserve all populated fields, including explicit `none` values; do not re-detect those fields.
+R0a1. IF an existing Source Profile lacks a non-empty `Notes file`, `Chapter heading`, `Unit heading`, or `language` field THEN detect and fill only the missing fields under R0b–R0h before loading or segmenting a chapter; R0a1 overrides R0a only for missing fields.
+R0a2. IF `Source file` is missing THEN resolve the source from the notes' recorded provenance or the class Contents inventory and add it only when exactly one textbook matches; retain the existing ambiguity prompt when several match.
 R0b. IF no Source Profile exists THEN detect the source's shape per R0c–R0e, write it to `CLAUDE.md` as a `## Source Profile` section, and report that it was created.
 R0c. Chapter heading = the shallowest heading level whose text matches a chapter form (`# Chapter N`, `## N`, `# N`). A heading-like line is NOT a heading if it is a code comment — judge by whether it sits among code lines rather than prose.
 R0c0. Detection under R0c is per-LINE, never per-level. Match every line at a level against the chapter forms and keep the matches. A heading level is NOT disqualified because other lines share its depth, however many of them there are.
@@ -18,9 +21,9 @@ R0c0a. Before recording `Chapter heading: none`, state the count of lines matchi
 R0c0b. IF a level holds both chapter-form matches and non-matching lines THEN the level IS the chapter level and the non-matching lines are simply not chapters. Do NOT reach for a fallback pattern.
 R0c1. A heading whose entire trimmed text matches `Page <N>` or `Slide <N>` — with or without a trailing `— <title>` — is a LOCATOR, not a heading. Exclude locators when determining the chapter level under R0c, the unit level under R0d, and the unit count under R7.
 R0c2. Locators remain valid citation targets. R0c1 removes them from segmentation only — the prose under a locator is tested for inventory admissibility under R12d like any other text.
-     // Commentary: this clause pointed at `R0q` until commit cc14901, which deleted the locator-admissibility rules and recycled that number for select-run pool matching. The deleted rule deferred to R12d, which is why R12d is the target. Do not reintroduce an admissibility test for class material — the current design has none.
+     // Commentary: slide-deck admissibility lives in lecture.md L5–L5f, not here.
 R0d. Unit heading = the heading level one deeper than the chapter level. IF only one heading level exists THEN unit = chapter.
-R0e. A Source Profile describes the NOTES source only — the textbook at `extracted/textbook/`. It says nothing about class material, which is reached through the registry under R0m and never needs detecting.
+R0e. A Source Profile describes the NOTES source only — the textbook at `extracted/textbook/`. It says nothing about class material, which is reached through the registry under lecture.md L2–L3 and never needs detecting.
 R0g. The user may correct a Source Profile by hand. R0a makes the correction permanent.
 R0h. Detect the language of the notes content. Record `language: <code>` (e.g. `es`, `en`) in the Source Profile.
 R0i. IF language = `en` THEN skip R16f–R16g. No `Teach_EN` or `Question_EN` fields are generated.
@@ -44,9 +47,9 @@ R4a. IF no argument is given THEN list those same chapter slices, ask the user w
 R4b. IF this is a BOOK run AND the Source Profile describes the source as scanned or names character-level OCR damage THEN check the chapter slice for a `<!-- visual-repair: done -->` marker on its first line.
 R4b1. IF the marker is absent THEN visual-repair the chapter before proceeding: extract the page range from the slice's `## Page <N>` headings, render each page with `pdftoppm -f <p> -l <p> -r 170 -png <source PDF> <outprefix>`, read each image, compare against the corresponding text in the slice, and fix character-level OCR errors in place.
 R4b2. Visual repair is TRANSCRIPTION from the image, never inference from context. IF a token cannot be read clearly THEN leave it as-is and flag it in the report.
-R4b3. After repairing, prepend `<!-- visual-repair: done -->` as the first line of the chapter slice. This prevents re-repair on future runs.
+R4b3. IF visual repair finishes AND R4b5 successfully synchronizes the full notes file THEN prepend `<!-- visual-repair: done -->` as the first line of the chapter slice.
 R4b4. IF the chapter slice contains no `## Page <N>` headings THEN stop and tell the user to re-extract the textbook first — page anchors are required for visual repair. Do NOT proceed to generation.
-R4b5. AFTER R4b3 stamps the marker, propagate the repair into the full textbook notes file named in the Source Profile's `Notes file:` — run `splice_chapter.py <slice> <notes file>` (next to this skill).
+R4b5. IF visual repair finishes OR a scanned chapter already carries the completion marker THEN run `splice_chapter.py <slice> <notes file>` before generating questions, using the Source Profile's `Notes file:`; an existing marker does not bypass synchronization.
 R4b5a. IF `splice_chapter.py` exits non-zero THEN stop and report its message. Do NOT generate questions while the slice and the notes file disagree.
 R4b5b. Do NOT write the `<!-- visual-repair: done -->` marker into the notes file. The marker is per-slice bookkeeping; `splice_chapter.py` strips it.
 R4b5c. Report the chapter spliced, the line range replaced, and the count of lines changed.
@@ -55,17 +58,49 @@ R4b6. IF the Source Profile does NOT describe the source as scanned or character
 
 // Existing-file handling — book branch of R5
 R5a1. IF this is a BOOK run THEN warn the user that the file already exists and ask whether to `regenerate` or `cancel`. STOP until user responds.
-R5a2. IF a BOOK run regenerates a chapter file THEN say in the report that every select file copying from it is now stale, and name the command that fixes each: `/generate-questions week<N>` → `resync`.
+
+// Figure gate — after R5 resolves to a first run or `regenerate`, before R7
+R6.  IF this is a BOOK run AND R5c or R5b1 has resolved the run to a first generation THEN count the chapter's UNCHECKED FIGURES per R9o–R9o2 before applying R7.
+R6a. IF R6 counts one or more unchecked figures THEN invoke the `extract` skill with the argument `<Source file> diagrams-only chapter<N>`, where `<Source file>` is the Source Profile's `Source file:` value, and run that pass to completion before applying R7.
+R6b. IF the Source Profile has no `Source file:` line THEN stop, tell the user the figure pass cannot locate the book, and ask how to proceed. STOP until user responds.
+R6c. IF the extract pass stops for user input THEN wait for the user's reply, finish the pass, and only then apply R7.
+R6d. IF the extract pass completes THEN recount under R9o and carry the remaining count into the report under R9o1.
+R6e. IF R6 counts zero unchecked figures THEN skip R6a–R6d.
+R6f. IF R5b1 resolves to `cancel` THEN do NOT apply R6.
+     // Commentary: the user asked for this gate so a chapter is never generated with its figures left unchecked. The figure pass is the most expensive step of a book run, so it runs only once the run is certain to write a file.
 
 // Unit segmentation
 R7.  Count the headings matching the Source Profile's unit heading pattern inside the selected chapter. This count is N.
 R8.  Each unit heading and its content until the next unit heading, or the end of the chapter, = one unit.
 R8a. IF the Source Profile records `Unit heading: none` THEN the whole chapter is a single unit and N = 1.
-R9.  Process units in order — document order on a book run, ascending chapter order on a select run.
+R9.  Process units in document order.
 
 // Figures (per unit)
 R9a. A markdown image link — `![...](path)` — is NOT a question source. Do NOT open it, do NOT transcribe it, and do NOT build a Teach field from it. Treat the surrounding prose and the figure's caption as the only content.
 R9b. IF a figure's caption carries content a question would test THEN use the CAPTION TEXT, which is prose in the notes like any other. This is not an exception to R9a.
+R9c. IF a unit contains figure embeds OR its class Contents names a figure registry THEN read the registry entries for that unit before selecting diagram attachments.
+R9d. IF that entry has `Status: verified` AND its recorded display image and source PDF or EPUB exist AND that source is the selected textbook THEN the entry's `Description` is admissible visual evidence for that question's scenario, values, and connections; retain the explanatory prose `Source quote` required by R12d–R12e.
+R9e. IF using R9d THEN record `Figure source: <class-root-relative-registry>#<figure-id>` and `Figure quote:` with the supporting description sentences verbatim; attach the question image as `Diagram: ![Figure <number>](<class-root-relative-image>)` when available.
+R9f. IF attaching a solution image THEN record it only as `Answer diagram: ![Figure <number> — solution](<class-root-relative-PNG>)` using the registry's `Answer image`.
+R9g. IF an entry has no verified question image THEN do not make the question depend on seeing that image.
+R9h. IF a figure has no verified registry entry THEN retain R9a and R18a without exception and report any diagram-dependent question excluded for that reason.
+R9i. IF a question has a verified diagram under R9d THEN its Teach, optional Legend, and Diagram together must satisfy R12 and R16–R18; its Source quote and Figure quote together must support every claim under R18a–R18b1.
+R9j. IF R9d–R9i apply THEN they override R9a, R12, R16–R18b1 only to admit the verified diagram evidence; all other generation, inventory, and audit requirements remain in force.
+R9k. IF writing `Diagram` or `Answer diagram` THEN use one Markdown image on one field line, with a class-root-relative path; omit all four diagram-related fields when no diagram is attached.
+// Commentary: the four optional fields are Figure source, Figure quote, Diagram, and Answer diagram.
+R9l. IF looking up the registry schema THEN read `../extract/diagrams.md`; use only its registry schema and do not start a new extraction during question generation. R6a is the only extraction a book run starts, and it finishes before R7.
+R9m. IF a unit contains figure embeds but no registry exists THEN apply R9h instead of creating an unverified registry from the notes.
+R9n. IF attaching a verified diagram under R9d THEN inspect its crop and compare it with its Description before writing the attachment.
+R9p.  IF a verified figure illustrates the content a question's Teach field explains THEN attach it as `Diagram:` as a visual aid, even when the question is answerable from Teach alone.
+R9p1. IF a verified figure carries content a question can test (a scenario, values, a labeled path or connection) THEN the question MAY be built on it under R9d–R9i.
+R9p2. IF a verified figure does neither THEN do NOT attach it.
+R9p3. R9p overrides R9e's "IF using R9d" condition for visual-aid attachments; R9e's Figure source and Figure quote fields still apply.
+     // Example: PASSES R9p: Teach lists the five layers a datagram passes through; Figure 1.24 draws that stack → attach. PASSES R9p1: a question asks which devices a datagram crosses in Figure 1.24. FAILS R9p2: a Teach field on queuing delay with Figure 1.1, the Internet overview, attached.
+R9o. IF this is a BOOK run THEN count the chapter's UNCHECKED FIGURES: registry entries with `Status: unverified` whose `Question image` or `Answer image` path lies under a `chapter<N>/` folder for this chapter, plus figures the chapter captions or embeds that have no registry entry at all.
+R9o1. IF the R6d recount finds one or more unchecked figures THEN report the count and name each figure the extract pass left unresolved, with the reason it gave.
+R9o2. IF the class has no figure registry AND the chapter captions or embeds figures THEN R9o1 applies with every such figure counted as unchecked.
+R9o3. Outside the R6a extract pass, do NOT crop, label, describe, or verify a figure during a book run; R9l still applies.
+     // Commentary: labeling belongs to /extract's diagram mode (extract/diagrams.md D1–D32), which records each figure once for every later regenerate run. A book run that labeled its own figures would be auditing descriptions it wrote itself.
 
 // Teach content (per question)
 R10. IF writing a question THEN write a `Teach:` field immediately before `Question:` carrying only the source content needed to answer this specific question — no more.
@@ -89,9 +124,9 @@ R11h. Each sentence in a Teach field MUST express one idea only. Max 25 words pe
 R11i. Bold each key term the first time it appears in a Teach field.
 R11j. No single list in a Teach field should exceed 7 items. IF a natural grouping exceeds 7 THEN split into labeled sub-groups with a bold label for each.
 
-R12. The Teach field is sufficient IF AND ONLY IF the question is fully answerable from that Teach field alone, given that the user has already seen all prior questions' Teach fields within the same unit in order.
-R12a. IF a concept required to answer this question was already covered in a prior question's Teach field within the same unit THEN the Teach field MAY omit re-explaining that concept.
-R12b. R12 overrides R12a: IF omitting the prior context would make the Teach field insufficient to answer the question THEN include it anyway.
+R12. IF auditing a conceptual question THEN require that its own Teach field, plus its verified Diagram and Legend when present, suffices to answer it without any earlier question.
+R12a. IF answering this question requires a concept explained in an earlier entry THEN include the necessary source-grounded explanation in this entry's Teach and its supporting sentences in Source quote.
+R12b. IF an entry depends on earlier delivery context THEN mark it FAIL and repair its own Teach before adoption or saving; R12–R12b override prior-context allowances elsewhere in this file.
 
 // Concept inventory (per unit)
 R12c. Before generating any question for a unit, enumerate that unit's testable concepts. This list is the unit's concept inventory.
@@ -102,17 +137,19 @@ R12e2. IF an extraction has split the sentence that satisfies R12d — a figure,
      // Example: `"However, they use them selectively [...] and always try to discover solutions to problems even when there are no applicable theories and methods."`
 R12f. Exclude from the inventory: bibliographic references, author names, tool and product names, chapter objective lists, further-reading sections, end-of-chapter exercises, and page headers.
 R12f1. R12f excludes those passages from the CONCEPT INVENTORY only. It does NOT remove end-of-chapter exercises from R12h0's classification or from R12t's curated-question scan.
-R12g1. R12g's same-idea test also applies ACROSS units within one run. IF a concept would produce a question with the same Answer key idea as a concept already questioned in an EARLIER unit of this run THEN exclude it and report it, naming the unit that already covers it.
-     // Commentary: R12g itself is in SKILL.md, because select-run matching depends on it.
-R12g3. R12g1 is scoped to one run over one source. It says nothing about a concept questioned in a different chapter file or in the week file for the same material.
+R12g1. IF concepts in different units of one run would produce the same Answer key idea THEN retain the earliest explanatory occurrence in the chapter inventory and exclude the duplicates before core-concept selection.
+     // Commentary: R12g itself is in SKILL.md.
+R12g3. R12g1 is scoped to one run over one source. It says nothing about a concept questioned in a different chapter file or in a lecture file for the same material.
 
 // Exercise classification (per unit)
-R12h0. IF the chapter contains an `Exercises` section THEN classify each numbered exercise as `analytical` or `constructive`. Book runs only — R0k3 suspends this on a select run.
+R12h0. IF the chapter contains an `Exercises` section THEN classify each numbered exercise as `analytical`, `constructive`, or `computational`. Book runs only — lecture.md L1a suspends this on a lecture run.
 R12h0a. An exercise is `analytical` IF it asks the reader to explain, discuss, describe, compare, suggest a reason, or give examples.
 R12h0b. An exercise is `constructive` IF it asks the reader to produce an artifact — draw, design, develop, model, write, or rewrite.
 R12h0c. IF an exercise contains both an analytical and a constructive clause THEN classify it `analytical`.
 R12h0d. R12t overrides R12h0: IF a numbered exercise is interrogative AND its answer appears in the source body THEN it is a CURATED QUESTION and R12t decides its fate. R12h0 classifies only the exercises R12t did not adopt.
 R12h0e. IF R12t declines to adopt a curated question because it maps to no inventory concept THEN R12r's inventory-gap handling applies to it exactly as to an unadopted analytical exercise.
+R12h0f. IF a numbered exercise asks the reader to determine, calculate, find, or compute a value THEN classify it `computational`. R12h0f overrides R12h0a–R12h0c.
+R12h0g. IF an exercise is classified `computational` THEN it is a source for a PROBLEMS run only (problems.md P2); a BOOK run writes no entry for it. Do NOT write it to `practice_<arg>.md` and do NOT record it as an inventory gap under R12r.
 
 // Inventory handling
 R12m. The concept inventory is internal metadata. Do NOT write it to the output file. Each question records its own concept in the `Concept:` field per R13f and its own R12e sentence in the `Source quote:` field per R13g.
@@ -121,8 +158,21 @@ R12m. The concept inventory is internal metadata. Do NOT write it to the output 
 R12r. IF this is a BOOK run AND an `analytical` exercise asks about a topic that no inventory concept covers THEN record it as an inventory gap.
 R12s. IF an inventory gap is recorded THEN attempt to admit the missing concept under R12d–R12e. IF no sentence in the chapter body explains it THEN leave it uncovered and report it.
 
+// Chapter-wide core selection — before any question is written
+R12n. IF beginning a BOOK run's question planning THEN read the entire chapter and build all units' source-grounded inventories, including cross-unit deduplication, before selecting concepts or writing any candidate question.
+R12n1. IF a concept is an isolated fact, minor exception, or narrow example AND it is not needed to explain another chapter concept THEN exclude it from core selection.
+R12n2. IF ranking eligible concepts THEN prioritize prerequisites needed by other chapter concepts, followed by major mechanisms and contrasts, followed by scenarios reusable beyond a single example; break equal-priority ties by source order.
+// Example: A transport chapter selects reliable delivery and flow control before a one-off implementation exception.
+R12n3. IF allocating the chapter's 25 question slots THEN first select the highest-ranked eligible concept from each unit; if more than 25 units qualify, retain the 25 highest-ranked representatives.
+R12n4. IF slots remain after unit representation THEN fill them with the highest-ranked remaining eligible concepts across the chapter.
+R12n5. IF generating or adopting questions THEN use only the selected concepts; generate fewer than 25 when fewer eligible concepts or passing questions exist, without padding.
+R12n6. IF an inventory gap or retry adds an eligible concept THEN rerun chapter-wide selection before writing a question for that concept.
+R12n7. IF a unit has inventory concepts but none selected THEN retain its unit heading without questions or omitted-topic commentary and continue; R12n7 overrides R13d–R13d2 for this condition.
+R12n8. IF preparing to save a BOOK file THEN count all PASS entries across all units, including adopted questions and split sub-questions; if more than 25 remain, retain one highest-priority entry per selected concept first, fill remaining slots by R12n2 priority, and re-audit retained entries against their retained Teach context before saving.
+R12n9. IF selection or question count conflicts with exhaustive generation, exercise adoption, question splitting, retries, or question-type quotas THEN R12n–R12n8 override R12t–R12t11, R13, R13c, R15b, R15d–R15f, R16d, and R23 only to enforce selected concepts and the fixed 25-entry maximum; keep single-concept, single-question, source-grounding, and audit requirements in force.
+
 // Curated question adoption (per unit)
-R12t. After building the concept inventory, scan the unit's source for curated questions — any interrogative sentence whose answer appears in the same source. Match each to the inventory concept it tests.
+R12t. IF chapter-wide selection under R12n–R12n9 is complete THEN scan the source for curated questions whose answers appear in the same source and match them only to selected concepts.
 R12t1. A curated question is ADOPTABLE if all three hold: (a) it maps to exactly one inventory concept, (b) the source contains enough content after the question to build a Teach field that makes it answerable (R12/R16), and (c) it passes R15.
 R12t2. A curated question is NOT adoptable if any of these apply: it is a discussion prompt with no answer in the source; it is a skill checklist item; it is an ethical dilemma or open-ended question the author deliberately left unanswered; it is a process-step definition where the question IS the content; it duplicates a question already adopted for the same concept; or it fails R15 (definitional recall).
 R12t3. For each adopted question: preserve the author's question wording in the `Question:` field. Build `Teach:`, `Answer key:`, `Elaboration:`, and `Audit:` from the source content per the same rules as generated questions (R10–R12b, R16a–R16e, R17). Record `Concept:` per R13f and `Source quote:` per R13g2.
@@ -135,14 +185,15 @@ R12t9. Curated questions are not confined to a unit's own prose. A textbook's en
 R12t11. IF a unit's scan finds no curated question at all THEN report that as an explicit zero. Do NOT omit the unit from the adoption report.
 
 // Question generation (per unit)
-R13. Generate exactly one candidate question per concept in the unit's concept inventory that has no adopted curated question from R12t. There is no fixed upper or lower bound on the number of questions per unit.
+R13. IF a selected concept has no adopted curated question from R12t THEN generate one candidate question for it within the fixed chapter-wide maximum of 25 entries.
+R13a. A BOOK run writes no `Type: problem` entry. Computational problems belong to a PROBLEMS run (problems.md).
 R13b. Order questions within each unit from most foundational concept to most complex, so later questions may safely rely on earlier ones having been seen.
 R13c. R15b overrides R13: IF one inventory concept produces two natural sub-questions THEN that concept yields two entries.
 R13d. IF a unit's concept inventory is empty THEN stop, show the user the unit's notes, and ask how to proceed. Do not improvise.
 R13d1. R13d1 overrides R13d: IF a unit's inventory is empty ONLY because every concept it held was excluded under R12g1 as already covered by an earlier unit THEN this is a RESTATEMENT UNIT. Generate nothing for it, continue to the next unit, and report it naming the units its content repeats. Do NOT stop and do NOT ask.
 R13d2. A restatement unit still appears in the output file with its heading and its "Unit N of M" numbering, carrying no questions and a one-line note that its content is covered by the units named.
 R13e. Before saving, check each candidate question against the inventory. IF a question does not map to exactly one inventory concept THEN drop it.
-R13f. Record each question's inventory concept in its `Concept:` field. This is the merge key R5k reads.
+R13f. Record each question's inventory concept in its `Concept:` field. This is the entry's concept key.
 R13g. Record the R12e sentence for this question's concept in its `Source quote:` field, verbatim per R12e1–R12e2. This is the field R18b audits the Teach field against.
 R13g1. IF a question's Teach field draws on two or more R12e sentences THEN `Source quote:` carries all of them, each verbatim, separated by a blank line.
 R13g2. IF a question was adopted under R12t THEN `Source quote:` records the source sentence(s) its Teach field was built from, NOT the curated question's own wording.
@@ -160,8 +211,8 @@ R15g. A `Question:` field MUST name its subject. It MUST NOT point at its own `T
      // FAILS: "Why does this end-to-end expression leave out one of the four delay components entirely?"
      // PASSES: "The end-to-end delay formula adds only three of the four delay components. What assumption lets it drop the fourth?"
 R15g1. R15g bars pointing OUTWARD at the Teach field. It does not bar a pronoun whose antecedent the Question itself supplies.
-R15g2. R15g does NOT override R12a. A Question may still rely on a term defined in an EARLIER question's Teach field within the same unit; what it may not do is refer to its own.
-R16. Each question MUST be fully answerable using only this question's Teach field, given that prior questions' Teach fields within the same unit have been shown in order.
+R15g2. IF a Question uses a term taught earlier THEN R12a requires its necessary definition in this entry; R15g does not waive that requirement.
+R16. IF auditing an entry THEN require it to be fully answerable from its own Teach, Question, optional Legend, and verified Diagram without earlier entries; a problem is solved from these fields under R18c.
 
 // Answer key (per question)
 R16a. The `Answer key` field MUST state the minimum sufficient answer: the single idea whose absence makes an answer wrong. One sentence, max 25 words.
@@ -187,21 +238,21 @@ R18b. Compare the Teach field against this entry's `Source quote:`. IF the Teach
      // FAILS: quote says "the bandwidth to the satellite is relatively narrow"; Teach says "the satellite link is too slow to carry per-minute readings, so the station compresses them". Compression appears nowhere in the source.
 R18b1. Restating, reordering, shortening, and formatting the `Source quote:` are permitted. Adding a mechanism, a cause, a consequence, a number, or an example that the quote does not carry is not.
 R18b2. R12a does NOT exempt a Teach field from R18b. IF a Teach field carries context from a prior question's concept THEN that context's own R12e sentence belongs in `Source quote:` per R13g1.
-     // Commentary: R18b3 — the no-quote skip — is in SKILL.md, because the select-run verify cites it too.
 R19. IF this question's Teach field states a fact without an explanation AND the question asks "why" about that fact THEN mark FAIL.
-R20. IF an acronym or term appears in the question AND it is not defined in this question's Teach field AND it was not defined in a prior question's Teach field within the same unit THEN mark FAIL.
+R20. IF an acronym or term needed to answer the question is not defined in this entry's Teach, Question, Legend, or verified Diagram THEN mark FAIL; an earlier entry's definition does not satisfy this check.
 R20a. IF the `Answer key` field contains more than one independently droppable claim THEN mark FAIL with reason "over-specified answer key — move the surplus to Elaboration per R16b".
 R20b. IF the `Question` field demands two distinct facts — even when it contains a single `?` — THEN mark FAIL with reason "compound requirement — split per R15b/R16d".
-R20b1. A conjunction in the Question is NOT itself evidence of a compound requirement. Apply the interdependence test: IF either half, answered alone, would fully satisfy the question THEN it is compound and R20b fires. IF neither half alone satisfies it THEN the two halves state ONE relation and R20b does NOT fire.
-     // FIRES (two independent facts): "¿qué ocurre con la oposición /y/ ~ /ll/ y cuál de los dos fonemas sobrevive?" — each half is a complete answer on its own.
+R20b1. IF a Question requires two separately answerable facts rather than one relationship THEN R20b fires, even when neither fact alone answers the whole Question; a conjunction joining the two sides of one comparison is not compound by itself.
+     // FIRES: "Which protocol provides reliability, and which has lower overhead?" asks for two separate identifications.
+     // DOES NOT FIRE: "How does flow control differ from congestion control?" asks for one contrast.
 R20c. IF the `Question` field points at its own `Teach` field deictically THEN mark FAIL with reason "question not self-contained — rewrite per R15g".
 R21. IF a candidate question is not marked FAIL by R17–R20 — including all lettered sub-rules — THEN mark PASS.
 R22. Drop all FAIL questions. Only PASS questions go into the output file.
-R23. R23 overrides R13: IF all candidates for a unit fail audit, count that audited round and generate a new round for every inventory concept not yet represented by a PASS or adopted question; a failed candidate does not make its concept used, so it may be revised. Re-run R12c–R12g to discover additional concepts, but the absence of new concepts does not block retrying failed ones. After the third failed audited round, R23a applies.
+R23. IF all candidates for a unit fail audit THEN count that audited round and retry its selected concepts not yet represented by a PASS or adopted question; a failed candidate does not make its concept used. R23 overrides R13 only to permit retries, not to bypass R12n–R12n9. After the third failed audited round, R23a applies.
 R23a. IF 3 rounds of candidates for a unit have all failed audit THEN stop, show the user the failed candidates with their fail reasons and the unit's notes, and ask whether to (a) keep generating or (b) skip the unit. STOP until user responds.
 
 // Constructive exercises
-R24e. IF the chapter contains `constructive` exercises THEN write them next to the questions file (same directory as R24) with frontmatter `name: practice_<arg>`, `source: <notes filename>`, `generated: <today's date>`. A select run never writes this file.
+R24e. IF the chapter contains `constructive` exercises THEN write them next to the questions file (same directory as R24) with frontmatter `name: practice_<arg>`, `source: <notes filename>`, `generated: <today's date>`. A lecture run never writes this file.
 R24f. Each `practice_<arg>.md` entry records the exercise number and its text verbatim. Do NOT paraphrase and do NOT attempt an answer.
 R24g. IF the chapter contains no constructive exercises THEN do NOT create `practice_<arg>.md`.
 
@@ -223,20 +274,25 @@ effort: <reasoning effort level>
 #### Q1
 Concept: <the inventory concept this question tests>
 Source quote: <the R12e sentence(s), VERBATIM from the source>
+Figure source: <class-root-relative-registry>#<figure-id>  ← optional diagram provenance
+Figure quote:
+  <supporting Description sentence(s), verbatim; omit with no attachment>
 Teach:
   <only the source-grounded restatement(s) needed to answer Q1 — no more>
   <every continuation line indented two spaces; blank lines stay blank>
 Teach_EN:                ← omit when language = en (R16i)
   <English translation of the Teach field — preserves structure>
 Question: <question text>
+Diagram: ![Figure <number>](<class-root-relative-PNG>)  ← optional question image
 Question_EN: <English translation of the Question field>   ← omit when language = en
 Tests: <one-line description of the concept being tested>
 Answer key: <the single minimal idea whose absence makes an answer wrong — one sentence, max 25 words>
 Elaboration: <mechanism, example, or consequence completing the answer; omit entirely if there is none>
+Answer diagram: ![Figure <number> — solution](<class-root-relative-PNG>)  ← optional, answer release only
 Audit: PASS — <cite the exact phrase in the Teach field that contains the answer>
 
 #### Q2
-<same fields — Teach may omit concepts already covered in Q1's Teach per R12a>
+<same fields — Teach includes its own necessary prerequisite explanations per R12a>
 <Elaboration omitted entirely when the minimal idea is the whole answer (R16e)>
 
 ## Unit 2 of N — <Unit Title>
@@ -249,7 +305,16 @@ Audit: PASS — <cite the exact phrase in the Teach field that contains the answ
 
 F1.  IF writing a questions file THEN write `format: 2` into the frontmatter.
 F2.  IF a field's value spans more than one line THEN indent every continuation line exactly two
-     spaces. Only `Teach`, `Teach_EN`, and `Source quote` are ever multi-line.
+     spaces. Only `Teach`, `Teach_EN`, `Source quote`, `Figure quote`, a problem entry's
+     `Elaboration` (R13r4), and an F2a `Question` or `Question_EN` are ever multi-line.
+F2a. IF a question offers lettered answer options THEN write the stem on the `Question:` line and
+     each option on its own continuation line, in the form `  - <letter>) <option text>`.
+     Apply the same layout to `Question_EN:`.
+     // Example: `Question: Which are activities of elicitation?`
+     //          `  - a) Discovery`
+     //          `  - b) Documentation`
+     //          `  - c) a and b`
+F2b. IF a question offers no lettered answer options THEN `Question` stays on one line.
 F3.  IF a continuation line is blank THEN leave it blank. Do NOT indent it.
      // Commentary: R13g1 separates independently-findable quote sentences with a blank line, and
      // verify_quotes.py splits `Source quote` on them. An indented "blank" line is not blank.
@@ -272,6 +337,8 @@ F7.  IF any condition not covered by F1–F6 arises THEN stop, describe the situ
 
 A book run reads the chapter slice at `extracted/textbook/chapters/chapter<N>/`. If no slice exists,
 it falls back to segmenting the full textbook notes file. It generates questions, audits them, and
-writes them next to the slice. This file is the POOL — a reference bank covering everything the
-chapter explains, not a study list. Re-running warns before overwriting; there is no merge, since
+writes them next to the slice. It holds at most 25 questions selected for core
+concepts and section breadth before generation. It holds conceptual questions only; the chapter's
+computational problems go to `problems_chapter<N>.md` through a PROBLEMS run (problems.md).
+Re-running warns before overwriting; there is no merge, since
 textbook chapters don't change.

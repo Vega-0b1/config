@@ -14,6 +14,8 @@ destroy a good dump -- so a failing candidate is kept as .new for inspection and
 the live file is left untouched. --force overrides, --dry-run never promotes.
 
 Source kinds:
+  archive      extract selected HTML or text pages from offline tar archives.
+  local-man    render installed Debian man-page packages into indexed text.
 
   nix-options  build a flake attr and render its options.json. No network; the
                output matches the version actually installed rather than a
@@ -47,6 +49,7 @@ import urllib.parse
 import urllib.request
 
 import index_dumps
+from reference_sources import build_archive, build_local_man
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MANIFEST = os.path.join(HERE, "sources.toml")
@@ -755,7 +758,9 @@ def build_pydoc(name, spec):
     return lines
 
 
-BUILDERS = {"nix-options": build_nix_options,
+BUILDERS = {"archive": build_archive,
+            "local-man": build_local_man,
+            "nix-options": build_nix_options,
             "markdown": build_markdown,
             "mediawiki": build_mediawiki,
             "texinfo": build_texinfo,

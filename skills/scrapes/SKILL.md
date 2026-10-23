@@ -42,16 +42,16 @@ R4.  IF adding a source THEN add a `sources.toml` entry with `kind`, its source 
 R5.  IF choosing sentinels THEN pick strings that would vanish first if extraction regressed, not strings that appear everywhere.
      // Example: `useGrimAdapter` sits inside a code template — it disappears the moment template parsing breaks. "NixOS" does not.
 R6.  IF a source is reachable both locally and over the network THEN prefer local.
-     // Commentary: home_manager_options, openocd_manual and stm32f4_hal are generated from what is installed, so they match the running system and need no network. nixos_options was too, on the former NixOS host; it no longer describes this one.
+     // Commentary: home_manager_options, openocd_manual and stm32f4_hal are generated from what is installed, so they match the running system and need no network.
 R7.  IF a flake package is the source THEN reference it through `builtins.getFlake "/home/jcvega/repos/debian-config"`, never a bare `github:owner/repo/branch` ref.
-     // Commentary: a branch ref resolves to that branch's HEAD, which drifts ahead of flake.lock and documents a version this system does not have. The flake moved here from /etc/nixos when the host became Debian — there is no system flake now, only this Home Manager one.
+     // Commentary: a branch ref resolves to that branch's HEAD, which drifts ahead of flake.lock and documents a version this system does not have.
 R8.  IF a new source is added THEN run `scrape NAME --dry-run` first and inspect the candidate before promoting.
 
 // PDFs
 R9.  IF adding a PDF THEN use `kind = "pdf"` with `urls` (remote), `files` (local), or both. Each PDF page becomes one dump page, so citations by page number resolve.
 R10. IF a PDF source is remote THEN ask the user before the first download of that source. State the filename and origin.
      // Commentary: downloading is the one step here that reaches outside the machine and writes a file the user did not ask for by name.
-R11. IF a PDF has been extracted THEN do NOT keep the PDF. The manifest holds the URL and the dump regenerates.
+R11. IF a PDF has been extracted THEN remove only temporary copies created by the scraper; preserve every user-supplied local PDF and every path named by a manifest's `files` field.
 R12. IF extraction reports "no extractable text" THEN the PDF is an image-only scan. Say so and stop. Do NOT work around it.
      // Commentary: pdftotext cannot read it; OCR is out of scope. A silent workaround produces a dump of blank pages.
 
@@ -84,7 +84,7 @@ R24. IF a dump is added or retired THEN update the file table in `~/edu/zStore/s
 R25. IF deleting any dump THEN first verify what is uniquely in it, and report that before deleting.
      // Commentary: a redundancy call in this directory was wrong once. Title overlap is not content overlap.
 R26. IF a `.txt` dump changes THEN do NOT stage or commit it. Dumps live under `~/edu`, which `~/repos/config` does not track.
-     // Commentary: the Nextcloud client syncs ~/edu, so dumps are backed up but not versioned. They regenerate from `tools/sources.toml`. The toolchain itself moved into `tools/` on 2026-10-02 after being lost in the NixOS-to-Debian migration.
+     // Commentary: the Nextcloud client syncs ~/edu, so dumps are backed up but not versioned. They regenerate from `tools/sources.toml`.
 
 // Catch-all
 R27. IF any condition not covered by R0–R26 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.

@@ -21,6 +21,7 @@ code/        — code written during the course. Created only when the class has
 R1.  IF an argument is given (e.g. `calculus`) THEN target = `/home/jcvega/edu/<arg>/`. Create it if it doesn't exist.
 R2.  IF no argument is given AND cwd's parent is `~/edu` or `~/edu/zOld` THEN target = cwd; scaffold in place.
 R3.  IF no argument is given AND cwd's parent is NOT `~/edu` or `~/edu/zOld` THEN stop and tell the user to provide a name or navigate to a class directory.
+R3a. IF `{target}/CLAUDE.md` already exists THEN preserve it and the existing class structure, report that the class is already scaffolded, and stop before sorting or writing; R3a overrides R4–R19, including lettered sub-rules.
 
 // Metadata inference
 R4.  IF inferring course metadata THEN scan filenames in the target root. Do NOT ask the user questions about metadata.
@@ -46,7 +47,7 @@ R15. IF a file is a dotfile, a lock file, an archive of unknown contents, or a m
 R16. Do NOT move `extracted/`, `source/`, `code/`, or `CLAUDE.md`.
 
 // CLAUDE.md
-R17. Write `{target}/CLAUDE.md` using the template below.
+R17. IF `{target}/CLAUDE.md` does not exist THEN write it using the template below.
 R18. IF `code/` was not created (R10) THEN omit the `code/` line from the directories block in CLAUDE.md.
 R18a. IF writing the `## Contents` section THEN add a one-line entry (`- file — description`) for every file sorted in R11–R15, grouped under a `**<dir>/**` bold header per directory.
 R18a1. Every Contents entry MUST begin with the file's literal name in backticks, then ` — `, then the description. Do NOT name a file in prose only.

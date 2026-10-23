@@ -1,14 +1,22 @@
 ---
 name: extract
-description: Extract all content from PDFs/DOCX/EPUB/PPTX files into a markdown notes file. Accepts an optional output directory (defaults to extracted/). PDFs gain a `## Page N` heading per page and PPTX decks a `## Slide N` heading per slide, so extracted content can be cited and grepped by location. Scanned and oversized PDFs go through `pdftotext -layout` + `pdf_layout.py`, which strips repeated running heads and rebuilds chapter/section/subsection headings from the book's own numbering, tolerating OCR damage and rejecting table-of-contents lines. When extracting a textbook to extracted/textbook/, also splits it into per-chapter slices using the chapter heading pattern from the Source Profile. After extracting, moves the source files into source/.
+description: Extract all content from PDFs/DOCX/EPUB/PPTX files into a markdown notes file. Accepts an optional output directory (defaults to extracted/). PDFs gain a `## Page N` heading per page and PPTX decks a `## Slide N` heading per slide, so extracted content can be cited and grepped by location. Every PDF goes through `pdftotext -layout` + `pdf_layout.py`; born-digital PDFs also get their ruled tables converted to Markdown by `pdf_tables.py` (tables with sub/superscripts or math are flagged and retyped from the page image), and scanned PDFs are re-OCR'd on the NAS through the offload skill with `ocr_pdf.py`. `pdf_layout.py` strips repeated running heads and rebuilds chapter/section/subsection headings from the book's own numbering, tolerating OCR damage and rejecting table-of-contents lines. When extracting a textbook to extracted/textbook/, also splits it into per-chapter slices using the chapter heading pattern from the Source Profile. After extracting, moves the source files into source/.
 ---
 
 Scan files and extract all content into a single markdown file. Output directory is caller-specified or defaults to `extracted/`.
 
 ## Rules
 
+// Optional PDF/EPUB image mode
+R0d. IF the request explicitly asks to extract, add, or preserve diagrams or images THEN read `diagrams.md` beside this skill and apply its D rules to the requested source scope.
+R0d1. IF diagram extraction was not requested THEN apply the existing text-only workflow without loading `diagrams.md`.
+R0d2. IF the argument contains the option `diagrams` THEN remove that option before target resolution and apply R0d alongside text extraction.
+R0d3. IF the argument contains the option `diagrams-only` THEN remove that option before target resolution and apply R0d to existing notes without rerunning text extraction or moving sources.
+R0d4. IF diagram mode is active THEN its D rules override R11a and R13a–R13c only for figures in the requested scope; report the actual extracted and unresolved figure counts instead of saying no figures were extracted.
+R0d5. IF `diagrams-only` is active THEN R6 applies to replacing existing assets or registry entries, not to adding image links to the existing notes under D14.
+
 // Target and output resolution
-R0.  IF the caller provides an output directory (e.g. `/updateclass` passing `extracted/class/week1/`) THEN OUTDIR = that directory. OTHERWISE OUTDIR = `extracted/`.
+R0.  IF the caller provides an output directory (e.g. `/updateclass` passing `extracted/class/lectures/`) THEN OUTDIR = that directory. OTHERWISE OUTDIR = `extracted/`.
 R1.  IF the argument names a subfolder (e.g. `wk9`) THEN target = all files inside that subfolder; output = `OUTDIR/<subfolder>_notes.md`.
 R2.  IF the argument names a single file (e.g. `textbook.epub`) THEN target = that file; output = `OUTDIR/<sanitized>_notes.md`, sanitized per the Sanitization block below.
 R3.  IF no argument is given THEN target = all loose files in the current directory; output = `OUTDIR/<current-folder-name>_notes.md`.
@@ -35,10 +43,10 @@ R8j. IF a target file is skipped OR its extraction fails THEN do NOT add that ta
 
 R9.  IF a file is unrelated (`.gitignore`, lock files, code files, existing markdown in `extracted/`) THEN skip it.
 R10. IF multiple files are targeted THEN read them in parallel.
-R11. IF the file is a PDF AND it is under 100 MB AND it is BORN-DIGITAL THEN read it directly with the Read tool.
+R11. IF the file is a PDF AND it is BORN-DIGITAL THEN extract with `pdftotext -layout <file> <raw.txt>`, convert its tables per R11t–R11t6, and build the notes file with `pdf_layout.py` (next to this skill).
+     // Commentary: reading the PDF with the Read tool and retyping it into the notes file cost the whole book's tokens twice, once in and once out. `pdftotext` writes the file directly.
 R11a. IF a source carries figures THEN say so in the report — the format and that its figures were not extracted.
-R11a1. IF the file is a PDF AND (it is 100 MB or larger OR it is SCANNED) THEN extract with `pdftotext -layout <file> <raw.txt>`, then build the notes file with `pdf_layout.py <raw.txt> <notes.md>` (next to this skill).
-R11a2. IF the Read tool returns a size error on a PDF THEN fall back to R11a1. Do NOT report the extraction as blocked.
+R11a1. IF the file is a PDF AND it is SCANNED THEN re-OCR it on the NAS per R11s–R11s5, and build the notes file from the OCR output with `pdf_layout.py`.
 R11b. IF the file is a PDF THEN emit `## Page <N>` on its own line immediately before each page's content, where `<N>` is that page's 1-indexed position in the PDF.
 R11d. IF a PDF page yields no extractable text THEN emit its `## Page <N>` heading anyway, followed by no content.
 
@@ -47,16 +55,41 @@ R11f. IF the file is a PDF THEN classify it as SCANNED or BORN-DIGITAL before ex
 R11g. Classify SCANNED IF either holds: (a) the `Producer` or `Creator` names a scanner or an OCR pass — `Paper Capture`, `Image Converter`, `MFP`, `intsig`, `CamScanner`, `ScanSnap`; or (b) `pdftotext` over three sample pages yields under 200 characters per page while `pdfimages -list` shows a full-page image on those pages.
 R11h. PDF alone is NOT the risk factor; SCANNED is. A born-digital PDF carries the publisher's own text and extracts cleanly.
 R11i. IF a PDF is SCANNED THEN run `rejoin_ocr.py` (next to this skill) over the finished notes file, and report the merge count.
-R11j. IF a PDF is SCANNED THEN say so in the class `CLAUDE.md` Source Profile, naming the residual damage as character-level and stating that re-extraction will NOT repair it.
+R11j. IF a PDF is SCANNED THEN say so in the class `CLAUDE.md` Source Profile, state whether it was re-OCR'd (R11s1) or extracted from its own text layer (R11s3), and name the residual damage as character-level.
 R11k. Residual substitutions — `nonnal` for `normal`, `tum` for `turn` — are repaired only by reading the page image: `pdftoppm -f <p> -l <p> -r 170 -png`. Do this per chapter, on demand, not across a whole book.
 R11k1. Visual repair is TRANSCRIPTION from the image, never inference from context. IF a token cannot be read clearly THEN leave it as-is and flag it.
 R11k2. Repairing text invalidates every `Source quote:` generated against the old text. Repair a chapter BEFORE generating its questions.
 R11l. Do NOT use a word-fragment rate as a quality gate on its own. The measure is English-prose-specific and over-reports on non-English text and math-heavy content.
 
+// Scanned PDFs — re-OCR on the NAS
+R11s. IF a PDF is SCANNED THEN still run `pdftotext -layout <file> <raw_layer.txt>` and keep it beside the OCR output.
+R11s1. IF a PDF is SCANNED THEN run `ocr_pdf.py` (next to this skill) on the NAS through the `offload` skill: inputs = the PDF and `ocr_pdf.py`; command = `python -I in/ocr_pdf.py in/<file>.pdf out /mnt/Raid_1_Storage/jobs/cache/en_PP-OCRv3_rec_infer.onnx`; collect `out/raw.txt` as `<raw.txt>`.
+R11s2. IF the jobs venv lacks `pypdfium2` or `rapidocr_onnxruntime`, OR the model file is missing from `jobs/cache/` THEN install the package per offload R7, or download the model from `https://huggingface.co/SWHL/RapidOCR/resolve/main/PP-OCRv3/en_PP-OCRv3_rec_infer.onnx` into `jobs/cache/`.
+     // Commentary: RapidOCR's default recognition model is Chinese-trained and drops the spaces between English words (`Wechoosethe/etc/passwdfile`). The English model keeps them.
+R11s3. IF the offload preflight fails THEN build the notes from `<raw_layer.txt>` instead, and report that the PDF was NOT re-OCR'd and why.
+R11s4. IF `<raw.txt>` holds a different number of pages (form-feed-separated) than `pdfinfo` reports THEN stop and report both counts.
+R11s6. IF the OCR `<raw.txt>` is collected THEN run `merge_layer.py <raw_layer.txt> <raw.txt> <raw_merged.txt>` (next to this skill), and build the notes from `<raw_merged.txt>`.
+     // Commentary: the re-OCR drops whole lines (1.7% of the Du textbook, on 219 of 690 pages). The text layer is damaged but complete, so its missing lines are merged back in at their position.
+R11s7. IF R11s3 applies THEN skip R11s6; the text layer is already the source.
+R11s5. Do NOT run R11t–R11t6 on a SCANNED PDF.
+     // Commentary: pdfplumber reads tables from the text layer, which on a scan is the damaged OCR R11s1 replaces.
+
+// Tables — BORN-DIGITAL PDFs only
+R11t. IF a PDF is BORN-DIGITAL THEN run `pdf_tables.py mark <file> <raw.txt> <raw_marked.txt> <tables.json>` (next to this skill), and give `<raw_marked.txt>` to `pdf_layout.py` in place of `<raw.txt>`.
+R11t0. Run `pdf_tables.py` from a scratchpad venv with `pdfplumber` installed. Do NOT install `pdfplumber` into the system or the Nix profile.
+R11t1. IF `pdf_layout.py` has written its output THEN run `pdf_tables.py fill <notes_marked.md> <tables.json> <notes.md>`.
+R11t2. IF the notes contain `<!-- RETYPE table <p>.<k>: <reasons> -->` THEN render page `<p>` with `pdftoppm -f <p> -l <p> -r 150 -png`, rewrite the Markdown table under the comment from the image, and delete the comment.
+R11t3. Under R11t2, write a superscript as `^` (`10^7`), a subscript as `_` (`A_O`), a fraction as `(a)/(b)`, and every other math symbol as its Unicode character.
+R11t4. Retyping under R11t2 is TRANSCRIPTION from the image, never inference. IF a cell cannot be read clearly THEN keep the script's text for that cell and flag it in the report.
+R11t5. IF the image shows the flagged region is a figure or graph, not a table THEN replace the Markdown table with the cells' text as plain lines, in reading order.
+     // Commentary: graph axes and circuit labels can sit inside ruling lines. Their text is still content, so R16 keeps it; only the table shape is dropped.
+R11t6. R11t–R11t5 are an exception to R15 and R16 only in replacing a table's space-aligned text with the same content as a Markdown table. A raw line holding any word from outside the table is kept, so no prose is removed.
+
 // Pipeline order
-R11m. IF a PDF is extracted under R11a1 THEN run the stages in this order: `pdftotext -layout` → `pdf_layout.py` → `rejoin_ocr.py` → chapter split (R16a–R16b4). Do NOT reorder them.
+R11m. IF a PDF is BORN-DIGITAL THEN run the stages in this order: `pdftotext -layout` → `pdf_tables.py mark` → `pdf_layout.py` → R16h → `pdf_tables.py fill` → R11t2 retypes → chapter split (R16a–R16b4). Do NOT reorder them.
+R11m0. IF a PDF is SCANNED THEN run the stages in this order: `pdftotext -layout` (kept, R11s) and `ocr_pdf.py` on the NAS (R11s1) → `merge_layer.py` (R11s6) → `pdf_layout.py` → R16h → `rejoin_ocr.py` → chapter split (R16a–R16b4). Do NOT reorder them.
 R11m1. Run `rejoin_ocr.py` AFTER headings exist, so its heading-preservation check counts them.
-R11m2. Keep the `pdftotext` output. IF a later stage needs re-running THEN re-run it from that file, not from the PDF.
+R11m2. Keep every raw text file (`<raw.txt>`, `<raw_layer.txt>`, `<raw_merged.txt>`, `<raw_marked.txt>`) and `<tables.json>`. IF a later stage needs re-running THEN re-run it from those files, not from the PDF.
 
 // PDF running heads — layout furniture, not content
 R11n. A running head is the line a print layout repeats at the top of every page: verso `<folio>   CHAPTER <N>. <TITLE>`, recto `<N>.<M>. <TITLE>   <folio>`. IF a line falls within the first three non-blank lines of a page AND matches a running-head form THEN remove it.
@@ -116,7 +149,7 @@ R15a. R11b, R14b, and R14e emit headings that do not appear in the source. R15's
 R15b. R11o may join a detected chapter-number line with its verbatim title line(s) and insert Markdown heading punctuation. Aside from that reconstruction, the source words survive unchanged; only leading whitespace and alignment padding may be dropped.
 R16. Do NOT summarize, filter, or omit anything.
 R16g. R11n overrides R16: running heads are removed. No other rule may omit source text.
-R16h. Verify the `pdf_layout.py` output against the `pdftotext` text: every non-heading line in the output must appear in the raw text. IF a line was invented THEN stop and report.
+R16h. Verify the `pdf_layout.py` output against the raw text it was built from (`<raw_marked.txt>` for BORN-DIGITAL, `<raw_merged.txt>` for SCANNED): every non-heading line in the output must appear in that raw text. IF a line was invented THEN stop and report.
 R16h1. Run R16h BEFORE `rejoin_ocr.py`, never after. `rejoin_ocr.py` rewrites lines by design, so the comparison is only meaningful on the pre-rejoin artifact.
      // Commentary: R16h catches a heading-reconstruction bug that rewrites text instead of re-tagging it. Run after the rejoin and it reports thousands of false differences.
 
@@ -155,11 +188,13 @@ R20a. IF R20 and either R17a or R18a apply THEN R20 overrides R17a and R18a.
 R21. IF the output write succeeded AND the class root contains a `CLAUDE.md` with a `## Contents` section THEN add a one-line entry for the new notes file under its `**extracted/**` group and update the `**source/**` group to reflect the moved files.
 R22. IF the output write succeeded AND the class root contains a `CLAUDE.md` without a `## Contents` section THEN append a `## Contents` section and populate it per R21.
 R23. IF the class root contains no `CLAUDE.md` THEN skip R21–R22.
-R24. IF updating the Contents section THEN do not modify any other part of `CLAUDE.md`.
+R24. IF updating the class `CLAUDE.md` during extraction THEN limit changes to `## Contents` and the scan/OCR provenance required by R11j in `## Source Profile`.
 
 // Confirm
 R25. Report: what was written and its path, OUTDIR used, any legacy file converted and what it became, any extension/magic mismatch, figures present but not extracted, SCANNED/BORN-DIGITAL classification of every PDF and which test decided it, `rejoin_ocr.py` merge count for scanned sources, `## Page`/`## Slide` anchor counts, empty page counts, slides with no title placeholder, heading reconstruction count when R13g applied, chapter slices written and R16b4 verification result, what was moved to `source/`, whether `CLAUDE.md` Contents was updated.
-R25a. IF a PDF was extracted under R11a1 THEN also report: running heads removed (R11n4), chapter/section/subsection counts and R11o6 rejections (R11o7), the R11o8 total-vs-unique check per level, and the R16h no-invented-lines check.
+R25c. IF a PDF is BORN-DIGITAL THEN also report: tables found, how many replaced their aligned text vs. were appended, how many passed as auto-ok, how many were retyped under R11t2, how many became plain lines under R11t5, and any cells flagged under R11t4.
+R25d. IF a PDF is SCANNED THEN also report: whether it was re-OCR'd on the NAS or fell back to the text layer (R11s3), the NAS job id, the R11s4 page-count check, and the number of text-layer lines `merge_layer.py` inserted (R11s6).
+R25a. IF a PDF was extracted THEN also report: running heads removed (R11n4), chapter/section/subsection counts and R11o6 rejections (R11o7), the R11o8 total-vs-unique check per level, and the R16h no-invented-lines check.
 R25b. IF R16a1 found repaired slices THEN report which chapters were discarded or preserved, and that a discarded chapter re-repairs on its next `/generate-questions` run.
 
 // Catch-all
@@ -176,12 +211,14 @@ Strip the extension, drop everything after the first ` - ` or `(`, lowercase, re
 /extract wk9                          ← standalone, output to extracted/
 /extract textbook.epub                ← standalone, output to extracted/
 /extract                              ← standalone, output to extracted/
+/extract textbook.pdf diagrams        ← text plus verified PDF figure crops
+/extract textbook.pdf diagrams-only   ← add figures to existing notes
 ```
 
 When called by `/updateclass`, the output directory is passed by the caller:
 
 ```
-/updateclass answers y, week 1  → /extract deck.pptx  → output to extracted/class/week1/
+/updateclass finds deck.pptx  → /extract deck.pptx  → output to extracted/class/lectures/
 /updateclass answers t          → /extract book.epub   → output to extracted/textbook/
 /updateclass answers c          → /extract syllabus.pdf→ output to extracted/
 /updateclass answers m          → /extract setup.pdf   → output to extracted/class/misc/

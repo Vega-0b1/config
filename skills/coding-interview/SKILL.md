@@ -1,6 +1,6 @@
 ---
 name: coding-interview
-description: Practice essential CS problems in Python, Rust, or C, each with its own deck, in normal or low-energy (easy) mode, with a PREVIOUS/CURRENT/NEXT lane tracker, and a technical debrief in normal mode.
+description: Practice essential CS problems in Python, Rust, or C/C++, each with its own deck, in normal or low-energy (easy) mode, with a PREVIOUS/CURRENT/NEXT lane tracker, and a technical debrief in normal mode.
 ---
 
 Problems are stored in one deck file per language under `decks/` in the current working directory. The user solves each problem in the ACTIVE LANGUAGE, drawn from that language's deck (the ACTIVE DECK).
@@ -18,16 +18,16 @@ R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situa
 
 ## Language
 
-The supported languages are Python, Rust, and C. Each language has its own deck with its own lanes, `last:` dates, answer keys, and curriculum order. A problem is solved once, in the ACTIVE LANGUAGE, and its completion is recorded only in the ACTIVE DECK.
+The supported languages are Python, Rust, and C/C++. C/C++ means C as the primary language, with C++ used where its tooling helps. Each language has its own deck with its own lanes, `last:` dates, answer keys, and curriculum order. A problem is solved once, in the ACTIVE LANGUAGE, and its completion is recorded only in the ACTIVE DECK.
 
 R1. IF the skill is invoked AND its arguments name a supported language (`python`/`py`, `rust`/`rs`, `c`) THEN set the ACTIVE LANGUAGE to that language without asking.
-     // Example: `/coding_interview c` → NORMAL, C.  `/coding_interview easy rust` → EASY, Rust.  `/coding_interview c_easy` → EASY, C.
-R2. IF the skill is invoked AND its arguments name no supported language THEN ask in one line which language — Python, Rust, or C — and wait. Select no problem until the user answers.
+     // Example: `/coding_interview c` → NORMAL, C/C++.  `/coding_interview easy rust` → EASY, Rust.  `/coding_interview c_easy` → EASY, C/C++.
+R2. IF the skill is invoked AND its arguments name no supported language THEN ask in one line which language — Python, Rust, or C/C++ — and wait. Select no problem until the user answers.
 R3. IF the ACTIVE LANGUAGE is set THEN set the ACTIVE DECK to that language's deck file per R7, and read and write lane state only in the ACTIVE DECK.
 R4. IF Check returns correct THEN apply the completion path for the ACTIVE MODE.
 R5. IF the user names a different supported language while a problem is active THEN leave that problem's entry in its deck unchanged, set the ACTIVE LANGUAGE and ACTIVE DECK to the named language, state the switch in one line, and select a problem from the new deck per Problem Selection.
      // Commentary: decks are independent. The old problem is neither completed nor recorded; if it was `[~]`, it stays `[~]` and is presented again the next time that deck is used.
-R5a. IF the user names an unsupported language THEN state in one line that only Python, Rust, and C are supported and leave the ACTIVE LANGUAGE unchanged.
+R5a. IF the user names an unsupported language THEN state in one line that only Python, Rust, and C/C++ are supported and leave the ACTIVE LANGUAGE unchanged.
 R6. IF the user asks to move on THEN apply Workflow R4.
 R7. IF resolving the active language to a deck, file extension, or run command THEN use this table:
 
@@ -35,7 +35,7 @@ R7. IF resolving the active language to a deck, file extension, or run command T
 |---|---|---|---|
 | Python | `decks/python.md` | `.py` | `python3 FILE` |
 | Rust | `decks/rust.md` | `.rs` | `rustc -o prog FILE && ./prog` |
-| C | `decks/c.md` | `.c` | `gcc -std=c11 -Wall -Wextra -o prog FILE && ./prog` |
+| C/C++ | `decks/c.md` | `.cpp` | `g++ -std=c++17 -Wall -Wextra -o prog FILE && ./prog` |
 
 R8. IF the user asks which language is active THEN state the language and the ACTIVE DECK in one line.
 R9. IF the ACTIVE DECK file does not exist THEN stop, name the missing file, and ask how to proceed.
@@ -55,10 +55,18 @@ EASY mode draws only from PREVIOUS. NORMAL mode draws from CURRENT, promoting fr
 
 R1. IF selecting any problem THEN read the problem list and lane markers from the ACTIVE DECK only. Markers in other decks do not affect selection.
 R2. IF the ACTIVE MODE is NORMAL AND CURRENT holds one or more problems THEN select the earliest CURRENT problem in curriculum order.
-R3. IF the ACTIVE MODE is NORMAL AND CURRENT is empty THEN mark the earliest NEXT problem in curriculum order `[~]`, then select it.
+R3. IF the ACTIVE MODE is NORMAL AND CURRENT is empty THEN mark the NEXT problem chosen per R3a–R3g `[~]`, then select it.
 R3a. IF R3 fires AND PREVIOUS is not empty THEN consider only NEXT problems whose solution reuses at least one concept PREVIOUS covers AND adds at most one concept PREVIOUS does not cover, counted per R12a, R12b, and R12d. R3a overrides R11.
      // Commentary: each new problem must build on what is already owned and add one step. An Easy label measures difficulty for someone who already owns the concepts, not the size of the step from PREVIOUS; set/clear/toggle/test a bit is Easy and still introduces four operators at once.
-R3b. IF R3 fires AND no NEXT problem in the current R10a group satisfies R3a THEN present no problem. Name the closest candidate and the concepts it would add, propose one bridging problem that adds exactly one of them, and add that problem to the ACTIVE DECK only after the user says yes.
+R3b. IF R3 fires AND no NEXT problem in the ACTIVE DECK satisfies R3a THEN present no problem. Name the closest candidate and the concepts it would add, propose one bridging problem that adds exactly one of them, and add that problem to the ACTIVE DECK only after the user says yes.
+R3c. IF R3 fires THEN choose, among the NEXT problems admitted by R3a in the ACTIVE DECK, the problem with the smallest delta: the number of concepts its reference solution adds that PREVIOUS does not cover, counted per R12a, R12b, and R12d. R3c overrides R10–R13.
+     // Example: PREVIOUS owns frequency counting. A Medium whose reference solution is pure frequency counting (delta 0) is chosen over an Easy that adds one look-ahead comparison (delta 1).
+R3d. IF two or more problems tie under R3c THEN choose the one whose reference solution reuses the most distinct concepts PREVIOUS covers.
+R3e. IF two or more problems remain tied after R3d THEN choose the one whose reference solution in the ACTIVE LANGUAGE has the fewest lines of code, counting non-blank lines of the solution body and excluding imports and the signature.
+     // Example: Top K Frequent Elements (`Counter` plus `heapq.nlargest`, 2 lines) is chosen over Group Anagrams (dict of lists keyed by sorted letters, 4 lines).
+R3f. IF two or more problems remain tied after R3e THEN present no problem. List the tied problems with the concept each adds and the PREVIOUS concepts each reuses, and promote the one the user picks.
+R3g. IF choosing a problem under R3c–R3f THEN do not use its deck position, its section, or its stated Easy, Medium, or Hard difficulty as a reason.
+     // Commentary: Roman to Integer was once promoted because it was the first Easy entry in the deck among one-concept candidates. Deck order says where an entry was typed, not how far it sits from what is owned.
 R4. IF R2 fires AND the problem presented most recently is still in CURRENT THEN select it again. Do not exclude it for having been presented.
      // Commentary: CURRENT is serial by design. A problem stays in front of the user until they answer `easy`, which is the only thing that moves it to PREVIOUS.
 R5. IF the ACTIVE MODE is NORMAL AND CURRENT and NEXT are both empty THEN state that and present no problem.
@@ -67,20 +75,18 @@ R7. IF the ACTIVE MODE is EASY AND PREVIOUS is empty THEN state that PREVIOUS is
 R8. IF two or more PREVIOUS problems tie on `last:` THEN select the earliest one in curriculum order.
 R9. IF the ACTIVE MODE is EASY THEN exclude the three most recently presented problems when another PREVIOUS problem exists. R9 overrides R6 and R8.
 R10. IF ranking problems into curriculum order THEN place prerequisite problems before problems that build on them.
-R10a. IF the ACTIVE DECK has a `## Deferred` heading THEN rank every entry below that heading after every entry above it, and apply R10–R13 within each group separately. R10a overrides R10–R13.
-     // Commentary: this is how the C deck keeps hash-map and heap problems out of the way. Without R10a, R11 would rank Deferred Easy problems (Two Sum) ahead of every Medium in the main path.
 R11. IF two problems have no prerequisite relationship THEN place the problem with the lower stated Easy, Medium, or Hard difficulty first.
 R12. IF two problems remain tied after R10–R11 THEN place the problem requiring fewer distinct concepts or state variables first.
 R12a. IF counting distinct concepts under R12 THEN count only concepts the PREVIOUS lane does not already cover. A problem that reuses owned machinery counts as requiring none.
      // Commentary: this is what makes the order cumulative. Without R12a, a one-variable problem resting on an unsupported trick (Single Number's XOR cancellation) outranks a two-variable problem that is pure reuse of a PREVIOUS entry (First Unique Character over Valid Anagram's counter), which inverts the intent.
 R12b. IF counting distinct concepts under R12 THEN count each language mechanic the solution depends on as a concept: character-code arithmetic, digit extraction with `%` and `/`, sign handling, integer-overflow edge cases, pointer casts, and each bitwise operator (`|`, `&`, `^`, `~`, shifts) separately. Do not count only named data structures and algorithms.
      // Example: with strlen, reverse a string, and memcpy in PREVIOUS: itoa counts four (digit extraction, `'0' + d`, sign, the most negative `int`); set/clear/toggle/test a bit counts four (shift, `|`, `&` with `~`, `^`); memmove counts one (copy direction when the regions overlap).
-R12c. IF ranking NEXT problems under R10–R13 THEN rank every NEXT entry in the same R10a group of the ACTIVE DECK against every other. Do not favor an entry for sitting in the same section as, or directly after, the problem completed last.
-     // Commentary: itoa was once promoted for following memcpy in the deck while a one-concept problem earlier in the same section went unranked. Deck position is a tiebreaker under R13 only.
+R12c. IF ranking NEXT problems under R10–R13 THEN rank every NEXT entry in the ACTIVE DECK against every other. Do not favor an entry for sitting in the same section as, or directly after, the problem completed last.
+     // Commentary: itoa was once promoted for following memcpy in the deck while a one-concept problem earlier in the same section went unranked. Deck position never decides a NEXT promotion (R3g).
 R12d. IF counting concepts under R3a or R12 THEN count the concepts of the problem's reference solution: the standard solution an interviewer expects for that problem in the ACTIVE LANGUAGE. Do not count a workaround that avoids the mechanics the problem exists to test.
      // Example: Swap byte order of a 32-bit integer was once promoted as zero new concepts by counting a memcpy-and-reverse workaround, then shown with shifts, `&`, and `|`. Its reference solution is shift-and-mask, which adds three concepts and fails R3a.
 R12e. IF the user asks to see a solution THEN show the reference solution counted under R12d.
-R13. IF two problems remain tied after R10–R12e THEN preserve their order in the ACTIVE DECK.
+R13. IF two problems remain tied after R10–R12e AND the ranking is not a NEXT promotion under R3 THEN preserve their order in the ACTIVE DECK.
 R14. IF the user asks why a problem was selected THEN state the active mode, the ACTIVE DECK, the lane it came from, and its `last:` value when that field exists.
 R15. IF the user names an Easy, Medium, or Hard difficulty while requesting a problem outside an invocation carrying the `easy` argument THEN ignore that filter and state that NORMAL mode follows CURRENT then NEXT while EASY mode means PREVIOUS.
 R16. IF the user asks to add a named problem to CURRENT THEN mark that entry `[~]` in the ACTIVE DECK regardless of curriculum order.
@@ -140,7 +146,7 @@ R1. IF this skill needs the user's current work THEN read the most recently modi
 R2. IF two or more files with that extension under the working directory were modified within the last 10 minutes THEN ask which one is the problem file before answering. R2 overrides R1.
 R3. IF no file with that extension exists under the working directory THEN ask the user what they have so far and wait for the answer. R3 fires only when R1 cannot.
 R3a. IF a file with the active language's extension exists THEN ignore files of every other extension, including a previous problem's file in a different language. R3a overrides R1 only as to which files are candidates.
-     // Commentary: switching from Python to C leaves `fun.py` on disk and newer than `fun.c` at first. Matching on extension keeps answers aimed at the file the user is actually editing.
+     // Commentary: switching from Python to C leaves `fun.py` on disk and newer than `fun.cpp` at first. Matching on extension keeps answers aimed at the file the user is actually editing.
 R4. IF answering a question about the user's code or a check request THEN re-read the problem file from disk at that moment, before composing the answer. Never answer from a previously read copy, including one read earlier in the same session.
      // Commentary: the user edits between requests; a stale copy produces answers about code that no longer exists.
 R5. IF the problem file contradicts what the user states in chat THEN say so, quote the relevant lines, and ask which is current before answering.
@@ -180,8 +186,8 @@ R6. IF grading question 1 THEN identify input data structures from the problem a
 R7. IF grading question 4 THEN exclude storage belonging to the input and count only auxiliary space created or consumed by the solution.
 R8. IF grading complexity answers THEN accept conceptual answers without requiring Big-O notation.
 R9. IF the answer key names a data structure THEN accept the active language's equivalent data structure.
-     // Example: a `HashMap` key accepts Python `dict`, Rust `std::collections::HashMap`, or a C lookup array or hand-written table serving the same role.
-R10. IF an answer-key complexity does not hold for the user's implementation THEN grade against the user's actual code and state that basis.
+     // Example: a `HashMap` key accepts Python `dict`, Rust `std::collections::HashMap`, or a C/C++ lookup array or hand-written table serving the same role.
+R10. IF the deck's data-structure, algorithm, or complexity answer differs from the user's implementation THEN grade all four debrief answers against the user's actual code and state that basis; R10 overrides R5, R6, and R9 when they prescribe a different verdict.
 R11. IF the problem lacks an answer key in the ACTIVE DECK on its first completion THEN derive the answers from the problem and implementation and write the answer key inline in the ACTIVE DECK before proceeding.
 R12. IF all four technical questions are graded THEN ask: `easy = move it to PREVIOUS, keep = leave it in CURRENT.`
 R13. IF the user answers R12's question THEN apply Completion Tracking R2–R5 and R7 as applicable.

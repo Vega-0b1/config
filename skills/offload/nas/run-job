@@ -1,0 +1,16 @@
+#!/bin/sh
+# Usage: run-job <id> <command...>
+# Runs <command> detached inside runs/<id>/ with the jobs venv first on PATH.
+# Writes runs/<id>/log.txt (stdout+stderr), pid (also the process group id), and status ("running" or "exit <code>").
+set -eu
+J=/mnt/Raid_1_Storage/jobs
+[ $# -ge 2 ] || { echo "usage: run-job <id> <command...>" >&2; exit 2; }
+id=$1; shift
+d=$J/runs/$id
+mkdir -p "$d/in" "$d/out"
+[ "$(cat "$d/status" 2>/dev/null)" = running ] && { echo "job $id already running" >&2; exit 1; }
+echo running > "$d/status"
+cd "$d"
+setsid nohup sh -c 'PATH="$0/venv/bin:$PATH"; export PATH; "$@" > log.txt 2>&1; echo "exit $?" > status' "$J" "$@" >/dev/null 2>&1 &
+echo $! > pid
+echo "started $id (pid $(cat pid))"

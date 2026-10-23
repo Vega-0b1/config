@@ -1,0 +1,10 @@
+#!/bin/sh
+# Usage: job-status [id]   With no id, lists every run and its status.
+J=/mnt/Raid_1_Storage/jobs
+if [ $# -eq 0 ]; then
+  for d in "$J"/runs/*/; do [ -d "$d" ] && printf '%s\t%s\n' "$(basename "$d")" "$(cat "$d/status" 2>/dev/null)"; done
+else
+  d=$J/runs/$1
+  printf 'status: %s\n' "$(cat "$d/status" 2>/dev/null || echo missing)"
+  tail -5 "$d/log.txt" 2>/dev/null
+fi
