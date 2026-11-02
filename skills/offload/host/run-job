@@ -3,7 +3,7 @@
 # Runs <command> detached inside runs/<id>/ with the jobs venv first on PATH.
 # Writes runs/<id>/log.txt (stdout+stderr), pid (also the process group id), and status ("running" or "exit <code>").
 set -eu
-J=/mnt/Raid_1_Storage/jobs
+J="$HOME/jobs"
 [ $# -ge 2 ] || { echo "usage: run-job <id> <command...>" >&2; exit 2; }
 id=$1; shift
 d=$J/runs/$id

@@ -1,6 +1,6 @@
 ---
 name: extract
-description: Extract all content from PDFs/DOCX/EPUB/PPTX files into a markdown notes file. Accepts an optional output directory (defaults to extracted/). PDFs gain a `## Page N` heading per page and PPTX decks a `## Slide N` heading per slide, so extracted content can be cited and grepped by location. Every PDF goes through `pdftotext -layout` + `pdf_layout.py`; born-digital PDFs also get their ruled tables converted to Markdown by `pdf_tables.py` (tables with sub/superscripts or math are flagged and retyped from the page image), and scanned PDFs are re-OCR'd on the NAS through the offload skill with `ocr_pdf.py`. `pdf_layout.py` strips repeated running heads and rebuilds chapter/section/subsection headings from the book's own numbering, tolerating OCR damage and rejecting table-of-contents lines. When extracting a textbook to extracted/textbook/, also splits it into per-chapter slices using the chapter heading pattern from the Source Profile. After extracting, moves the source files into source/.
+description: Extract all content from PDFs/DOCX/EPUB/PPTX files into a markdown notes file. Accepts an optional output directory (defaults to extracted/). PDFs gain a `## Page N` heading per page and PPTX decks a `## Slide N` heading per slide, so extracted content can be cited and grepped by location. Every PDF goes through `pdftotext -layout` + `pdf_layout.py`; born-digital PDFs also get their ruled tables converted to Markdown by `pdf_tables.py` (tables with sub/superscripts or math are flagged and retyped from the page image), and scanned PDFs are re-OCR'd on the offload host through the offload skill with `ocr_pdf.py`. `pdf_layout.py` strips repeated running heads and rebuilds chapter/section/subsection headings from the book's own numbering, tolerating OCR damage and rejecting table-of-contents lines. When extracting a textbook to extracted/textbook/, also splits it into per-chapter slices using the chapter heading pattern from the Source Profile. After extracting, moves the source files into source/.
 ---
 
 Scan files and extract all content into a single markdown file. Output directory is caller-specified or defaults to `extracted/`.
@@ -46,7 +46,7 @@ R10. IF multiple files are targeted THEN read them in parallel.
 R11. IF the file is a PDF AND it is BORN-DIGITAL THEN extract with `pdftotext -layout <file> <raw.txt>`, convert its tables per R11t–R11t6, and build the notes file with `pdf_layout.py` (next to this skill).
      // Commentary: reading the PDF with the Read tool and retyping it into the notes file cost the whole book's tokens twice, once in and once out. `pdftotext` writes the file directly.
 R11a. IF a source carries figures THEN say so in the report — the format and that its figures were not extracted.
-R11a1. IF the file is a PDF AND it is SCANNED THEN re-OCR it on the NAS per R11s–R11s5, and build the notes file from the OCR output with `pdf_layout.py`.
+R11a1. IF the file is a PDF AND it is SCANNED THEN re-OCR it on the offload host per R11s–R11s5, and build the notes file from the OCR output with `pdf_layout.py`.
 R11b. IF the file is a PDF THEN emit `## Page <N>` on its own line immediately before each page's content, where `<N>` is that page's 1-indexed position in the PDF.
 R11d. IF a PDF page yields no extractable text THEN emit its `## Page <N>` heading anyway, followed by no content.
 
@@ -61,9 +61,9 @@ R11k1. Visual repair is TRANSCRIPTION from the image, never inference from conte
 R11k2. Repairing text invalidates every `Source quote:` generated against the old text. Repair a chapter BEFORE generating its questions.
 R11l. Do NOT use a word-fragment rate as a quality gate on its own. The measure is English-prose-specific and over-reports on non-English text and math-heavy content.
 
-// Scanned PDFs — re-OCR on the NAS
+// Scanned PDFs — re-OCR on the offload host
 R11s. IF a PDF is SCANNED THEN still run `pdftotext -layout <file> <raw_layer.txt>` and keep it beside the OCR output.
-R11s1. IF a PDF is SCANNED THEN run `ocr_pdf.py` (next to this skill) on the NAS through the `offload` skill: inputs = the PDF and `ocr_pdf.py`; command = `python -I in/ocr_pdf.py in/<file>.pdf out /mnt/Raid_1_Storage/jobs/cache/en_PP-OCRv3_rec_infer.onnx`; collect `out/raw.txt` as `<raw.txt>`.
+R11s1. IF a PDF is SCANNED THEN run `ocr_pdf.py` (next to this skill) on the offload host through the `offload` skill: inputs = the PDF and `ocr_pdf.py`; command = `python -I in/ocr_pdf.py in/<file>.pdf out /home/jcvega/jobs/cache/en_PP-OCRv3_rec_infer.onnx`; collect `out/raw.txt` as `<raw.txt>`.
 R11s2. IF the jobs venv lacks `pypdfium2` or `rapidocr_onnxruntime`, OR the model file is missing from `jobs/cache/` THEN install the package per offload R7, or download the model from `https://huggingface.co/SWHL/RapidOCR/resolve/main/PP-OCRv3/en_PP-OCRv3_rec_infer.onnx` into `jobs/cache/`.
      // Commentary: RapidOCR's default recognition model is Chinese-trained and drops the spaces between English words (`Wechoosethe/etc/passwdfile`). The English model keeps them.
 R11s3. IF the offload preflight fails THEN build the notes from `<raw_layer.txt>` instead, and report that the PDF was NOT re-OCR'd and why.
@@ -87,7 +87,7 @@ R11t6. R11t–R11t5 are an exception to R15 and R16 only in replacing a table's 
 
 // Pipeline order
 R11m. IF a PDF is BORN-DIGITAL THEN run the stages in this order: `pdftotext -layout` → `pdf_tables.py mark` → `pdf_layout.py` → R16h → `pdf_tables.py fill` → R11t2 retypes → chapter split (R16a–R16b4). Do NOT reorder them.
-R11m0. IF a PDF is SCANNED THEN run the stages in this order: `pdftotext -layout` (kept, R11s) and `ocr_pdf.py` on the NAS (R11s1) → `merge_layer.py` (R11s6) → `pdf_layout.py` → R16h → `rejoin_ocr.py` → chapter split (R16a–R16b4). Do NOT reorder them.
+R11m0. IF a PDF is SCANNED THEN run the stages in this order: `pdftotext -layout` (kept, R11s) and `ocr_pdf.py` on the offload host (R11s1) → `merge_layer.py` (R11s6) → `pdf_layout.py` → R16h → `rejoin_ocr.py` → chapter split (R16a–R16b4). Do NOT reorder them.
 R11m1. Run `rejoin_ocr.py` AFTER headings exist, so its heading-preservation check counts them.
 R11m2. Keep every raw text file (`<raw.txt>`, `<raw_layer.txt>`, `<raw_merged.txt>`, `<raw_marked.txt>`) and `<tables.json>`. IF a later stage needs re-running THEN re-run it from those files, not from the PDF.
 
@@ -193,7 +193,7 @@ R24. IF updating the class `CLAUDE.md` during extraction THEN limit changes to `
 // Confirm
 R25. Report: what was written and its path, OUTDIR used, any legacy file converted and what it became, any extension/magic mismatch, figures present but not extracted, SCANNED/BORN-DIGITAL classification of every PDF and which test decided it, `rejoin_ocr.py` merge count for scanned sources, `## Page`/`## Slide` anchor counts, empty page counts, slides with no title placeholder, heading reconstruction count when R13g applied, chapter slices written and R16b4 verification result, what was moved to `source/`, whether `CLAUDE.md` Contents was updated.
 R25c. IF a PDF is BORN-DIGITAL THEN also report: tables found, how many replaced their aligned text vs. were appended, how many passed as auto-ok, how many were retyped under R11t2, how many became plain lines under R11t5, and any cells flagged under R11t4.
-R25d. IF a PDF is SCANNED THEN also report: whether it was re-OCR'd on the NAS or fell back to the text layer (R11s3), the NAS job id, the R11s4 page-count check, and the number of text-layer lines `merge_layer.py` inserted (R11s6).
+R25d. IF a PDF is SCANNED THEN also report: whether it was re-OCR'd on the offload host or fell back to the text layer (R11s3), the offload job id, the R11s4 page-count check, and the number of text-layer lines `merge_layer.py` inserted (R11s6).
 R25a. IF a PDF was extracted THEN also report: running heads removed (R11n4), chapter/section/subsection counts and R11o6 rejections (R11o7), the R11o8 total-vs-unique check per level, and the R16h no-invented-lines check.
 R25b. IF R16a1 found repaired slices THEN report which chapters were discarded or preserved, and that a discarded chapter re-repairs on its next `/generate-questions` run.
 

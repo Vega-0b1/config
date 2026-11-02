@@ -362,3 +362,239 @@ source_base = "https://doc.rust-lang.org/1.85.1/"
 content_tag = "main"
 min_pages = 450
 sentinels = ['E0382', 'E0597', 'E0502']
+
+[esp32_doit_devkit_v1]
+kind = "html"
+title = "DOIT ESP32 DevKit V1 board reference — espboards.dev (third-party; header pinout)"
+urls = ["https://www.espboards.dev/esp32/esp32doit-devkit-v1/"]
+content_tag = "main"
+min_pages = 1
+sentinels = ["| 30 | 39 |", "INPUT ONLY", "strap pin", "UART0 TX"]
+
+[esp32_datasheet]
+kind = "pdf"
+urls = ["https://documentation.espressif.com/esp32_datasheet_en.pdf"]
+doc_title = "ESP32 Series Datasheet"
+title = "ESP32 Series Datasheet — Espressif (chip: pins, strapping, electrical, peripherals)"
+min_pages = 50
+sentinels = ["ESP32-D0WDQ6", "VDD_SDIO", "Strapping", "MTDI"]
+
+[esp32_wroom32_datasheet]
+kind = "pdf"
+urls = ["https://documentation.espressif.com/esp32-wroom-32_datasheet_en.pdf"]
+doc_title = "ESP32-WROOM-32 Datasheet"
+title = "ESP32-WROOM-32 Datasheet — Espressif (module: pin definitions, electrical, schematics)"
+min_pages = 20
+sentinels = ["ESP32-WROOM-32", "SENSOR_VP", "Pin Definitions", "Strapping"]
+
+# 3D printing: Creality K1C on SimpleAF (pellcorp) with a Cartographer probe.
+# See ~/edu/zStore/3dPrint/CLAUDE.md.
+
+# Pinned to the exact commit the printer runs (klippy reports
+# v0.13.0-183-g386fde4f, branch jun2025 of pellcorp's fork), not upstream master.
+[klipper_docs]
+kind      = "markdown"
+min_pages = 50
+sentinels = ["square_corner_velocity", "minimum_cruise_ratio", "SHAPER_CALIBRATE", "pressure_advance_smooth_time"]
+tree = [
+  { repo = "pellcorp/klipper", branch = "386fde4fd38e8eda6999e58bf260eceb00051188", prefix = "docs/", ext = ".md" },
+]
+
+# The wiki repo is unversioned, so this is wiki HEAD on the scrape date, not a
+# snapshot of the installed Orca 2.4.2. Scoped to user-facing settings and
+# calibration; developer_reference, cli, plugins, releases and the wiki's own
+# agent files are excluded.
+[orcaslicer_wiki]
+kind      = "markdown"
+min_pages = 100
+sentinels = ["Max volumetric speed", "square_corner_velocity", "Pressure Advance", "Jerk"]
+urls = [
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/home.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/calibration/adaptive_pressure_advance_calib.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/calibration/cornering_calib.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/calibration/flow_ratio_calib.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/calibration/input_shaping_calib.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/calibration/pressure_advance_calib.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/calibration/retraction_calib.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/calibration/temp_calib.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/calibration/tolerance_calib.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/calibration/vfa_calib.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/calibration/volumetric_speed_calib.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/general_settings/import_export.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/general_settings/keyboard_shortcuts.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/general_settings/option_mode.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/general_settings/option_type.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/general_settings/transfer_discard_changes.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/general_settings/troubleshoot_center.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/material_settings/advanced/material_advanced.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/material_settings/cooling/material_cooling.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/material_settings/dependencies/material_dependencies.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/material_settings/filament/material_basic_information.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/material_settings/filament/material_flow_ratio_and_pressure_advance.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/material_settings/filament/material_temperatures.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/material_settings/filament/material_volumetric_speed_limitation.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/material_settings/multimaterial/material_multimaterial.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/material_settings/setting%20overrides/material_setting_overrides.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/basic%20information/printer_basic_information_accessory.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/basic%20information/printer_basic_information_adaptive_bed_mesh.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/basic%20information/printer_basic_information_advanced.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/basic%20information/printer_basic_information_belt_printer.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/basic%20information/printer_basic_information_cooling_fan.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/basic%20information/printer_basic_information_extruder_clearance.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/basic%20information/printer_basic_information_machine_frame_transforms.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/basic%20information/printer_basic_information_printable_space.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/extruder/printer_extruder_basic_information.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/extruder/printer_extruder_retraction.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/extruder/printer_extruder_z_hop.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/machine%20gcode/printer_machine_gcode.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/motion%20ability/printer_motion_ability.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/multimaterial/printer_multimaterial_advanced.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/multimaterial/printer_multimaterial_idex_iqex.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/multimaterial/printer_multimaterial_semm_parameters.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/multimaterial/printer_multimaterial_setup.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/printer_settings/multimaterial/printer_multimaterial_wipe_tower.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_assembly_tools.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_auto_arrange.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_auto_orient.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_basic.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_brim_ears_painting.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_color_painting.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_cutting_tool.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_emboss.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_image_tool.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_mesh_boolean.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_object_manipulation.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_object_set.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_paint_on_fuzzy_skin.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_precise_seam.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_seam_painting.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_stl_transformation.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_support_painting.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_texture_displacement.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_texture_displacement_pro.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_texture_displacement_uv_editor.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_prepare/prepare_variable_layer_height.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/multimaterial/multimaterial_settings_advanced.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/multimaterial/multimaterial_settings_filament_for_features.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/multimaterial/multimaterial_settings_flush_options.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/multimaterial/multimaterial_settings_ooze_prevention.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/multimaterial/multimaterial_settings_prime_tower.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/others/others_settings_brim.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/others/others_settings_fuzzy_skin.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/others/others_settings_g_code_output.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/others/others_settings_notes.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/others/others_settings_post_processing_scripts.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/others/others_settings_skirt.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/others/others_settings_special_mode.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/quality/quality_settings_bridging.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/quality/quality_settings_ironing.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/quality/quality_settings_layer_height.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/quality/quality_settings_line_width.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/quality/quality_settings_overhangs.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/quality/quality_settings_precision.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/quality/quality_settings_seam.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/quality/quality_settings_wall_and_surfaces.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/quality/quality_settings_wall_generator.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/quality/quality_settings_z_contouring.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/speed/speed_settings_acceleration.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/speed/speed_settings_advanced.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/speed/speed_settings_initial_layer_speed.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/speed/speed_settings_jerk_xy.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/speed/speed_settings_other_layers_speed.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/speed/speed_settings_overhang_speed.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/speed/speed_settings_travel.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/strength/strength_settings_advanced.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/strength/strength_settings_infill.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/strength/strength_settings_infill_rotation_template_metalanguage.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/strength/strength_settings_patterns.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/strength/strength_settings_patterns_quick_reference.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/strength/strength_settings_top_bottom_shells.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/strength/strength_settings_walls.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/support/support_settings_advanced.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/support/support_settings_filament.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/support/support_settings_ironing.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/support/support_settings_raft.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/support/support_settings_support.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/print_settings/support/support_settings_tree.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/speed_dial/speed_dial.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/guides/belt_printing.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/guides/calibration_guide.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/guides/how_to_download_pr_artifacts.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/guides/idex_iqex_parallel_printing.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/guides/mixed_nozzle_sizes.md",
+  "https://raw.githubusercontent.com/wiki/OrcaSlicer/OrcaSlicer/user_profiles/user_profiles.md",
+]
+
+# SimpleAF installer docs. snippets/ holds text the pages include, so it is
+# scraped alongside docs/.
+[simpleaf_wiki]
+kind      = "markdown"
+min_pages = 100
+sentinels = ["pellcorp-overrides", "installer.sh", "SimpleAF", "cartotouch"]
+tree = [
+  { repo = "pellcorp/creality-wiki", branch = "main", prefix = "docs/", ext = ".md" },
+  { repo = "pellcorp/creality-wiki", branch = "main", prefix = "snippets/", ext = ".md" },
+]
+
+# Current probe docs only; archive/ (classic and RP2040-era instructions) and
+# the non-probe products are excluded so outdated procedures are not cited.
+[cartographer_docs]
+kind      = "markdown"
+min_pages = 40
+sentinels = ["CARTOGRAPHER_TOUCH_CALIBRATE", "CARTOGRAPHER_SCAN_CALIBRATE", "Z_OFFSET_APPLY_PROBE", "BED_MESH_CALIBRATE"]
+urls = [
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/README.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/assembly/README.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/assembly/low-profile.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/assembly/right-angle.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/assembly/standard.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/classic-vs-survey-touch.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/faq.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/features/README.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/features/axis-twist-compensation.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/features/coil-temperature-offset-calibration.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/features/scanning.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/features/touch.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/features/z-backlash-estimation.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/fine-tuning/README.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/fine-tuning/cartographer-models.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/fine-tuning/extras.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/fine-tuning/temperature-differential-calibration-beta.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/fine-tuning/useful-macros.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/firmware/README.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/firmware/re-flashing.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/firmware/switching-protocols.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/firmware/switching-v4-from-usb-to-can.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/firmware/updating-firmware.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/README.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/before-you-begin.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/creality-k1-and-k1-max-specific.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/installation/README.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/installation/calibration.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/installation/first-print.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/installation/klipper-configuation.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/installation/klipper-setup.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/installation/migrating-from-cartographer-to-scanner.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/installation/print-start-macro.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/probe-installation/README.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/probe-installation/can-termination.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/probe-installation/stealthburner-cw2-mount.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/probe-installation/wiring-diagrams.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/qidi-specific-installation-instructions.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/software-configuration/README.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/software-configuration/klipper-setup.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/software-configuration/print_start-template.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/software-configuration/scan-calibration.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/software-configuration/touch-calibration.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/software-configuration/z-offset.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/installation-and-setup/v4-switching-from-usb-to-can.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/need-assistance.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/reference/README.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/reference/configuration-reference.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/reference/macro-reference.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/reference/macros-reference.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/settings-and-commands.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/troubleshooting.md",
+  "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/useful-links.md",
+]
+

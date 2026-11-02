@@ -1,17 +1,17 @@
 ---
 name: updateclass
-description: Update an existing class directory after new material arrives. Lecture slide decks (.ppt/.pptx) go to one lectures folder without prompts; other files are classified as teaching material, textbook, course scope, or misc material. No week bookkeeping.
+description: Update an existing class directory after new material arrives. Lecture slide decks (.ppt/.pptx) go to one lectures folder without prompts; other files are classified as lecture, textbook, or auto sort. Auto sort reads the content, files syllabi as course scope, and groups same-type material into collections. No week bookkeeping.
 ---
 
 Update an existing class directory with newly added material.
 
 `/addclass` scaffolds a class once. `/updateclass` imports later material. A `.ppt` or `.pptx`
 file is a lecture deck: it is extracted into `extracted/class/lectures/` without a prompt. Every
-other file receives a classification prompt. Nothing is filed by week.
+other file receives a `l/t/a` prompt: lecture, textbook, or auto sort. Nothing is filed by week.
 
-Textbook chapters and registered lecture slide decks create questions. Each registered deck is a
-source for `/generate-questions <deck>`; handouts, specs, labs and code are registered but never
-generate questions. `/updateclass` never asks the user to map material to a textbook chapter.
+Textbook chapters and registered lecture material create questions. Each registered deck is a
+source for `/generate-questions <deck>`; auto-sorted material (handouts, specs, labs, code) is
+organized into collections but never generates questions. `/updateclass` never asks the user to map material to a textbook chapter.
 
 ## Rules
 
@@ -40,36 +40,46 @@ R19. IF R16 succeeds THEN move the deck's raw file(s) to `source/lectures/`.
 
 // Loose-candidate classification
 R22. IF a LOOSE CANDIDATE exists THEN print the full numbered list of LOOSE CANDIDATES once, then prompt for exactly one candidate at a time in list order.
-R23. Ask `what is this? (y/t/c/m)` for each LOOSE CANDIDATE.
+R23. Ask `what is this? (l/t/a)` for each LOOSE CANDIDATE.
 R24. Print this legend with every R23 prompt:
-     `y = teaching material from the professor (not a slide deck)`
+     `l = lecture material from the professor`
      `t = textbook`
-     `c = course scope, such as a syllabus or schedule`
-     `m = misc class material`
-R25. Accept exactly one case-insensitive `y`, `t`, `c`, or `m`. IF the reply is any other token THEN re-ask about the same candidate.
+     `a = auto sort: read the content and organize it`
+R25. Accept exactly one case-insensitive `l`, `t`, or `a`. IF the reply is any other token THEN re-ask about the same candidate.
 R30. Do NOT ask for a week.
-R31. Do NOT infer a LOOSE CANDIDATE's classification from its filename, extension, location, lecture number, or modification time.
+R31. Do NOT infer a LOOSE CANDIDATE's `l/t/a` answer from its filename, extension, location, lecture number, or modification time.
+     // Commentary: R31 governs the prompt only. Auto sort (R36–R36i) reads content after the user answers `a`.
 
-// Loose-candidate processing
-R32. IF a loose document is teaching material THEN invoke `/extract <candidate>` with output to `extracted/class/other/`.
+// Lecture and textbook processing
+R32. IF a loose document is lecture material THEN invoke `/extract <candidate>` with output to `extracted/class/lectures/` AND move its raw file to `source/lectures/`.
+R33. IF a loose code or image file is lecture material THEN copy it to `extracted/class/lectures/` AND move its original to `source/lectures/`.
 R34. IF a loose document is a textbook THEN invoke `/extract <candidate>` with output to `extracted/textbook/`.
-R35. IF a loose document is course scope THEN invoke `/extract <candidate>` with output to `extracted/`.
-R36. IF a loose document is misc material THEN invoke `/extract <candidate>` with output to `extracted/class/misc/`.
-R37. Invoke `/extract` once per document and name that document explicitly.
-R38. IF `/extract` stops for a loose document THEN leave that document unregistered, continue with the remaining candidates, and report the stop.
-R38a. IF a teaching document was extracted THEN move its raw file to `source/other/`.
-R39. IF a loose code or image file is teaching material THEN copy it to `extracted/class/other/` and move its original to `source/other/`.
-R41. IF a loose code or image file is misc material THEN copy it to `extracted/class/misc/` and move its original to `source/`.
-R42. IF a loose code or image file is a textbook or course-scope candidate THEN stop, name the file, and ask the user how to handle it.
+R34a. IF a loose code or image file is a textbook candidate THEN stop, name the file, and ask the user how to handle it.
+R35. Invoke `/extract` once per document and name that document explicitly.
+R35a. IF `/extract` stops for a loose document THEN leave that document unregistered, continue with the remaining candidates, and report the stop.
+
+// Auto sort
+R36. IF a LOOSE CANDIDATE is answered `a` THEN read its content and name its DOCUMENT TYPE as one plural lowercase noun describing what the document is.
+     // Example: a homework assignment → `homework`; a lab handout → `labs`; a past exam → `exams`; a grading rubric → `rubrics`; a Python demo → `code`.
+R36a. IF the content is a syllabus, course schedule, or course calendar THEN its DOCUMENT TYPE is COURSE SCOPE; invoke `/extract <candidate>` with output to `extracted/` AND move its raw file to `source/`.
+R36b. A COLLECTION is a directory `extracted/class/<DOCUMENT TYPE>/` paired with `source/<DOCUMENT TYPE>/`. `lectures`, `misc`, and `other` are never COLLECTION names.
+R36c. IF a COLLECTION for the candidate's DOCUMENT TYPE exists THEN file the candidate into it.
+R36d. IF no COLLECTION for the DOCUMENT TYPE exists AND `extracted/class/misc/` or `extracted/class/other/` holds a file of the same DOCUMENT TYPE THEN create the COLLECTION, move each such file and its raw source file into it, and file the candidate into it.
+R36e. IF neither R36c nor R36d applies THEN file the candidate into `extracted/class/misc/`, with its raw file in `source/misc/`.
+R36f. Filing a document = invoke `/extract <candidate>` with output to the target `extracted/` directory AND move its raw file to the paired `source/` directory. Filing a code or image file = copy it to the target `extracted/` directory AND move its original to the paired `source/` directory.
+R36g. Process auto-sort candidates one at a time in list order, so a candidate filed under R36e is visible to R36d for the next candidate.
+R36h. IF R36d moves a file THEN rewrite every `## Contents` and `## Instructor Material` entry for its old path to the new path.
+R36i. IF a candidate's content fits none of the document types already present AND cannot be named as one plural noun THEN file it under R36e.
+R37. IF `/extract` stops for an auto-sort document THEN leave it unregistered, continue with the remaining candidates, and report the stop.
 R43. IF a loose candidate is neither a document, code file, nor image file THEN move it to `source/` after its classification.
 R43a. IF moving files out of a NEW directory leaves it empty THEN remove that empty directory.
 
 // Registry
-R44. IF at least one teaching or course-scope file was successfully processed THEN ensure `CLAUDE.md` contains an `## Instructor Material` section immediately after `## Contents`, or append it at end of file when `## Contents` is absent.
-R45. IF a lecture deck or teaching file was successfully processed THEN write it under `### Teaching` as ``- `<path>` — <kind and extent>``.
+R44. IF at least one lecture or course-scope file was successfully processed THEN ensure `CLAUDE.md` contains an `## Instructor Material` section immediately after `## Contents`, or append it at end of file when `## Contents` is absent.
+R45. IF a lecture deck or lecture-material file was successfully processed THEN write it under `### Teaching` as ``- `<path>` — <kind and extent>``.
 R47. IF a course-scope file was successfully processed THEN write it under `### Course Scope` as ``- `<path>` — <kind and extent>``.
 R48. IF a registry entry for the same path already exists THEN replace that entry.
-R49. Do NOT add a textbook or misc-material registry entry.
+R49. Do NOT add a registry entry for textbook or COLLECTION or `misc` files. R36h overrides R49 for an entry that existed before the move.
 R50. Do NOT record a chapter number or inferred chapter mapping in `## Instructor Material`.
 
 // Contents and textbook state
@@ -81,13 +91,13 @@ R55. IF a textbook was successfully extracted AND `Notes file:` names a differen
 R56. IF updating `CLAUDE.md` THEN limit changes to `## Contents`, `## Instructor Material`, `## Source Profile`'s `Notes file:` field, and the scan/OCR provenance required by extract R11j in `## Source Profile`.
 
 // Lecture-deck state
-R57. IF a processed teaching file holds one or more deck headings (generate-questions lecture.md L2) THEN list each DECK ID (L2a) it holds.
+R57. IF a processed lecture file holds one or more deck headings (generate-questions lecture.md L2) THEN list each DECK ID (L2a) it holds.
 R58. IF a listed deck's `questions_<DECK ID>.md` already exists beside its file THEN mark that questions file STALE and report that `/generate-questions <DECK ID>` with `regenerate` rebuilds it.
 R59. Do NOT invoke `/generate-questions` automatically.
 R60. IF a listed deck has no questions file THEN report that `/generate-questions <DECK ID>` creates its study list.
 
 // Report
-R62. Report the NEW candidates, each lecture deck, each loose-file classification, files extracted or copied and their destinations, files moved to `source/`, every extraction stop, registry and Contents changes, Notes-file conflicts, and the decks listed under R57–R60.
+R62. Report the NEW candidates, each lecture deck, each loose-file classification, each auto-sort DOCUMENT TYPE and destination, each COLLECTION created and the files moved into it, files extracted or copied and their destinations, files moved to `source/`, every extraction stop, registry and Contents changes, Notes-file conflicts, and the decks listed under R57–R60.
 
 // Catch-all
 R64. IF any condition not covered by R1–R62 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
@@ -100,8 +110,7 @@ R64. IF any condition not covered by R1–R62 arises THEN stop, describe the sit
 ### Teaching
 
 - `extracted/class/lectures/lec13_dijkstra_notes.md` — pptx, 14 slides
-- `extracted/class/other/hw_1_1_notes.md` — pdf, 1 page
-- `extracted/class/other/demo.py` — code, read directly
+- `extracted/class/lectures/week3_handout_notes.md` — pdf, 4 pages
 
 ### Course Scope
 
@@ -120,13 +129,14 @@ Teaching line for slide decks.
 
 Drop new files (or a folder of them) in the class root and run `/updateclass`. Every `.ppt`/`.pptx`
 is extracted into `extracted/class/lectures/` with no question asked, and its raw file goes to
-`source/lectures/`. Every other file receives the `y/t/c/m` prompt. Then run
+`source/lectures/`. Every other file receives the `l/t/a` prompt. Then run
 `/generate-questions <deck>` for each new deck the report lists.
 
 ```
 deck (.ppt/.pptx)     → extracted/class/lectures/     → BECOMES questions_<deck>.md
-y  teaching material  → extracted/class/other/        → registered, never a question
+l  lecture material   → extracted/class/lectures/     → registered under Teaching
 t  textbook           → extracted/textbook/           → BECOMES questions_chapter<N>.md
-c  course scope       → extracted/                    → becomes a notice, never a question
-m  misc class material→ extracted/class/misc/         → searchable, never a question
+a  auto sort          → syllabus/schedule → extracted/ (Course Scope, a notice)
+                      → second file of a type → extracted/class/<type>/ collection
+                      → first file of a type  → extracted/class/misc/ until a match arrives
 ```

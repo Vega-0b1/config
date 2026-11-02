@@ -158,6 +158,33 @@ def build_archive(name: str, spec: Spec) -> list[str]:
     return lines
 
 
+def build_html(name: str, spec: Spec) -> list[str]:
+    """Fetch server-rendered HTML pages, one dump page per URL.
+
+    For references that exist only as a web page, such as a vendor board
+    pinout. content_id or content_tag scopes extraction to the article body;
+    a page rendered client-side has no body to find and fails the parse.
+    """
+    lines = [setting(spec, 'title', name), SEPARATOR, '']
+    urls = strings(spec, 'urls')
+    for url in urls:
+        print(f'  fetching {url}', flush=True)
+        request = urllib.request.Request(url, headers={'User-Agent': 'scrapes.py/1.0 (personal doc mirror)'})
+        with urllib.request.urlopen(request, timeout=30) as response:
+            body = response.read().decode('utf-8', errors='replace')
+        parser = ReferenceHTML(setting(spec, 'content_id'), setting(spec, 'content_tag'))
+        parser.feed(body)
+        parser.close()
+        text = parser.result()
+        if not text.strip():
+            raise ValueError(f'Empty page: {url}')
+        title = url.rstrip('/').rsplit('/', 1)[-1]
+        lines.extend([SEPARATOR, f'# {title}', SEPARATOR, f'(source: {url})', '', *text.splitlines(), ''])
+        time.sleep(0.15)
+    print(f'  {len(urls)} html pages', flush=True)
+    return lines
+
+
 def render_man(path: str) -> tuple[str, str]:
     with gzip.open(path, 'rt', encoding='utf-8') as source:
         roff = source.read()

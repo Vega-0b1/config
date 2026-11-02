@@ -15,8 +15,7 @@
 - **Editor**: Neovim 0.12.4 (from the Nix profile)
 
 ## Network
-- **Wired NIC**: `enp8s0`, MAC `f0:2f:74:ac:8f:5e`, hostname `vega`
-- **Wake-on-LAN**: magic packet (`g`), set on NetworkManager connection "Wired connection 1" (`802-3-ethernet.wake-on-lan magic`), enabled 2026-10-01. BIOS-side setting not verified
+- **NIC**: Wi-Fi `wlo1`, MAC `c4:bd:e5:72:c5:b8`, NetworkManager connection "VegaWifi", hostname `zeus`
 
 ## Configuration
 
@@ -37,19 +36,19 @@ R7. IF any condition not covered by R1–R6 arises THEN stop, describe the situa
 
 ## Compute Offload
 
-- **Host**: TrueNAS SCALE 25.04, `truenas_admin@truenas-scale` (Tailscale); LAN address `192.168.1.104`. Key-based SSH from this machine
-- **Hardware**: AMD Ryzen 7 5800X (8 cores / 16 threads), 15 GB RAM with ~6 GB free, no GPU
-- **Jobs root**: `/mnt/Raid_1_Storage/jobs` — `venv/` (Python 3.11 + pip), `bin/` (`run-job`, `job-status`), `runs/<id>/` (`in/`, `out/`, `log.txt`, `pid`, `status`), `cache/` (pip cache)
-- **Not available**: Docker and sudo for `truenas_admin`; `/home`, `/tmp` and `/var/tmp` are mounted `noexec`
+- **Host**: CachyOS machine `cachyos-x8664`, SSH alias `offload` (`jcvega@cachyos-x8664.local`, LAN `192.168.1.184` via DHCP). Key-based SSH from this machine; login shell is fish
+- **Hardware**: changes over time; read `nproc` and `free -g` at job start. Wake-on-LAN magic packet: `wakeonlan f0:2f:74:ac:8f:5e` (wired `enp8s0`, enabled 2026-11-02 on NetworkManager "Wired connection 1"; BIOS-side setting not verified)
+- **Jobs root**: `~/jobs` (`/home/jcvega/jobs`) — `venv/` (Python 3.14 + pip), `bin/` (`run-job`, `job-status`), `runs/<id>/` (`in/`, `out/`, `log.txt`, `pid`, `status`), `cache/` (pip cache)
+- **Not available**: passwordless sudo
 
-O1. IF a task is CPU-bound AND is expected to run longer than 1 minute on this machine AND neither O2 nor O5 applies THEN run it on the NAS through the `offload` skill.
+O1. IF a task is CPU-bound AND is expected to run longer than 1 minute on this machine AND neither O2 nor O5 applies THEN run it on the offload host through the `offload` skill.
      // Example: OCR over thousands of video frames, Whisper transcription of a feature-length film, batch image or video conversion.
 O2. IF a task needs a GPU, a display, or the user's files edited in place THEN run it locally. Do NOT offload it.
-O3. IF the user has not explicitly requested NAS execution AND (a task is not CPU-bound OR is expected to finish in 1 minute or less on this machine) THEN run it locally.
-O4. IF software must be installed for an offloaded job THEN install it into `/mnt/Raid_1_Storage/jobs/venv`. Do NOT install into `/home`, `/tmp`, `/var/tmp`, or the system.
-     // Commentary: the noexec mounts break compiled Python packages, and the boot pool is replaced on TrueNAS updates.
+O3. IF the user has not explicitly requested offload execution AND (a task is not CPU-bound OR is expected to finish in 1 minute or less on this machine) THEN run it locally.
+O4. IF software must be installed for an offloaded job THEN install it into `~/jobs/venv` on the offload host. Do NOT install into the offload host's system.
+     // Commentary: system installs need sudo, and the venv keeps job dependencies separate from the host's own packages.
 O5. IF the job's inputs contain credentials, keys, or tokens THEN run it locally. Do NOT offload it.
-O5a. IF O2 or O5 conflicts with an instruction to offload a job THEN O2 and O5 override that instruction, including an explicit NAS request.
+O5a. IF O2 or O5 conflicts with an instruction to offload a job THEN O2 and O5 override that instruction, including an explicit offload request.
 O6. IF any condition not covered by O1–O5 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
 
 ## Response Style
@@ -78,7 +77,11 @@ R2e. IF the user has not explicitly requested additional work THEN end the respo
 R2f. IF the user has not explicitly requested that information persist beyond the current chat THEN do not save it to memory or any other persistent store.
 R2g. IF the user explicitly requests that information persist beyond the current chat THEN save it only to the global AGENT.md or directory-local AGENT.md target the user specifies.
      // Commentary: Persistence must remain reproducible from versioned instruction files after chat history is cleared.
-R3. IF the user asks "why," "how," "explain," or "elaborate" THEN provide full explanation.
+R3.  IF the user asks "why," "how," or "explain" THEN give the single core reason in at most two sentences.
+R3a. IF the user asks "elaborate," "more," "in detail," or "go deeper" THEN provide full explanation.
+R3b. IF one answer would cover more than one idea THEN give the first idea only and stop.
+     // Commentary: the user learns one piece at a time; the next question pulls the next piece.
+     // Example: "why infinity?" -> "No path has been found yet; ∞ guarantees the first real path replaces it."
 R4. R3 overrides R2. R4 does not reach R2a, R2b, R2c, or R2d.
 R5. IF generating any response THEN omit filler phrases ("Great question!", "Certainly!", transitional summaries that restate what was just said).
 R6. IF output will be displayed in a terminal (Alacritty) THEN do not use markdown visual tricks: no `---` horizontal rules, no HTML, no LaTeX. Use Unicode line characters (`────────────────────────────────────────────────────────────────`) for visual separators.
@@ -111,8 +114,15 @@ R14. IF any condition not covered by R1–R13 arises THEN stop, describe the sit
 Source precedence: scraped dumps → official documentation → model knowledge.
 
 R1. IF answering a factual question about a tool, OS, language, or library THEN check `~/edu/zStore/scrapes/` for a dump covering that topic before consulting any other source.
-R2. IF a relevant dump exists THEN grep it and answer from it, citing file and line.
+R2. IF a relevant dump exists THEN look up the page covering the topic with `~/repos/config/skills/scrapes/tools/doc_lookup DUMP PAGE TERM...`, passing the terms the question asks about, in one tool call per question.
+     // Example: `doc_lookup cppreference_cpp vector/empty "Return value"` → `403025:true if the container is empty, false otherwise.`
+     // Commentary: doc_lookup reads the CONTENTS index, prints pages of 100 lines or fewer whole, filters longer pages to TERM matches plus 3 lines of context, and prints absolute line numbers.
+R2a. IF `doc_lookup` exits 2 THEN grep the dump body for the term.
      // Example: `grep -n "onlyMinimized" ~/edu/zStore/scrapes/plasma_manager_widgets.txt`
+R2b. IF answering from a dump THEN cite file and the absolute line `doc_lookup` printed.
+R2c. IF `doc_lookup` exits 3 THEN rerun it with the full index path of the candidate it listed that covers the topic.
+R2d. IF the filtered output does not contain the answer THEN rerun `doc_lookup` with different terms, or with no terms to print the whole page.
+R2e. IF `doc_lookup` is missing or exits 1 THEN grep the dump's CONTENTS index for the page AND print its range with `sed -n 'START,ENDp'`.
 R3. IF no relevant dump exists THEN consult official documentation before answering.
 R4. IF a dump was consulted AND does not contain the answer THEN consult official documentation before answering.
 R5. IF a dump documents an older version than the one installed THEN treat the dump as stale and verify against official documentation.
@@ -122,7 +132,7 @@ R7. IF answering from model knowledge THEN label it inline as unverified model k
 R8. IF an answer rests on inference or incomplete information THEN disclose a rough confidence level inline (e.g., "~60% confident").
      // Example: "~60% confident — verify against the relevant official documentation."
 R9. R6 overrides R7: IF no source can be found THEN say so rather than answering from model knowledge and labeling it.
-R10. R5 overrides R2: IF a dump is stale on the point in question THEN the official documentation answer wins over the dump's.
+R10. R5 overrides R2–R2e: IF a dump is stale on the point in question THEN the official documentation answer wins over the dump's.
 R11. IF a dump needs refreshing or adding THEN use `/scrapes`. Do NOT hand-edit a `.txt` dump.
      // Commentary: every dump is build output with an indexed CONTENTS header. A hand edit desynchronizes the index from the body, and the next real scrape discards it anyway.
 R12. IF any condition not covered by R1–R11 arises THEN stop, describe the situation to the user, and ask how to proceed. Do not improvise.
@@ -140,6 +150,13 @@ R12. IF any condition not covered by R1–R11 arises THEN stop, describe the sit
 - `stm32f4_hal.txt` — 2,468 HAL functions with `@param` valid-value lists, from the on-disk F4 firmware
 - `openocd_manual.txt` — OpenOCD User's Guide, generated from the installed 0.12.0
 - `stm32cube_getting_started.txt` — UM1730, extracted from the local PDF; one dump page per PDF page
+- `esp32_doit_devkit_v1.txt` — DOIT ESP32 DevKit V1 board page from espboards.dev (third-party), scraped 2026-10-28: the 30-pin header order (physical pin → GPIO), boot/strapping guidance per pin, board power and USB-serial notes. The only source for the header layout; chip-level facts belong to the Espressif datasheets
+- `esp32_datasheet.txt` — ESP32 Series Datasheet v5.3 (Espressif), scraped 2026-10-28; one dump page per PDF page. Authoritative for chip pin functions, strapping pins, electrical limits and peripherals
+- `esp32_wroom32_datasheet.txt` — ESP32-WROOM-32 module datasheet v3.8 (Espressif), scraped 2026-10-28; one dump page per PDF page. Module pin definitions, electrical characteristics, reference schematics
+- `klipper_docs.txt` — Klipper docs (56 pages) pinned to commit `386fde4f` of pellcorp's fork, the exact build the K1C runs, scraped 2026-11-01. Config Reference (`[printer]` limits, `square_corner_velocity`, `minimum_cruise_ratio`), Kinematics, input shaper, pressure advance, G-Codes, bed mesh
+- `orcaslicer_wiki.txt` — OrcaSlicer wiki (114 pages), scraped 2026-11-01: print, printer and material settings, plus the calibration guides. The wiki is unversioned, so it documents wiki HEAD, not the installed 2.4.2
+- `simpleaf_wiki.txt` — SimpleAF (pellcorp) installer wiki (115 pages, docs + snippets), scraped 2026-11-01: K1-series setup, `pellcorp-overrides`, probe pages, slicer settings
+- `cartographer_docs.txt` — Cartographer probe docs (53 pages), scraped 2026-11-01: touch and scan calibration, z offset, K1-specific install, configuration and macro reference. `archive/` (classic/RP2040-era) excluded
 - `freecad_api.txt` — FreeCAD Python API, generated 2026-10-02 by `freecadcmd` from the installed 1.0.0: one page per class (`Part.Face`, `Sketcher.Constraint`) and one `type <TypeId>` page per document object listing its properties (`type PartDesign::Pad`). Authoritative for signatures
 - `freecad_wiki.txt` — FreeCAD wiki scripting tutorials and worked examples (89 pages). Its API pages self-declare outdated (2018–2019); use them for examples, not signatures
 - `cppreference_c.txt` — C language and standard library; offline snapshot 2025-02-09; 627 indexed pages

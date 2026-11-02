@@ -31,7 +31,7 @@ R1b5. IF R1b2 and R1b3 both apply THEN R1b2 overrides R1b3.
 R1f. IF ORIGINAL_ARGUMENTS contains a `problems` token, case-insensitively, THEN PROBLEMS = true; remove that token from the working arguments. Otherwise PROBLEMS = false.
 R1f1. IF PROBLEMS = true AND no topic remains after removing the option tokens THEN stop and tell the user: "Name a chapter or a deck: /learn chapter<N> problems or /learn <deck> problems."
 R1f2. IF PROBLEMS = true THEN the topic name shown in R7b and R28a–R28a1 reads `<topic> problems` — `chapter<N> problems` for a chapter, `<DECK ID> problems` for a deck.
-     // Example: `/learn lec13 problems` opens with `network — lec13_dijkstra problems, 5 questions.`
+     // Example: `/learn lec13 problems` opens with `lec13_dijkstra problems, 5 questions.`
 // Delivery scope
 R1c. IF START = 1 THEN deliver EVERY entry in the loaded file.
 R1c1. IF START > 1 THEN deliver EVERY entry at absolute position START or later and deliver no entry before START.
@@ -47,7 +47,6 @@ R2b. IF R2a does not apply THEN search one level under `~/edu/` for a directory 
 R2c. IF R2b finds EXACTLY ONE class holding that file THEN it is the class root. Do NOT prompt.
 R2d. IF R2b finds SEVERAL classes holding that file THEN stop, list them by directory name, and ask the user which course. STOP until user responds. Do NOT guess from conversation context and do NOT pick the most recently modified.
 R2e. IF R2b finds NO class holding that file THEN R5 applies.
-R2f. IF the class root was resolved under R2c or R2d THEN name that course in the R7b opener, so the user can see which one loaded.
 
 // File lookup
 R3.  IF <arg> matches `week<N>` or `wk<N>`, case-insensitively, THEN stop and tell the user: "Week files were removed; use /learn <deck> for each lecture deck."
@@ -94,10 +93,10 @@ R6d. IF a `### Course Scope` entry exists but carries no derivable chapter list 
 // Question delivery
 R7.  Delivery is FLAT. Do NOT display unit headings, unit numbers, unit titles, or unit boundaries at any point. The `## Unit X of Y` headings in the questions file are provenance metadata, not display structure.
 R7a. IF the file holds several units THEN deliver its questions as one continuous sequence across them. A unit boundary is invisible to the user and is never announced.
-R7b. Before the first question of a session, display ONE line naming the resolved course, the topic, and the delivery range — e.g. `network — lec13_dijkstra, 12 questions.` IF START > 1 THEN the range reads `positions <START>–<M> of <M>`. This is the whole session opener; do NOT add a title, a rule, a summary, or a unit heading.
+R7b. Before the first question of a session, display ONE line naming the topic and the delivery range — e.g. `lec13_dijkstra, 12 questions.` IF START > 1 THEN the range reads `positions <START>–<M> of <M>`. This is the whole session opener; do NOT add a title, a rule, a summary, or a unit heading.
 R7c. R7b fires exactly once per session, before the first question only. Do NOT repeat it at a window edge, at a unit boundary, or when re-displaying a pending question under R13c/R14/R20b.
 R8.  IF about to display a question THEN first display the level-3 markdown heading `### 📘 Teach`.
-     // Example: Display `### 📘 Teach`, then its blockquote, then `### ❓ Q6 — <question text>`.
+     // Example: Display `### 📘 Teach`, then its blockquote, then `### ❓ Q6/25 — <question text>`.
 R8e. IF R8 applies THEN display that question's `Teach:` field verbatim as a markdown blockquote and prefix every line with `> `.
 R8d. IF R8e displays Teach AND the entry has a `Legend:` field AND R8f does not apply THEN append Legend inside the same blockquote.
 R8f. IF the entry's `Legend:` field is a GIVENS legend THEN display it after the Teach blockquote, under its own level-3 heading `### 📋 Given`, as a bulleted list, and NOT inside the Teach blockquote.
@@ -124,9 +123,9 @@ R11a. Do NOT display the `Answer key` or `Elaboration` field when delivering a q
 
 // Question delivery loop
 R12. IF a question is delivered THEN STOP and wait for the user.
-R12k. Displaying one question = its `Question` field rendered as a level-3 markdown heading with a `❓` anchor and its ABSOLUTE POSITION as the label: `### ❓ Q<p> — <question text>`, where `<p>` is the question's absolute position from the R4c step-2 index. R8 and R8b precede it.
+R12k. Displaying one question = its `Question` field rendered as a level-3 markdown heading with a `❓` anchor and its ABSOLUTE POSITION as the label: `### ❓ Q<p>/<M> — <question text>`, where `<p>` is the question's absolute position and `<M>` is the total number of positions in the R4c step-2 index. R8 and R8b precede it.
 R12k3. IF the `Question` field has continuation lines THEN `<question text>` in R12k is its first line only. Display the continuation lines below the heading as a markdown bulleted list, one option per bullet, with the two-space indent stripped and each line's text otherwise unchanged.
-     // Example: `Question: Which are UML diagrams?` + `  - a) Class` + `  - b) State` → `### ❓ Q5 — Which are UML diagrams?`, then `- a) Class` and `- b) State` on separate lines.
+     // Example: `Question: Which are UML diagrams?` + `  - a) Class` + `  - b) State` → `### ❓ Q5/12 — Which are UML diagrams?`, then `- a) Class` and `- b) State` on separate lines.
 R12k4. IF R12k3 adds a bulleted list THEN treat it as display framing under R8a.
 R12k1. IF the file is format 1 per R4c1b THEN IGNORE the heading's `Q<n>` label for display; it restarts at Q1 in every unit and is not unique. Do NOT display it and do NOT combine it with a unit prefix.
 R12k2. IF the file is format 2 per R4c1a THEN the heading label and the absolute position are the same number, and displaying either is correct.
@@ -204,7 +203,7 @@ Anything else you type leaves the pending question in place. An attempted answer
 
 Questions are numbered straight through the file — `Q1` to `Q<M>` — with no unit headings and no
 restart at a unit boundary. The number on
-screen is the absolute position, so `start<N>` takes exactly the number you last saw: stop at `Q47`,
+screen is the absolute position out of the file's total (`Q47/120`), so `start<N>` takes exactly the number you last saw: stop at `Q47`,
 resume with `start47`.
 
 In format 2 files the heading in the file carries that same absolute number, so what you see on
@@ -217,5 +216,4 @@ That is provenance; `/learn` never displays it.
 
 The course is resolved from the current directory when you are inside a class, and otherwise by
 searching `~/edu/` for the topic file. Several courses have a `chapter2`, so when the search matches
-more than one the run stops and asks which — it never guesses. The session opens with one line
-naming the course it loaded.
+more than one the run stops and asks which — it never guesses.

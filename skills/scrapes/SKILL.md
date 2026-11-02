@@ -25,8 +25,9 @@ R0b. IF `sources.toml` or a script changes THEN tell the user the change is unco
     audit_dumps.py  pages | compare A B | options | stale | coverage | verify
     index_dumps.py  [FILE...] | --check | --strip | --scraped YYYY-MM-DD
 
-Source kinds: `nix-options`, `markdown`, `mediawiki`, `texinfo`, `doxygen`, `pdf`, `pydoc`.
+Source kinds: `nix-options`, `markdown`, `mediawiki`, `texinfo`, `doxygen`, `pdf`, `pydoc`, `html`.
 `mediawiki` takes `categories` (+ `titles`) to scope a wiki too large to take whole.
+`html` takes `urls` plus `content_tag` or `content_id` to scope extraction to the article body.
 
 ## Rules
 

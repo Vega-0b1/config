@@ -13,15 +13,15 @@ headings in it:
     gutter before a running head's folio survives (`7.3. TITLE      159`);
   * a section number fused to its title (`8.6.1Selecting`) gets its space back.
 
-Built to run on the NAS through the `offload` skill (CPU-heavy: a 690-page book
-took about an hour on the NAS). Needs `pypdfium2` and `rapidocr_onnxruntime`
+Built to run on the offload host through the `offload` skill (CPU-heavy: a 690-page book
+took about an hour on a 16-thread Ryzen 5800X). Needs `pypdfium2` and `rapidocr_onnxruntime`
 plus the English recognition model `en_PP-OCRv3_rec_infer.onnx`; the default
 model is Chinese-trained and drops the spaces between English words.
 
 Usage:
     ocr_pdf.py <in.pdf> <out_dir> <rec_model.onnx> [--workers 6] [--dpi 300]
 
-Each worker holds ~0.6-0.9 GB. Size --workers from the NAS's free memory
+Each worker holds ~0.6-0.9 GB. Size --workers from the offload host's free memory
 (offload skill R6c); 14 workers exhausted it and the kernel killed workers.
 A re-run skips pages already in `<out_dir>/pages/`, so a crashed run resumes.
 A dead worker raises BrokenProcessPool instead of hanging the run forever.
