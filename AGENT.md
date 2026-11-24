@@ -1,34 +1,35 @@
 # Environment Globals
 
 ## System
-- **OS**: Debian GNU/Linux 13 (trixie)
-- **Shell**: Bash
-- **Packages**: `apt` for system packages; Nix for the user environment (no NixOS — Nix is installed on top of Debian)
+- **OS**: CachyOS (Arch-based, rolling release)
+- **Shell**: Bash, with ble.sh (configured in `modules/bash.nix`)
+- **Packages**: `pacman` for system packages; Flatpak (Flathub, user scope) for OrcaSlicer and other GUI apps without a CachyOS package; Nix for the user environment (no NixOS — Nix is installed on top of CachyOS)
 
 ## Desktop
 - **DE**: KDE Plasma on Wayland (`kwin_wayland`)
 - **Panel**: Plasma panel (`plasmashell`), configured through plasma-manager
 - **Terminal**: Alacritty (Konsole also installed)
-- **Browser**: Chromium (`chromium`, from `/usr/bin`) is the main browser and desktop default; Firefox ESR (`firefox-esr`, from `/usr/bin`) is the backup browser.
+- **Browser**: Chromium (`chromium`, from `/usr/bin`) is the main browser and desktop default; Firefox (`firefox`, from `/usr/bin`) is the backup browser.
 
 ## Tools
 - **Editor**: Neovim 0.12.4 (from the Nix profile)
 
 ## Network
-- **NIC**: Wi-Fi `wlo1`, MAC `c4:bd:e5:72:c5:b8`, NetworkManager connection "VegaWifi", hostname `zeus`
+- **NIC**: Wi-Fi `wlan0`, MAC `c4:bd:e5:72:c5:b8`, NetworkManager connection "VegaWifi", hostname `zeus`
 
 ## Configuration
 
 The user environment is declarative: a Home Manager + plasma-manager flake at
-`~/repos/debian-config`, applied with `~/repos/debian-config/install-home-manager.sh`.
-System-level state is plain Debian and is not declarative.
+`~/repos/dev-config`, applied with `~/repos/dev-config/install-home-manager.sh`
+(profile `default`, defined in `home.nix`). System-level state is plain
+CachyOS and is not declarative.
 
-R1. IF changing shell, git, Neovim, or Plasma configuration THEN edit the relevant module under `~/repos/debian-config/modules/` and re-run `install-home-manager.sh`. Do NOT hand-edit the generated dotfile.
+R1. IF changing shell, git, Neovim, or Plasma configuration THEN edit the relevant module under `~/repos/dev-config/modules/` (imported from `home.nix`) and re-run `install-home-manager.sh`. Do NOT hand-edit the generated dotfile.
      // Commentary: Home Manager owns those paths and the next activation overwrites hand edits.
 R2. IF a file must stay editable in place rather than be regenerated THEN link it with `config.lib.file.mkOutOfStoreSymlink`, not a plain `source`.
      // Example: each agent's native instruction filename and skills directory point at the live `~/repos/config` working tree this way, so an edit takes effect without an activation.
 R3. IF `~/repos/config/AGENT.md` or a skill under `~/repos/config/skills/` is edited THEN the change is live immediately; no activation is needed.
-R4. IF installing a system package THEN use `apt`. IF adding to the user environment THEN add it to the flake.
+R4. IF installing a system package THEN use `pacman`. IF adding to the user environment THEN add it to the flake.
 R5. IF the user has authorized a privileged command AND sudo cannot read from an interactive terminal AND `/usr/bin/ksshaskpass` exists THEN invoke the command with `SUDO_ASKPASS=/usr/bin/ksshaskpass sudo -A`.
      // Commentary: `sudo -A` sends the authentication request through KDE's system dialog instead of terminal or chat input.
 R6. IF sudo authentication is required THEN never ask the user to paste or disclose the password in chat or command text.
@@ -114,15 +115,16 @@ R14. IF any condition not covered by R1–R13 arises THEN stop, describe the sit
 Source precedence: scraped dumps → official documentation → model knowledge.
 
 R1. IF answering a factual question about a tool, OS, language, or library THEN check `~/edu/zStore/scrapes/` for a dump covering that topic before consulting any other source.
-R2. IF a relevant dump exists THEN look up the page covering the topic with `~/repos/config/skills/scrapes/tools/doc_lookup DUMP PAGE TERM...`, passing the terms the question asks about, in one tool call per question.
-     // Example: `doc_lookup cppreference_cpp vector/empty "Return value"` → `403025:true if the container is empty, false otherwise.`
-     // Commentary: doc_lookup reads the CONTENTS index, prints pages of 100 lines or fewer whole, filters longer pages to TERM matches plus 3 lines of context, and prints absolute line numbers.
-R2a. IF `doc_lookup` exits 2 THEN grep the dump body for the term.
+R2. IF a relevant dump exists THEN find the page covering the topic in the dump's CONTENTS index with `grep -n 'PAGE' DUMP`; each index line reads `START END PAGE`.
+     // Example: `grep -n 'vector/empty' ~/edu/zStore/scrapes/cppreference_cpp.txt` → `798:  402604   403075  cpp/container/vector/empty`
+R2a. IF the page spans 100 lines or fewer THEN print it whole with `sed -n 'START,ENDp' DUMP`.
+R2b. IF the page spans more than 100 lines THEN print only the question's terms with context and absolute line numbers: `grep -n -C3 'TERM' DUMP | awk -F'[:-]' '$1>=START && $1<=END'`.
+     // Example: TERM `Return value` on cpp/container/vector/empty → `403025-true if the container is empty, false otherwise.`
+R2c. IF the CONTENTS index has no page for the topic THEN grep the dump body for the term.
      // Example: `grep -n "onlyMinimized" ~/edu/zStore/scrapes/plasma_manager_widgets.txt`
-R2b. IF answering from a dump THEN cite file and the absolute line `doc_lookup` printed.
-R2c. IF `doc_lookup` exits 3 THEN rerun it with the full index path of the candidate it listed that covers the topic.
-R2d. IF the filtered output does not contain the answer THEN rerun `doc_lookup` with different terms, or with no terms to print the whole page.
-R2e. IF `doc_lookup` is missing or exits 1 THEN grep the dump's CONTENTS index for the page AND print its range with `sed -n 'START,ENDp'`.
+R2d. IF the printed lines do not contain the answer THEN rerun R2b with different terms, or print the whole page with R2a.
+R2e. IF answering from a dump THEN cite the file and the absolute line number.
+     // Commentary: the compiled `doc_lookup` helper that wrapped these steps was lost in the 2026-11-23 migration; grep and sed are the lookup method.
 R3. IF no relevant dump exists THEN consult official documentation before answering.
 R4. IF a dump was consulted AND does not contain the answer THEN consult official documentation before answering.
 R5. IF a dump documents an older version than the one installed THEN treat the dump as stale and verify against official documentation.
@@ -139,8 +141,8 @@ R12. IF any condition not covered by R1–R11 arises THEN stop, describe the sit
 
 ### Available dumps (`~/edu/zStore/scrapes/`)
 
-- `arch_wiki.txt` — Arch Wiki, scraped 2026-08-14. Distro-agnostic Linux reference; not Debian-specific
-- `home_manager_options.txt` — 5,406 home-manager options, scraped 2026-08-14. verify any option against the `release-26.05` Home Manager pin in `~/repos/debian-config/flake.nix` before relying on it
+- `arch_wiki.txt` — Arch Wiki, scraped 2026-08-14. Applies directly to this CachyOS (Arch-based) system
+- `home_manager_options.txt` — 5,406 home-manager options, scraped 2026-08-14. verify any option against the `release-26.05` Home Manager pin in `~/repos/dev-config/flake.nix` before relying on it
 - `plasma_manager_options.txt` — 669 `programs.plasma.*` options, generated the same way. **Stops at `panels.*.widgets`**; per-widget options are in the next file
 - `plasma_manager_widgets.txt` — the 17 plasma-manager widget modules, read from the pinned source. The only place per-widget options live (e.g. `iconTasks`' `onlyMinimized`)
 - `kde_config_keys.txt` — 47 KDE `.kcfg` schemas: the underlying KDE key, group, type and default, for `configFile` writes. **Absence of a key only means something if its group is declared in the dump** — an undeclared group means "not covered," not "does not exist," and grepping the package instead gives false positives
@@ -162,7 +164,7 @@ R12. IF any condition not covered by R1–R11 arises THEN stop, describe the sit
 - `cppreference_c.txt` — C language and standard library; offline snapshot 2025-02-09; 627 indexed pages
 - `cppreference_cpp.txt` — C++ language and standard library; offline snapshot 2025-02-09; 6,011 indexed pages
 - `gcc_manual.txt` — GCC 14.2.0 compiler and preprocessor manuals; 526 indexed pages
-- `linux_manpages.txt` — Installed Debian manpages/manpages-dev, sections 2, 3, and 7; 2,679 indexed pages
+- `linux_manpages.txt` — Debian manpages/manpages-dev from the previous Debian install, sections 2, 3, and 7; 2,679 indexed pages
 - `cpp_core_guidelines.txt` — C++ Core Guidelines: design, interfaces, ownership, and concurrency; 1 indexed page
 - `python_library.txt` — Python 3.13 standard library and built-ins; 320 indexed pages
 - `python_language.txt` — Python 3.13 language reference; 11 indexed pages

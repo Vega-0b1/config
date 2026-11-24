@@ -44,7 +44,7 @@ R5.  IF choosing sentinels THEN pick strings that would vanish first if extracti
      // Example: `useGrimAdapter` sits inside a code template — it disappears the moment template parsing breaks. "NixOS" does not.
 R6.  IF a source is reachable both locally and over the network THEN prefer local.
      // Commentary: home_manager_options, openocd_manual and stm32f4_hal are generated from what is installed, so they match the running system and need no network.
-R7.  IF a flake package is the source THEN reference it through `builtins.getFlake "/home/jcvega/repos/debian-config"`, never a bare `github:owner/repo/branch` ref.
+R7.  IF a flake package is the source THEN reference it through `builtins.getFlake "/home/jcvega/repos/dev-config"`, never a bare `github:owner/repo/branch` ref.
      // Commentary: a branch ref resolves to that branch's HEAD, which drifts ahead of flake.lock and documents a version this system does not have.
 R8.  IF a new source is added THEN run `scrape NAME --dry-run` first and inspect the candidate before promoting.
 

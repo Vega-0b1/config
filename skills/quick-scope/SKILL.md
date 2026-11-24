@@ -4,7 +4,7 @@ description: Start a silent browser-page screenshot watcher for quick questions 
 ---
 
 Pipeline: Meta+C → `screenshot-to-claude` → archived `shot-*.png` → `watch_capture.py` → immutable session copy → answer → acknowledge → next queued archive.
-The hotkey and script are declared in `~/repos/debian-config/modules/plasma.nix` (`hotkeys.commands."screenshot-to-claude"` and `home.file.".local/bin/screenshot-to-claude"`).
+The hotkey and script are declared in `~/repos/dev-config/modules/plasma.nix` (`hotkeys.commands."screenshot-to-claude"` and `home.file.".local/bin/screenshot-to-claude"`).
 Capture profile: this machine's Chromium window, with its bookmarks bar hidden; the helper captures the active window without decorations or shadows and removes its top 140 physical pixels. It then crops to one question box (1-px `rgb(169,168,168)` outline, at least 300×100 px): the box containing highlighted text (Chromium selection `rgb(77,105,210)`), else the box under the mouse pointer (queried from KWin), else the topmost box fully in view, else the topmost partial box. With no box it crops to the fixed rectangle 1872×1168+470+428 of the page image, measured from a 2880-px-wide window. The desktop panel lies outside the window capture. Only cropped images are published to the archive and latest.png.
 
 ## Start
