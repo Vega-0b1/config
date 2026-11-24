@@ -154,7 +154,7 @@ sentinels   = ["addGeometry", "Part.makeBox", "makeCylinder"]
 
 
 # C, C++, and Python references. Archive releases are explicit; local man-pages
-# follow the installed Debian manpages/manpages-dev package versions.
+# follow the installed pacman man-pages package version.
 [cppreference_c]
 kind = "archive"
 title = "cppreference C — offline release 2025-02-09"
@@ -191,7 +191,7 @@ sentinels = ["-fsanitize=address", "-Wconversion", "-std=c++17", "__VA_OPT__"]
 [linux_manpages]
 kind = "local-man"
 title = "Installed Linux man-pages — system calls, library functions, and conventions"
-packages = ["manpages", "manpages-dev"]
+packages = ["man-pages"]
 sections = ["2", "3", "7"]
 min_pages = 1000
 sentinels = ["malloc", "EINTR", "pthread_create", "feature_test_macros"]
@@ -598,3 +598,26 @@ urls = [
   "https://raw.githubusercontent.com/Cartographer3D/docs/main/cartographer-probe/useful-links.md",
 ]
 
+
+[qt6_qml]
+kind = "html"
+title = "Qt 6.8.2 QML and Qt Quick docs — installed qt6-declarative-doc-html (QML types, Qt Quick, Controls, anchors/positioning)"
+files = [
+  "/usr/share/qt6/doc/qtlabsplatform/*.html",
+  "/usr/share/qt6/doc/qtqml/*.html",
+  "/usr/share/qt6/doc/qtqmlcompiler/*.html",
+  "/usr/share/qt6/doc/qtqmlcore/*.html",
+  "/usr/share/qt6/doc/qtqmlmodels/*.html",
+  "/usr/share/qt6/doc/qtqmlnetwork/*.html",
+  "/usr/share/qt6/doc/qtqmltest/*.html",
+  "/usr/share/qt6/doc/qtqmlworkerscript/*.html",
+  "/usr/share/qt6/doc/qtqmlxmllistmodel/*.html",
+  "/usr/share/qt6/doc/qtquick/*.html",
+  "/usr/share/qt6/doc/qtquickcontrols/*.html",
+  "/usr/share/qt6/doc/qtquickdialogs/*.html",
+]
+exclude_suffixes = ["-members.html", "-obsolete.html"]
+content_class = "mainContent"
+exclude_classes = ["sidebar"]
+min_pages = 750
+sentinels = ["anchors.centerIn", "Text.AlignHCenter", "horizontalAlignment : enumeration", "import QtQuick"]

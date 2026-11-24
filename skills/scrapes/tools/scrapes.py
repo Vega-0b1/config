@@ -15,7 +15,7 @@ the live file is left untouched. --force overrides, --dry-run never promotes.
 
 Source kinds:
   archive      extract selected HTML or text pages from offline tar archives.
-  local-man    render installed Debian man-page packages into indexed text.
+  local-man    render installed pacman man-page packages into indexed text.
   html         fetch server-rendered web pages, one dump page per URL, scoped
                to the article body by content_id or content_tag.
 

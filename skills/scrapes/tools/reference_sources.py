@@ -205,12 +205,12 @@ def render_man(path: str) -> tuple[str, str]:
 
 
 def build_local_man(name: str, spec: Spec) -> list[str]:
-    result = subprocess.run(['dpkg-query', '-L', *strings(spec, 'packages')],
+    result = subprocess.run(['pacman', '-Qlq', *strings(spec, 'packages')],
                             capture_output=True, text=True, check=True)
     sections = strings(spec, 'sections')
     paths = sorted({path for path in result.stdout.splitlines()
                     if path.endswith('.gz') and any(f'/man{section}/' in path for section in sections)})
-    versions = subprocess.run(['dpkg-query', '-W', '-f=${binary:Package} ${Version}\n', *strings(spec, 'packages')],
+    versions = subprocess.run(['pacman', '-Q', *strings(spec, 'packages')],
                               capture_output=True, text=True, check=True).stdout.strip()
     lines = [setting(spec, 'title', name), SEPARATOR, '', versions, '']
     count = 0

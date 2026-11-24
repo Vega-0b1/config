@@ -2,7 +2,7 @@
 
 ## System
 - **OS**: CachyOS (Arch-based, rolling release)
-- **Shell**: Bash, with ble.sh (configured in `modules/bash.nix`)
+- **Shell**: Bash (configured in `modules/bash.nix`)
 - **Packages**: `pacman` for system packages; Flatpak (Flathub, user scope) for OrcaSlicer and other GUI apps without a CachyOS package; Nix for the user environment (no NixOS — Nix is installed on top of CachyOS)
 
 ## Desktop
@@ -164,7 +164,7 @@ R12. IF any condition not covered by R1–R11 arises THEN stop, describe the sit
 - `cppreference_c.txt` — C language and standard library; offline snapshot 2025-02-09; 627 indexed pages
 - `cppreference_cpp.txt` — C++ language and standard library; offline snapshot 2025-02-09; 6,011 indexed pages
 - `gcc_manual.txt` — GCC 14.2.0 compiler and preprocessor manuals; 526 indexed pages
-- `linux_manpages.txt` — Debian manpages/manpages-dev from the previous Debian install, sections 2, 3, and 7; 2,679 indexed pages
+- `linux_manpages.txt` — installed `man-pages` 6.20 (pacman), sections 2, 3, and 7 with their const/type/head/attr subsections; alias-only pages omitted; 1,341 indexed pages, scraped 2026-11-23
 - `cpp_core_guidelines.txt` — C++ Core Guidelines: design, interfaces, ownership, and concurrency; 1 indexed page
 - `python_library.txt` — Python 3.13 standard library and built-ins; 320 indexed pages
 - `python_language.txt` — Python 3.13 language reference; 11 indexed pages
